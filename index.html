@@ -3,148 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work Hours Tracker</title>
+    <title>Work Hours Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+<body class="bg-slate-50 min-h-screen">
 
-    <div class="max-w-4xl mx-auto">
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl font-bold text-gray-800">Work Hours Calculator</h1>
-            <p class="text-gray-600">Track your shifts and calculate total hours automatically.</p>
+    <div class="max-w-5xl mx-auto p-6">
+        <header class="flex justify-between items-center mb-10 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+            <div>
+                <h1 class="text-3xl font-black text-slate-800">TimeSheet Hub</h1>
+                <p class="text-slate-500">Track 7:48 AM to 5:32 PM as 9.44</p>
+            </div>
+            <button onclick="openNewSheetModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-lg shadow-blue-200">
+                <i class="fas fa-plus mr-2"></i> New Sheet
+            </button>
         </header>
 
-        <div class="bg-white p-6 rounded-xl shadow-md mb-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Date In</label>
-                    <input type="date" id="dateIn" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+        <div id="sheetsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+    </div>
+
+    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center z-40 p-4">
+        <div class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h2 id="modalTitle" class="text-xl font-bold">New Timesheet</h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <div id="step1" class="p-12 text-center">
+                <h3 class="text-2xl font-bold mb-4">Sheet Name</h3>
+                <input type="text" id="sheetNameInput" placeholder="January Sheet" class="w-full max-w-md mx-auto block border-2 border-slate-200 rounded-2xl p-4 text-lg focus:border-blue-500 outline-none">
+                <button onclick="goToStep2()" class="mt-8 bg-slate-800 text-white px-12 py-4 rounded-2xl font-bold">Next</button>
+            </div>
+
+            <div id="step2" class="hidden flex-col h-full overflow-hidden">
+                <div class="p-6 bg-slate-50 grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <input type="date" id="dateIn" class="border rounded-xl p-3">
+                    <input type="time" id="timeIn" class="border rounded-xl p-3">
+                    <input type="date" id="dateOut" class="border rounded-xl p-3">
+                    <input type="time" id="timeOut" class="border rounded-xl p-3">
+                    <button onclick="addEntry()" class="bg-emerald-500 text-white rounded-xl font-bold">Add</button>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Time In</label>
-                    <input type="time" id="timeIn" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                <div class="flex-1 overflow-y-auto p-6">
+                    <table class="w-full text-left">
+                        <thead class="border-b text-slate-400 text-xs">
+                            <tr><th class="pb-3">IN</th><th class="pb-3">OUT</th><th class="pb-3 text-right">HH.MM</th><th></th></tr>
+                        </thead>
+                        <tbody id="modalTableBody" class="divide-y"></tbody>
+                    </table>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Date Out</label>
-                    <input type="date" id="dateOut" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Time Out</label>
-                    <input type="time" id="timeOut" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div class="flex items-end">
-                    <button onclick="addEntry()" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">
-                        Add Shift
-                    </button>
+                <div class="p-8 border-t flex justify-between items-center bg-slate-50">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase">Total (HH.MM)</p>
+                        <span id="modalGrandTotal" class="text-4xl font-black text-blue-600">0.00</span>
+                    </div>
+                    <button onclick="showConfirmPopup()" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl">Save Sheet</button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="bg-white rounded-xl shadow-md overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Started</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Finished</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="entryTable" class="divide-y divide-gray-200">
-                    </tbody>
-                <tfoot class="bg-gray-50">
-                    <tr>
-                        <td colspan="2" class="px-6 py-4 text-right font-bold text-gray-700">Total Working Hours:</td>
-                        <td id="grandTotal" class="px-6 py-4 font-black text-blue-600 text-xl">0.00</td>
-                        <td></td>
-                    </tr>
-                </tfoot>
-            </table>
+    <div id="confirmPopup" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center z-[60]">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <h3 class="text-xl font-bold mb-2">Confirm Save?</h3>
+            <p class="text-slate-500 mb-8">This will sync your timesheet to the database.</p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirmPopup()" class="flex-1 p-3 bg-slate-100 rounded-xl font-bold">Cancel</button>
+                <button onclick="finalSave()" class="flex-1 p-3 bg-blue-600 text-white rounded-xl font-bold">Confirm</button>
+            </div>
         </div>
     </div>
 
-    <script>
-        // 1. Initialize Dexie Database
-        const db = new Dexie("WorkHoursDB");
-        db.version(1).stores({
-            shifts: '++id, dateIn, timeIn, dateOut, timeOut, duration'
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJHqn-KIG7ntbsc9OZik7hf5lhObx7Ecg",
+            authDomain: "hours-80ce8.firebaseapp.com",
+            projectId: "hours-80ce8",
+            storageBucket: "hours-80ce8.firebasestorage.app",
+            messagingSenderId: "425460400755",
+            appId: "1:425460400755:web:9fbbe205d914e8f84c2006",
+            measurementId: "G-4V0GE6QB9N"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentEntries = [];
+        let editingId = null;
+
+        // FIXED LOGIC: HH.MM Format
+        function calculateHHMM(startStr, endStr) {
+            const diff = new Date(endStr) - new Date(startStr);
+            const totalMins = Math.floor(diff / 60000);
+            const h = Math.floor(totalMins / 60);
+            const m = totalMins % 60;
+            return `${h}.${m.toString().padStart(2, '0')}`;
+        }
+
+        function sumHHMM(entries) {
+            let totalMins = 0;
+            entries.forEach(e => {
+                const parts = e.duration.split('.');
+                totalMins += (parseInt(parts[0]) * 60) + parseInt(parts[1]);
+            });
+            return `${Math.floor(totalMins / 60)}.${(totalMins % 60).toString().padStart(2, '0')}`;
+        }
+
+        window.openNewSheetModal = () => {
+            editingId = null; currentEntries = [];
+            document.getElementById('sheetNameInput').value = '';
+            document.getElementById('modalTitle').innerText = "New Sheet";
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            renderTable();
+        };
+
+        window.goToStep2 = () => {
+            if (!document.getElementById('sheetNameInput').value) return;
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('step2').classList.add('flex');
+        };
+
+        window.addEntry = () => {
+            const dIn = document.getElementById('dateIn').value, tIn = document.getElementById('timeIn').value;
+            const dOut = document.getElementById('dateOut').value, tOut = document.getElementById('timeOut').value;
+            if (!dIn || !tIn || !dOut || !tOut) return;
+
+            const duration = calculateHHMM(`${dIn}T${tIn}`, `${dOut}T${tOut}`);
+            currentEntries.push({ dIn, tIn, dOut, tOut, duration });
+            renderTable();
+        };
+
+        function renderTable() {
+            const body = document.getElementById('modalTableBody');
+            body.innerHTML = '';
+            currentEntries.forEach((e, i) => {
+                body.innerHTML += `<tr class="text-sm"><td class="py-3">${e.dIn} ${e.tIn}</td><td class="py-3">${e.dOut} ${e.tOut}</td><td class="py-3 text-right font-bold">${e.duration}</td><td class="text-right"><button onclick="removeRow(${i})" class="text-red-400 p-2"><i class="fas fa-trash"></i></button></td></tr>`;
+            });
+            document.getElementById('modalGrandTotal').innerText = sumHHMM(currentEntries);
+        }
+
+        window.removeRow = (i) => { currentEntries.splice(i, 1); renderTable(); };
+        window.closeModal = () => document.getElementById('modalOverlay').classList.add('hidden');
+        window.showConfirmPopup = () => document.getElementById('confirmPopup').classList.remove('hidden');
+        window.closeConfirmPopup = () => document.getElementById('confirmPopup').classList.add('hidden');
+
+        window.finalSave = async () => {
+            const data = {
+                name: document.getElementById('sheetNameInput').value,
+                entries: currentEntries,
+                total: document.getElementById('modalGrandTotal').innerText,
+                date: new Date()
+            };
+            try {
+                if (editingId) await updateDoc(doc(db, "timesheets", editingId), data);
+                else await addDoc(collection(db, "timesheets"), data);
+                closeConfirmPopup(); closeModal();
+            } catch (e) { alert("Save Failed! Check Firebase Rules."); }
+        };
+
+        onSnapshot(collection(db, "timesheets"), (snap) => {
+            const list = document.getElementById('sheetsList');
+            list.innerHTML = '';
+            snap.forEach(d => {
+                const s = d.data();
+                list.innerHTML += `
+                    <div class="bg-white p-6 rounded-3xl border border-slate-100 hover:shadow-xl transition-all cursor-pointer group relative">
+                        <button onclick="event.stopPropagation(); deleteSheet('${d.id}')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all"><i class="fas fa-trash-alt text-xs"></i></button>
+                        <div onclick="openSheet('${d.id}')">
+                            <h4 class="font-bold text-lg mb-4">${s.name}</h4>
+                            <p class="text-xs text-slate-400 uppercase font-bold">Total Duration</p>
+                            <p class="text-3xl font-black text-slate-800">${s.total}</p>
+                        </div>
+                    </div>`;
+            });
         });
 
-        // 2. Add Entry Function
-        async function addEntry() {
-            const dateIn = document.getElementById('dateIn').value;
-            const timeIn = document.getElementById('timeIn').value;
-            const dateOut = document.getElementById('dateOut').value;
-            const timeOut = document.getElementById('timeOut').value;
+        window.openSheet = async (id) => {
+            const snap = await getDoc(doc(db, "timesheets", id));
+            const s = snap.data();
+            editingId = id; currentEntries = s.entries;
+            document.getElementById('sheetNameInput').value = s.name;
+            document.getElementById('modalTitle').innerText = "Edit Sheet";
+            goToStep2();
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            renderTable();
+        };
 
-            if (!dateIn || !timeIn || !dateOut || !timeOut) {
-                alert("Please fill in all fields.");
-                return;
+        window.deleteSheet = async (id) => {
+            if (confirm("Delete this sheet permanently?")) {
+                await deleteDoc(doc(db, "timesheets", id));
             }
-
-            // Calculate Duration
-            const start = new Date(`${dateIn}T${timeIn}`);
-            const end = new Date(`${dateOut}T${timeOut}`);
-            
-            if (end <= start) {
-                alert("Out time must be after In time.");
-                return;
-            }
-
-            const diffMs = end - start;
-            const duration = (diffMs / (1000 * 60 * 60)).toFixed(2); // Convert to decimal hours
-
-            // Save to Dexie
-            await db.shifts.add({
-                dateIn, timeIn, dateOut, timeOut, duration: parseFloat(duration)
-            });
-
-            renderEntries();
-            clearInputs();
-        }
-
-        // 3. Render Entries to Table
-        async function renderEntries() {
-            const shifts = await db.shifts.toArray();
-            const tbody = document.getElementById('entryTable');
-            const totalDisplay = document.getElementById('grandTotal');
-            
-            tbody.innerHTML = '';
-            let totalHours = 0;
-
-            shifts.forEach(shift => {
-                totalHours += shift.duration;
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="px-6 py-4 text-sm text-gray-600">${shift.dateIn} <span class="text-xs text-gray-400">@</span> ${shift.timeIn}</td>
-                        <td class="px-6 py-4 text-sm text-gray-600">${shift.dateOut} <span class="text-xs text-gray-400">@</span> ${shift.timeOut}</td>
-                        <td class="px-6 py-4 text-sm font-bold text-gray-800">${shift.duration} hrs</td>
-                        <td class="px-6 py-4 text-right">
-                            <button onclick="deleteEntry(${shift.id})" class="text-red-500 hover:text-red-700 text-sm font-medium">Delete</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            totalDisplay.innerText = totalHours.toFixed(2);
-        }
-
-        // 4. Delete Entry
-        async function deleteEntry(id) {
-            await db.shifts.delete(id);
-            renderEntries();
-        }
-
-        function clearInputs() {
-            document.getElementById('dateIn').value = '';
-            document.getElementById('timeIn').value = '';
-            document.getElementById('dateOut').value = '';
-            document.getElementById('timeOut').value = '';
-        }
-
-        // Initial Load
-        renderEntries();
+        };
     </script>
 </body>
 </html>
