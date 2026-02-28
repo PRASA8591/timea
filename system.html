@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Work Hours Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: absolute; left: 0; top: 0; width: 100%; display: block !important; padding: 20px; }
+            .no-print { display: none !important; }
+        }
+        .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800">
+
+    <div id="customDialog" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[100] p-4 no-print transition-opacity">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl transform transition-transform scale-95" id="dialogBox">
+            <div id="dialogIcon" class="text-4xl mb-4 text-blue-500"><i class="fas fa-info-circle"></i></div>
+            <h3 id="dialogTitle" class="text-2xl font-black mb-2 text-slate-800">Title</h3>
+            <p id="dialogMessage" class="text-slate-500 mb-8 font-medium">Message</p>
+            <div class="flex gap-3" id="dialogButtons"></div>
+        </div>
+    </div>
+
+    <div id="passwordPromptModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[110] p-4 no-print">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <div class="text-4xl text-emerald-500 mb-4"><i class="fas fa-key"></i></div>
+            <h3 class="text-xl font-black mb-2 text-slate-800" id="passwordPromptTitle">New Password</h3>
+            <input type="text" id="passwordPromptInput" class="w-full border-2 rounded-xl p-3 focus:border-emerald-500 outline-none mt-2 mb-6 text-center font-bold" placeholder="Enter new password">
+            <div class="flex gap-3">
+                <button onclick="closePasswordPrompt()" class="flex-1 bg-slate-100 text-slate-600 py-3 rounded-xl font-bold hover:bg-slate-200 transition">Cancel</button>
+                <button onclick="confirmPasswordChange()" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 shadow-md transition">Save Password</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 no-print">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black tracking-tight text-slate-800">TimeSheet Hub</h1>
+                <p class="text-slate-500 text-sm font-medium mt-1">Logged in as: <span id="displayUsername" class="font-black text-blue-600 uppercase"></span></p>
+            </div>
+            <div class="flex flex-wrap gap-2 justify-center w-full md:w-auto">
+                <button id="adminBtn" onclick="openAdminModal()" class="hidden bg-slate-800 hover:bg-slate-900 text-white px-5 py-3 rounded-xl font-bold transition">
+                    <i class="fas fa-users-cog md:mr-2"></i><span class="hidden md:inline"> Manage Users</span>
+                </button>
+                <button onclick="openNewSheetModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold transition shadow-md shadow-blue-200">
+                    <i class="fas fa-plus md:mr-2"></i><span class="hidden md:inline"> New Sheet</span>
+                </button>
+                <button onclick="logout()" class="bg-red-50 text-red-600 hover:bg-red-500 hover:text-white px-5 py-3 rounded-xl font-bold transition">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </header>
+        <div id="sheetsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    </div>
+
+    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-40 p-2 md:p-4 no-print">
+        <div class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[95vh] md:h-auto md:max-h-[90vh]">
+            <div class="p-5 border-b flex justify-between items-center bg-white z-10">
+                <h2 id="modalTitle" class="text-xl font-black">Timesheet</h2>
+                <div class="flex gap-2 items-center">
+                    <div id="exportGroup" class="hidden flex gap-2 border-r pr-3 mr-1">
+                        <button onclick="printDocument()" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-800 hover:text-white transition tooltip" title="Print"><i class="fas fa-print"></i></button>
+                        <button onclick="exportPDF()" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-red-500 hover:text-white transition tooltip" title="PDF"><i class="fas fa-file-pdf"></i></button>
+                        <button onclick="exportExcel()" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-emerald-500 hover:text-white transition tooltip" title="Excel"><i class="fas fa-file-excel"></i></button>
+                    </div>
+                    <button onclick="closeModal('modalOverlay')" class="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+
+            <div id="step1" class="p-10 md:p-20 text-center overflow-y-auto">
+                <h3 class="text-3xl font-black mb-4">Name your project</h3>
+                <input type="text" id="sheetNameInput" placeholder="e.g., March Updates" class="w-full max-w-md mx-auto block border-2 border-slate-200 rounded-2xl p-4 text-center text-lg font-bold focus:border-blue-500 outline-none transition">
+                <button onclick="goToStep2()" class="mt-8 bg-blue-600 text-white px-12 py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition">Continue <i class="fas fa-arrow-right ml-2"></i></button>
+            </div>
+
+            <div id="step2" class="hidden flex-col h-full overflow-hidden">
+                <div class="p-4 md:p-5 bg-slate-50 border-b">
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <div class="col-span-1"><label class="text-[10px] font-black text-slate-500 uppercase block mb-1">Start Date</label><input type="date" id="dateIn" class="w-full border rounded-xl p-3 outline-none focus:border-blue-500 font-medium"></div>
+                        <div class="col-span-1"><label class="text-[10px] font-black text-slate-500 uppercase block mb-1">Start Time</label><input type="time" id="timeIn" class="w-full border rounded-xl p-3 outline-none focus:border-blue-500 font-medium"></div>
+                        <div class="col-span-1"><label class="text-[10px] font-black text-slate-500 uppercase block mb-1">End Date</label><input type="date" id="dateOut" class="w-full border rounded-xl p-3 outline-none focus:border-blue-500 font-medium"></div>
+                        <div class="col-span-1"><label class="text-[10px] font-black text-slate-500 uppercase block mb-1">End Time</label><input type="time" id="timeOut" class="w-full border rounded-xl p-3 outline-none focus:border-blue-500 font-medium"></div>
+                        <div class="col-span-2 md:col-span-1 flex items-end"><button onclick="addEntry()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 transition shadow-md"><i class="fas fa-plus mr-1"></i> Add Time</button></div>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-auto bg-white custom-scroll">
+                    <table class="w-full text-left min-w-[600px]">
+                        <thead class="bg-white sticky top-0 border-b z-10 shadow-sm">
+                            <tr class="text-slate-400 text-xs uppercase tracking-wider font-black"><th class="p-4">Started</th><th class="p-4">Finished</th><th class="p-4 text-right">Hours</th><th class="p-4 text-center w-24">Actions</th></tr>
+                        </thead>
+                        <tbody id="modalTableBody" class="divide-y divide-slate-50"></tbody>
+                    </table>
+                </div>
+
+                <div class="p-5 border-t flex justify-between items-center bg-slate-50 z-10">
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Working Hours</p>
+                        <span id="modalGrandTotal" class="text-4xl font-black text-blue-600">0.00</span>
+                    </div>
+                    <button onclick="finalSave()" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl hover:bg-blue-700 transition">Save Database</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4 no-print">
+        <div class="bg-white rounded-3xl w-full max-w-4xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b flex justify-between items-center bg-slate-800 text-white">
+                <h2 class="text-xl font-black"><i class="fas fa-shield-alt mr-2 text-blue-400"></i> Admin Center</h2>
+                <button onclick="closeModal('adminModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 bg-slate-50">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="md:col-span-1 bg-white p-5 rounded-2xl border shadow-sm">
+                        <h3 class="font-black mb-4 text-slate-800"><i class="fas fa-user-plus text-emerald-500 mr-2"></i>New User</h3>
+                        <input type="text" id="newUsername" placeholder="Username" class="w-full mb-3 border-2 rounded-xl p-3 focus:border-blue-500 outline-none font-medium">
+                        <input type="text" id="newPassword" placeholder="Password" class="w-full mb-3 border-2 rounded-xl p-3 focus:border-blue-500 outline-none font-medium">
+                        <select id="newRole" class="w-full mb-4 border-2 rounded-xl p-3 font-medium">
+                            <option value="user">Standard User</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                        <button onclick="createUser()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 shadow-md">Create Account</button>
+                    </div>
+
+                    <div class="md:col-span-2 bg-white rounded-2xl border shadow-sm overflow-hidden flex flex-col">
+                        <h3 class="font-black p-5 border-b text-slate-800"><i class="fas fa-users text-blue-500 mr-2"></i>Manage Directory</h3>
+                        <div class="flex-1 overflow-auto custom-scroll">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50 text-xs font-black text-slate-400 uppercase sticky top-0"><th class="p-3 pl-5">User</th><th class="p-3">Role</th><th class="p-3 text-right pr-5">Actions</th></thead>
+                                <tbody id="adminUserTable" class="divide-y text-sm font-medium"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="shareModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[60] p-4 no-print">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-sm text-center shadow-2xl">
+            <div class="text-4xl text-emerald-500 mb-4"><i class="fas fa-share-alt"></i></div>
+            <h3 class="text-2xl font-black mb-2">Grant Access</h3>
+            <p class="text-slate-500 text-sm mb-6 font-medium">Select a user to give them viewing/editing rights to this timesheet.</p>
+            <select id="shareUserSelect" class="w-full mb-6 border-2 rounded-xl p-3 font-bold text-slate-700 outline-none focus:border-emerald-500"></select>
+            <button onclick="grantAccess()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-bold shadow-md transition">Confirm Access</button>
+            <button onclick="closeModal('shareModal')" class="w-full mt-3 text-slate-500 py-2 font-bold hover:text-slate-800 transition">Cancel</button>
+        </div>
+    </div>
+
+    <div id="printArea" class="hidden bg-white p-8">
+        <div class="border-b-4 border-slate-900 pb-4 mb-6 flex justify-between items-end">
+            <div>
+                <h1 class="text-4xl font-black text-slate-900 uppercase tracking-tight">Work Hours Log</h1>
+                <h2 id="printSheetName" class="text-2xl text-slate-700 mt-2 font-bold"></h2>
+            </div>
+            <div class="text-right">
+                <p id="printDate" class="text-sm font-bold text-slate-500"></p>
+                <p id="printOwner" class="text-sm font-bold text-slate-500 mt-1"></p>
+            </div>
+        </div>
+        <table class="w-full text-left border-collapse mb-8">
+            <thead>
+                <tr class="bg-slate-100 text-sm border-y-2 border-slate-900 font-black uppercase">
+                    <th class="p-3">Start Date & Time</th><th class="p-3">End Date & Time</th><th class="p-3 text-right">Hours (HH.MM)</th>
+                </tr>
+            </thead>
+            <tbody id="printTableBody" class="divide-y divide-slate-300 text-sm font-medium"></tbody>
+        </table>
+        <div class="flex justify-end border-t-4 border-slate-900 pt-4 mt-6 mb-12">
+            <div class="text-right">
+                <p class="text-sm font-black text-slate-500 uppercase tracking-widest">Total Certified Hours</p>
+                <p id="printGrandTotal" class="text-4xl font-black text-slate-900 mt-1"></p>
+            </div>
+        </div>
+        <div class="fixed bottom-0 left-0 w-full text-center text-xs font-bold text-slate-400 border-t pt-4">
+            Generated by time.prasatek.site
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Auth Check - CHANGED TO sessionStorage for multi-tab support
+        const session = JSON.parse(sessionStorage.getItem('sessionUser'));
+        if (!session) window.location.href = 'index.html';
+        
+        document.getElementById('displayUsername').innerText = session.username;
+        if (session.role === 'admin') document.getElementById('adminBtn').classList.remove('hidden');
+
+        const app = initializeApp({
+            apiKey: "AIzaSyBJHqn-KIG7ntbsc9OZik7hf5lhObx7Ecg",
+            authDomain: "hours-80ce8.firebaseapp.com",
+            projectId: "hours-80ce8"
+        });
+        const db = getFirestore(app);
+
+        let currentEntries = [];
+        let editingId = null;
+        let shareTargetSheetId = null;
+        let passwordEditUserId = null; // Stores user ID for custom password prompt
+        window.allUsers = [];
+
+        // --- CUSTOM DIALOG ENGINE ---
+        window.uiDialog = (title, message, type = 'alert', confirmCallback = null) => {
+            const d = document.getElementById('customDialog');
+            const box = document.getElementById('dialogBox');
+            document.getElementById('dialogTitle').innerText = title;
+            document.getElementById('dialogMessage').innerText = message;
+            
+            const btnContainer = document.getElementById('dialogButtons');
+            const icon = document.getElementById('dialogIcon');
+
+            if (type === 'alert') {
+                icon.innerHTML = '<i class="fas fa-exclamation-circle text-red-500"></i>';
+                btnContainer.innerHTML = `<button onclick="closeDialog()" class="flex-1 bg-slate-800 text-white py-3 rounded-xl font-bold shadow-md">OK</button>`;
+            } else if (type === 'confirm') {
+                icon.innerHTML = '<i class="fas fa-question-circle text-blue-500"></i>';
+                btnContainer.innerHTML = `
+                    <button onclick="closeDialog()" class="flex-1 bg-slate-100 text-slate-600 py-3 rounded-xl font-bold hover:bg-slate-200 transition">Cancel</button>
+                    <button id="confirmYesBtn" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 shadow-md transition">Confirm</button>
+                `;
+                document.getElementById('confirmYesBtn').onclick = () => { closeDialog(); if(confirmCallback) confirmCallback(); };
+            }
+
+            d.classList.remove('hidden');
+            setTimeout(() => box.classList.remove('scale-95'), 10);
+        };
+        window.closeDialog = () => {
+            document.getElementById('dialogBox').classList.add('scale-95');
+            setTimeout(() => document.getElementById('customDialog').classList.add('hidden'), 200);
+        };
+
+        // UI Utils
+        window.logout = () => { sessionStorage.removeItem('sessionUser'); window.location.href = 'index.html'; };
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
+        // Math
+        function calcHHMM(s, e) {
+            const m = Math.floor((new Date(e) - new Date(s)) / 60000);
+            return `${Math.floor(m / 60)}.${(m % 60).toString().padStart(2, '0')}`;
+        }
+        function sumHHMM(arr) {
+            let m = 0;
+            arr.forEach(e => { const p = e.duration.split('.'); m += (parseInt(p[0]) * 60) + parseInt(p[1]); });
+            return `${Math.floor(m / 60)}.${(m % 60).toString().padStart(2, '0')}`;
+        }
+
+        // --- TIMESHEET UI ---
+        window.openNewSheetModal = () => {
+            editingId = null; currentEntries = [];
+            document.getElementById('sheetNameInput').value = '';
+            document.getElementById('exportGroup').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            renderTable();
+        };
+
+        window.goToStep2 = () => {
+            if (!document.getElementById('sheetNameInput').value) return uiDialog("Missing Name", "Please enter a project name.", "alert");
+            document.getElementById('exportGroup').classList.remove('hidden');
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('step2').classList.add('flex');
+        };
+
+        window.addEntry = () => {
+            const dIn = document.getElementById('dateIn').value, tIn = document.getElementById('timeIn').value;
+            const dOut = document.getElementById('dateOut').value, tOut = document.getElementById('timeOut').value;
+            if (!dIn || !tIn || !dOut || !tOut) return uiDialog("Missing Data", "Please fill in all date and time fields.", "alert");
+            
+            currentEntries.push({ dIn, tIn, dOut, tOut, duration: calcHHMM(`${dIn}T${tIn}`, `${dOut}T${tOut}`) });
+            renderTable();
+            document.getElementById('timeIn').value = ''; document.getElementById('timeOut').value = ''; 
+        };
+
+        function renderTable() {
+            document.getElementById('modalTableBody').innerHTML = currentEntries.map((e, i) => `
+                <tr class="hover:bg-slate-50 transition group">
+                    <td class="p-4 font-medium">${e.dIn} <span class="text-slate-400 text-xs ml-1">${e.tIn}</span></td>
+                    <td class="p-4 font-medium">${e.dOut} <span class="text-slate-400 text-xs ml-1">${e.tOut}</span></td>
+                    <td class="p-4 text-right font-black text-slate-700">${e.duration}</td>
+                    <td class="p-4 text-center">
+                        <button onclick="editRow(${i})" class="w-8 h-8 rounded-lg text-slate-300 hover:text-blue-500 hover:bg-blue-50 transition mr-1 tooltip" title="Edit"><i class="fas fa-pen"></i></button>
+                        <button onclick="removeRow(${i})" class="w-8 h-8 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition tooltip" title="Delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`).join('');
+            document.getElementById('modalGrandTotal').innerText = sumHHMM(currentEntries);
+        }
+
+        window.removeRow = (i) => { currentEntries.splice(i, 1); renderTable(); };
+        
+        window.editRow = (i) => {
+            const e = currentEntries[i];
+            document.getElementById('dateIn').value = e.dIn; document.getElementById('timeIn').value = e.tIn;
+            document.getElementById('dateOut').value = e.dOut; document.getElementById('timeOut').value = e.tOut;
+            currentEntries.splice(i, 1);
+            renderTable();
+        };
+
+        window.finalSave = () => {
+            if(currentEntries.length === 0) return uiDialog("Empty Sheet", "Add at least one time entry before saving.", "alert");
+            uiDialog("Save Database", "Are you sure you want to save these changes?", "confirm", async () => {
+                const data = {
+                    name: document.getElementById('sheetNameInput').value,
+                    entries: currentEntries,
+                    total: document.getElementById('modalGrandTotal').innerText,
+                    accessList: editingId ? undefined : [session.username]
+                };
+                try {
+                    if (editingId) await updateDoc(doc(db, "timesheets", editingId), data);
+                    else await addDoc(collection(db, "timesheets"), data);
+                    closeModal('modalOverlay');
+                } catch (e) { uiDialog("Error", "Save failed. Check database connection.", "alert"); }
+            });
+        };
+
+        // --- DASHBOARD REALTIME SYNC ---
+        const sheetQuery = session.role === 'admin' ? collection(db, "timesheets") : query(collection(db, "timesheets"), where("accessList", "array-contains", session.username));
+
+        onSnapshot(sheetQuery, (snap) => {
+            let docs = []; snap.forEach(d => docs.push({id: d.id, ...d.data()}));
+            
+            document.getElementById('sheetsList').innerHTML = docs.map(s => {
+                const delBtn = session.role === 'admin' ? `<button onclick="event.stopPropagation(); deleteSheet('${s.id}')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-red-500 hover:text-white transition"><i class="fas fa-trash-alt text-xs"></i></button>` : '';
+                const shareBtn = session.role === 'admin' ? `<button onclick="event.stopPropagation(); openShareModal('${s.id}')" class="text-emerald-500 bg-emerald-50 px-3 py-1.5 rounded-lg font-bold text-xs hover:bg-emerald-500 hover:text-white transition"><i class="fas fa-user-plus mr-1"></i>Share</button>` : '';
+                
+                return `
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 hover:shadow-xl hover:border-blue-400 transition-all cursor-pointer relative flex flex-col justify-between h-48 group">
+                    ${delBtn}
+                    <div onclick="openSheet('${s.id}')" class="flex-1">
+                        <h4 class="font-bold text-xl text-slate-800 pr-8 line-clamp-2">${s.name}</h4>
+                        <p class="text-[10px] uppercase font-bold text-slate-400 mt-2 tracking-wider"><i class="fas fa-user mr-1"></i> ${s.accessList ? s.accessList[0] : 'Admin'}</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-50 flex justify-between items-end">
+                        <span class="text-3xl font-black text-blue-600">${s.total}</span>
+                        ${shareBtn}
+                    </div>
+                </div>`;
+            }).join('');
+        });
+
+        window.openSheet = async (id) => {
+            const snap = await getDoc(doc(db, "timesheets", id));
+            const s = snap.data();
+            editingId = id; currentEntries = s.entries;
+            document.getElementById('sheetNameInput').value = s.name;
+            goToStep2();
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            renderTable();
+        };
+
+        window.deleteSheet = (id) => {
+            uiDialog("Delete Sheet", "This action cannot be undone. Permanently delete?", "confirm", async () => {
+                await deleteDoc(doc(db, "timesheets", id));
+            });
+        };
+
+        // --- ADVANCED ADMIN PANEL ---
+        window.openAdminModal = async () => {
+            document.getElementById('adminModal').classList.remove('hidden');
+            loadUsers();
+        };
+
+        async function loadUsers() {
+            const snap = await getDocs(collection(db, "users"));
+            window.allUsers = [];
+            let docs = []; snap.forEach(d => { const u = d.data(); u.id = d.id; docs.push(u); window.allUsers.push(u); });
+            
+            document.getElementById('adminUserTable').innerHTML = docs.map(u => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="p-3 pl-5 font-black text-slate-700">${u.username}</td>
+                    <td class="p-3"><span class="px-2 py-1 text-[10px] font-bold rounded-md uppercase tracking-wide ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-500'}">${u.role}</span></td>
+                    <td class="p-3 text-right pr-5">
+                        <button onclick="promptPasswordChange('${u.id}', '${u.username}')" class="text-blue-500 hover:text-blue-700 mr-3 text-xs font-bold"><i class="fas fa-key mr-1"></i>Pass</button>
+                        ${u.username !== session.username ? `<button onclick="deleteUser('${u.id}', '${u.username}')" class="text-red-400 hover:text-red-600 text-xs font-bold"><i class="fas fa-trash"></i></button>` : ''}
+                    </td>
+                </tr>`).join('');
+            
+            document.getElementById('shareUserSelect').innerHTML = docs.map(u => `<option value="${u.id}">${u.username} (${u.role})</option>`).join('');
+        }
+
+        window.createUser = async () => {
+            const u = document.getElementById('newUsername').value, p = document.getElementById('newPassword').value, r = document.getElementById('newRole').value;
+            if(!u || !p) return uiDialog("Missing Data", "Enter username and password.", "alert");
+            
+            const q = query(collection(db, "users"), where("username", "==", u));
+            const exist = await getDocs(q);
+            if(!exist.empty) return uiDialog("Duplicate", "Username already exists!", "alert");
+
+            await addDoc(collection(db, "users"), { username: u, password: p, role: r });
+            uiDialog("Success", "User created successfully!", "alert");
+            document.getElementById('newUsername').value = ''; document.getElementById('newPassword').value = '';
+            loadUsers();
+        };
+
+        // --- CUSTOM PASSWORD PROMPT LOGIC ---
+        window.promptPasswordChange = (uid, uname) => {
+            passwordEditUserId = uid;
+            document.getElementById('passwordPromptTitle').innerText = `Change password for ${uname}`;
+            document.getElementById('passwordPromptInput').value = '';
+            document.getElementById('passwordPromptModal').classList.remove('hidden');
+        };
+
+        window.closePasswordPrompt = () => {
+            document.getElementById('passwordPromptModal').classList.add('hidden');
+            passwordEditUserId = null;
+        };
+
+        window.confirmPasswordChange = async () => {
+            const newPass = document.getElementById('passwordPromptInput').value.trim();
+            if(!newPass) return uiDialog("Error", "Password cannot be empty.", "alert");
+            
+            if(passwordEditUserId) {
+                try {
+                    await updateDoc(doc(db, "users", passwordEditUserId), { password: newPass });
+                    closePasswordPrompt();
+                    uiDialog("Success", "Password Updated successfully.", "alert");
+                } catch (e) {
+                    uiDialog("Error", "Database error. Could not update password.", "alert");
+                }
+            }
+        };
+
+        window.deleteUser = (uid, uname) => {
+            uiDialog("Delete User", `Permanently delete ${uname}?`, "confirm", async () => {
+                await deleteDoc(doc(db, "users", uid));
+                loadUsers();
+            });
+        };
+
+        // --- SHARE SYSTEM ---
+        window.openShareModal = async (sheetId) => {
+            shareTargetSheetId = sheetId;
+            document.getElementById('shareModal').classList.remove('hidden');
+            if(window.allUsers.length === 0) await loadUsers();
+        };
+
+        window.grantAccess = async () => {
+            const selId = document.getElementById('shareUserSelect').value;
+            const uObj = window.allUsers.find(u => u.id === selId);
+            const ref = doc(db, "timesheets", shareTargetSheetId);
+            const snap = await getDoc(ref);
+            let acc = snap.data().accessList || [];
+            
+            if(!acc.includes(uObj.username)) {
+                acc.push(uObj.username);
+                await updateDoc(ref, { accessList: acc });
+                uiDialog("Access Granted", `${uObj.username} can now see this sheet.`, "alert");
+            } else { uiDialog("Notice", "User already has access.", "alert"); }
+            closeModal('shareModal');
+        };
+
+        // --- PRINT / PDF / EXCEL ---
+        function prepPrint() {
+            document.getElementById('printSheetName').innerText = document.getElementById('sheetNameInput').value || 'Untitled';
+            document.getElementById('printDate').innerText = `Date: ${new Date().toLocaleDateString()}`;
+            document.getElementById('printOwner').innerText = `User: ${session.username}`;
+            document.getElementById('printTableBody').innerHTML = currentEntries.map(e => `<tr><td class="p-3">${e.dIn} ${e.tIn}</td><td class="p-3">${e.dOut} ${e.tOut}</td><td class="p-3 text-right font-black">${e.duration}</td></tr>`).join('');
+            document.getElementById('printGrandTotal').innerText = document.getElementById('modalGrandTotal').innerText;
+        }
+
+        window.printDocument = () => { if(currentEntries.length>0) { prepPrint(); window.print(); }};
+        
+        window.exportPDF = () => {
+            if(currentEntries.length === 0) return;
+            prepPrint();
+            const el = document.getElementById('printArea');
+            el.classList.remove('hidden');
+            html2pdf().set({ margin: 0.5, filename: `${document.getElementById('sheetNameInput').value}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(el).save().then(() => el.classList.add('hidden'));
+        };
+
+        window.exportExcel = () => {
+            if(currentEntries.length === 0) return;
+            const wsData = [["Date In", "Time In", "Date Out", "Time Out", "Hours"]];
+            currentEntries.forEach(e => wsData.push([e.dIn, e.tIn, e.dOut, e.tOut, e.duration]));
+            wsData.push(["", "", "", "Total:", document.getElementById('modalGrandTotal').innerText]);
+            const ws = XLSX.utils.aoa_to_sheet(wsData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sheet1"); XLSX.writeFile(wb, `${document.getElementById('sheetNameInput').value}.xlsx`);
+        };
+    </script>
+</body>
+</html>
