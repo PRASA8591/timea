@@ -10,14 +10,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
-        /* Condensed Print Layout for A4 Optimization */
         @media print {
             @page { margin: 0.5cm; size: A4; }
             body * { visibility: hidden; }
             #printArea, #printArea * { visibility: visible; }
             #printArea { position: absolute; left: 0; top: 0; width: 100%; display: block !important; font-size: 9pt; }
             .no-print { display: none !important; }
-            #printTableBody tr td { padding: 3px 5px !important; border-bottom: 0.5px solid #eee; }
         }
         .custom-scroll::-webkit-scrollbar { height: 4px; width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -27,11 +25,11 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
 
-    <div id="customDialog" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print transition-opacity">
-        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate" id="dialogBox">
+    <div id="customDialog" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate">
             <div id="dialogIcon" class="text-4xl mb-4"></div>
-            <h3 id="dialogTitle" class="text-2xl font-black mb-2 text-slate-800">Title</h3>
-            <p id="dialogMessage" class="text-slate-500 mb-8 font-medium">Message</p>
+            <h3 id="dialogTitle" class="text-2xl font-black mb-2 text-slate-800"></h3>
+            <p id="dialogMessage" class="text-slate-500 mb-8 font-medium"></p>
             <div class="flex gap-3" id="dialogButtons"></div>
         </div>
     </div>
@@ -41,9 +39,9 @@
             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-key text-2xl"></i>
             </div>
-            <h3 class="text-xl font-black mb-2" id="passPromptTitle">Update Password</h3>
-            <p class="text-slate-500 text-sm mb-6" id="passPromptUser"></p>
-            <input type="text" id="passPromptInput" class="w-full border-2 rounded-xl p-3 focus:border-emerald-500 outline-none mb-6 text-center font-bold text-lg" placeholder="Enter new password">
+            <h3 class="text-xl font-black mb-2">Update Password</h3>
+            <p id="passPromptUser" class="text-slate-500 text-sm mb-6"></p>
+            <input type="text" id="passPromptInput" class="w-full border-2 rounded-xl p-3 focus:border-emerald-500 outline-none mb-6 text-center font-bold text-lg" placeholder="New Password">
             <div class="flex gap-3">
                 <button onclick="closeModal('passwordPromptModal')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Cancel</button>
                 <button id="passSaveBtn" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold shadow-lg shadow-emerald-100">Update</button>
@@ -55,11 +53,11 @@
         <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tighter">TimeSheet <span class="text-blue-600">Pro</span></h1>
-                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">Operator: <span id="displayUsername" class="text-blue-600 uppercase"></span></p>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">Logged as: <span id="displayUsername" class="text-blue-600"></span></p>
             </div>
-            <div class="flex flex-wrap gap-2 justify-center w-full md:w-auto">
+            <div class="flex flex-wrap gap-2">
                 <button id="adminBtn" onclick="openAdminModal()" class="hidden bg-slate-800 hover:bg-black text-white px-5 py-3 rounded-xl font-bold transition flex items-center">
-                    <i class="fas fa-users-cog mr-2"></i> Manage Users
+                    <i class="fas fa-users-cog mr-2"></i> Users
                 </button>
                 <button onclick="openNewSheetModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-100 transition">
                     <i class="fas fa-plus mr-2"></i> New Sheet
@@ -70,118 +68,80 @@
             </div>
         </header>
 
-        <div id="sheetsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            </div>
+        <div id="sheetsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
     </div>
 
     <div id="modalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-40 p-2 md:p-4 no-print">
         <div class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[95vh] md:h-auto md:max-h-[90vh] modal-animate">
-            <div class="p-5 border-b flex justify-between items-center bg-white z-10 sticky top-0">
-                <h2 class="text-xl font-black text-slate-800">Sheet Editor</h2>
-                <div class="flex gap-2 items-center">
-                    <div id="exportGroup" class="hidden flex gap-2 border-r pr-3 mr-1">
-                        <button onclick="printDocument()" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white transition"><i class="fas fa-print"></i></button>
-                        <button onclick="exportPDF()" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 hover:bg-red-500 hover:text-white transition"><i class="fas fa-file-pdf"></i></button>
-                    </div>
+            <div class="p-5 border-b flex justify-between items-center">
+                <h2 class="text-xl font-black text-slate-800">Editor</h2>
+                <div class="flex gap-2">
+                    <button onclick="printDocument()" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white transition"><i class="fas fa-print"></i></button>
+                    <button onclick="exportPDF()" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 hover:bg-red-500 hover:text-white transition"><i class="fas fa-file-pdf"></i></button>
                     <button onclick="closeModal('modalOverlay')" class="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition"><i class="fas fa-times"></i></button>
                 </div>
             </div>
 
-            <div id="step1" class="p-10 md:p-20 text-center overflow-y-auto">
-                <h3 class="text-3xl font-black mb-4 text-slate-800">Project Name</h3>
-                <input type="text" id="sheetNameInput" placeholder="e.g. March 2026 Work" class="w-full max-w-md mx-auto block border-2 rounded-2xl p-4 text-center text-lg font-bold outline-none focus:border-blue-500 transition">
-                <button onclick="goToStep2()" class="mt-8 bg-blue-600 text-white px-12 py-4 rounded-2xl font-bold shadow-xl">Continue <i class="fas fa-chevron-right ml-2"></i></button>
+            <div id="step1" class="p-10 text-center">
+                <h3 class="text-2xl font-black mb-4">Project Name</h3>
+                <input type="text" id="sheetNameInput" class="w-full max-w-md mx-auto block border-2 rounded-2xl p-4 text-center font-bold text-lg outline-none focus:border-blue-500">
+                <button onclick="goToStep2()" class="mt-8 bg-blue-600 text-white px-12 py-4 rounded-2xl font-bold shadow-xl">Continue</button>
             </div>
 
             <div id="step2" class="hidden flex-col h-full overflow-hidden">
                 <div class="p-4 bg-slate-50 border-b grid grid-cols-2 md:grid-cols-5 gap-3">
-                    <div><label class="text-[9px] font-black uppercase text-slate-400 mb-1 block">Start Date</label><input type="date" id="dateIn" class="w-full border rounded-xl p-3 outline-none"></div>
-                    <div><label class="text-[9px] font-black uppercase text-slate-400 mb-1 block">Start Time</label><input type="time" id="timeIn" class="w-full border rounded-xl p-3 outline-none"></div>
-                    <div><label class="text-[9px] font-black uppercase text-slate-400 mb-1 block">End Date</label><input type="date" id="dateOut" class="w-full border rounded-xl p-3 outline-none"></div>
-                    <div><label class="text-[9px] font-black uppercase text-slate-400 mb-1 block">End Time</label><input type="time" id="timeOut" class="w-full border rounded-xl p-3 outline-none"></div>
-                    <div class="flex items-end"><button onclick="addEntry()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 transition">Add Entry</button></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1">START DATE</label><input type="date" id="dateIn" class="w-full border rounded-xl p-3 outline-none"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1">START TIME</label><input type="time" id="timeIn" class="w-full border rounded-xl p-3 outline-none"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1">END DATE</label><input type="date" id="dateOut" class="w-full border rounded-xl p-3 outline-none"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1">END TIME</label><input type="time" id="timeOut" class="w-full border rounded-xl p-3 outline-none"></div>
+                    <div class="flex items-end"><button onclick="addEntry()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold">Add Entry</button></div>
                 </div>
                 <div class="flex-1 overflow-auto bg-white custom-scroll">
                     <table class="w-full text-left">
                         <thead class="bg-white sticky top-0 border-b z-10 text-[10px] font-black uppercase text-slate-400">
-                            <tr><th class="p-4">Start</th><th class="p-4">End</th><th class="p-4 text-right">Hours</th><th class="p-4 text-center">Action</th></tr>
+                            <tr><th class="p-4">Start</th><th class="p-4">End</th><th class="p-4 text-right">Duration (HH.MM)</th><th class="p-4 text-center">Action</th></tr>
                         </thead>
                         <tbody id="modalTableBody" class="divide-y divide-slate-50"></tbody>
                     </table>
                 </div>
-                <div class="p-5 border-t flex justify-between items-center bg-slate-50 z-10 sticky bottom-0">
-                    <div><p class="text-[10px] font-black uppercase text-slate-400">Total Calculation</p><span id="modalGrandTotal" class="text-4xl font-black text-blue-600">0.00</span></div>
-                    <button onclick="finalSave()" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl hover:bg-blue-700">Save to Cloud</button>
+                <div class="p-5 border-t flex justify-between items-center bg-slate-50">
+                    <div><p class="text-[10px] font-black text-slate-400">TOTAL TIME (BASE-60)</p><span id="modalGrandTotal" class="text-4xl font-black text-blue-600">00:00</span></div>
+                    <button onclick="finalSave()" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl">Save to Cloud</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4 no-print">
-        <div class="bg-white rounded-3xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] modal-animate">
-            <div class="p-6 border-b flex justify-between items-center bg-slate-900 text-white sticky top-0">
-                <h2 class="text-xl font-black">Admin Center</h2>
-                <button onclick="closeModal('adminModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] modal-animate">
+            <div class="p-6 border-b flex justify-between items-center bg-slate-900 text-white">
+                <h2 class="text-xl font-black">User Management</h2>
+                <button onclick="closeModal('adminModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
             </div>
-            <div class="p-6 overflow-y-auto bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-2xl border shadow-sm h-fit">
-                    <h3 class="font-black mb-4 text-slate-800">New Account</h3>
-                    <input type="text" id="newUsername" placeholder="User Name" class="w-full mb-3 border rounded-xl p-3 outline-none focus:border-blue-500">
-                    <input type="text" id="newPassword" placeholder="Password" class="w-full mb-3 border rounded-xl p-3 outline-none focus:border-blue-500">
-                    <select id="newRole" class="w-full mb-4 border rounded-xl p-3 font-bold text-slate-600">
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                    <button onclick="createUser()" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold hover:bg-blue-700">Create</button>
+            <div class="p-6 overflow-y-auto bg-slate-50">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <input type="text" id="newUsername" placeholder="Username" class="border p-3 rounded-xl outline-none">
+                    <input type="text" id="newPassword" placeholder="Password" class="border p-3 rounded-xl outline-none">
+                    <select id="newRole" class="border p-3 rounded-xl outline-none"><option value="user">User</option><option value="admin">Admin</option></select>
+                    <button onclick="createUser()" class="bg-blue-600 text-white rounded-xl font-bold">Add User</button>
                 </div>
-                <div class="md:col-span-2 bg-white rounded-2xl border shadow-sm overflow-hidden flex flex-col">
-                    <div class="overflow-auto custom-scroll max-h-[500px]">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 font-black uppercase text-slate-400 text-[10px] sticky top-0 border-b">
-                                <tr><th class="p-4">User</th><th class="p-4">Role</th><th class="p-4 text-right pr-12">Action</th></tr>
-                            </thead>
-                            <tbody id="adminUserTable" class="divide-y"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="shareModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[100] p-4 no-print">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-md overflow-hidden shadow-2xl modal-animate">
-            <div class="p-6 bg-blue-600 text-white flex justify-between items-center sticky top-0">
-                <h3 class="text-xl font-black">Share Sheet</h3>
-                <button onclick="closeModal('shareModal')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="p-6">
-                <div class="mb-6">
-                    <label class="text-[10px] font-black uppercase text-slate-400 mb-2 block">Shared With</label>
-                    <div id="currentAccessList" class="space-y-2 max-h-40 overflow-auto custom-scroll pr-2"></div>
-                </div>
-                <div class="border-t pt-4">
-                    <label class="text-[10px] font-black uppercase text-slate-400 mb-2 block">Add User</label>
-                    <div class="flex gap-2">
-                        <select id="shareUserSelect" class="flex-1 border rounded-xl p-3 font-bold outline-none"></select>
-                        <button onclick="confirmShare()" class="bg-emerald-500 text-white px-4 rounded-xl font-bold hover:bg-emerald-600"><i class="fas fa-plus"></i></button>
-                    </div>
-                </div>
+                <table class="w-full text-left bg-white rounded-2xl overflow-hidden shadow-sm">
+                    <thead class="bg-slate-100 text-[10px] font-black"><tr><th class="p-4">User</th><th class="p-4">Role</th><th class="p-4 text-right">Actions</th></tr></thead>
+                    <tbody id="adminUserTable"></tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <div id="printArea" class="hidden">
-        <div class="flex justify-between items-end border-b border-black pb-2 mb-4">
-            <div><h1 class="text-xl font-black uppercase">Report Certified By Prasatek</h1><h2 id="printSheetName" class="font-bold text-base mt-1"></h2></div>
-            <div class="text-right text-[8pt]"><p id="printDate"></p><p id="printOwner"></p></div>
-        </div>
-        <table class="w-full border-collapse">
-            <thead><tr class="bg-slate-100 border-y border-black font-black uppercase"><th class="p-1 text-left">Start Date/Time</th><th class="p-1 text-left">End Date/Time</th><th class="p-1 text-right">Hours</th></tr></thead>
+        <h1 id="printSheetName" style="font-size: 20pt; font-weight: 900; margin-bottom: 20px;"></h1>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead><tr style="border-bottom: 2px solid black;"><th>Start</th><th>End</th><th align="right">Duration</th></tr></thead>
             <tbody id="printTableBody"></tbody>
         </table>
-        <div class="flex justify-end border-t border-black pt-2 mt-4 text-right">
-            <p class="text-[7pt] font-black uppercase">Total Calculation</p>
-            <p id="printGrandTotal" class="text-2xl font-black"></p>
+        <div style="text-align: right; margin-top: 30px;">
+            <p style="font-size: 10pt;">TOTAL CALCULATION (HH:MM)</p>
+            <h2 id="printGrandTotal" style="font-size: 25pt; font-weight: 900;"></h2>
         </div>
     </div>
 
@@ -189,79 +149,71 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        const app = initializeApp({ apiKey: "AIzaSyBJHqn-KIG7ntbsc9OZik7hf5lhObx7Ecg", authDomain: "hours-80ce8.firebaseapp.com", projectId: "hours-80ce8" });
+        const db = getFirestore(app);
         const session = JSON.parse(sessionStorage.getItem('sessionUser'));
         if (!session) window.location.href = 'index.html';
         document.getElementById('displayUsername').innerText = session.username;
         if (session.role === 'admin') document.getElementById('adminBtn').classList.remove('hidden');
 
-        const app = initializeApp({
-            apiKey: "AIzaSyBJHqn-KIG7ntbsc9OZik7hf5lhObx7Ecg",
-            authDomain: "hours-80ce8.firebaseapp.com",
-            projectId: "hours-80ce8"
-        });
-        const db = getFirestore(app);
-
-        // Core Global State - Instantly synced on snapshot
-        window.cachedSheets = {};
-        window.allUsers = [];
         let currentEntries = [];
         let editingId = null;
-        let activeSheetId = null;
+        window.cachedSheets = {};
 
-        // UI Helpers
-        window.logout = () => { sessionStorage.removeItem('sessionUser'); window.location.href = 'index.html'; };
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+        // --- TIME ENGINE FIX (HH.MM to Base-60) ---
+        function calculateTotalTime(entries) {
+            let totalMinutes = 0;
+            entries.forEach(e => {
+                const parts = e.duration.split('.');
+                const hours = parseInt(parts[0]) || 0;
+                const minutes = parseInt(parts[1]) || 0;
+                totalMinutes += (hours * 60) + minutes;
+            });
+            const h = Math.floor(totalMinutes / 60);
+            const m = totalMinutes % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
 
+        // --- CUSTOM POPUPS ---
         window.uiDialog = (title, message, type = 'alert', cb = null) => {
-            const d = document.getElementById('customDialog');
-            const box = document.getElementById('dialogBox');
             document.getElementById('dialogTitle').innerText = title;
             document.getElementById('dialogMessage').innerText = message;
             const icon = document.getElementById('dialogIcon');
             icon.innerHTML = type === 'alert' ? '<i class="fas fa-info-circle text-blue-500"></i>' : '<i class="fas fa-trash-alt text-red-500"></i>';
             const btns = document.getElementById('dialogButtons');
-            if(type === 'alert') {
-                btns.innerHTML = `<button onclick="closeDialog()" class="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold shadow-md shadow-slate-100">OK</button>`;
-            } else {
-                btns.innerHTML = `<button onclick="closeDialog()" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Cancel</button>
-                                  <button id="confBtn" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-red-100">Confirm</button>`;
-                document.getElementById('confBtn').onclick = () => { closeDialog(); if(cb) cb(); };
-            }
-            d.classList.remove('hidden');
+            btns.innerHTML = type === 'alert' ? 
+                `<button onclick="closeDialog()" class="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold">OK</button>` :
+                `<button onclick="closeDialog()" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Cancel</button><button id="confBtn" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold">Confirm</button>`;
+            if(type === 'confirm') document.getElementById('confBtn').onclick = () => { closeDialog(); if(cb) cb(); };
+            document.getElementById('customDialog').classList.remove('hidden');
         };
         window.closeDialog = () => document.getElementById('customDialog').classList.add('hidden');
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
-        // DASHBOARD & Memory Cache (Fast Open Logic)
+        // --- CORE LOGIC ---
         const sheetQ = session.role === 'admin' ? collection(db, "timesheets") : query(collection(db, "timesheets"), where("accessList", "array-contains", session.username));
         onSnapshot(sheetQ, (snap) => {
             const list = document.getElementById('sheetsList');
             list.innerHTML = '';
             snap.forEach(d => {
                 const s = d.data();
-                window.cachedSheets[d.id] = s; // Synced on every DB update
-                const isAdmin = session.role === 'admin';
+                window.cachedSheets[d.id] = s;
                 list.innerHTML += `
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 hover:shadow-xl hover:border-blue-400 transition-all cursor-pointer relative group flex flex-col justify-between h-44 modal-animate" onclick="openSheet('${d.id}')">
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 hover:shadow-xl transition-all cursor-pointer relative group" onclick="openSheet('${d.id}')">
                     <div class="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                        ${isAdmin ? `<button onclick="event.stopPropagation(); openPermissions('${d.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition"><i class="fas fa-user-shield text-[10px]"></i></button>` : ''}
-                        ${isAdmin ? `<button onclick="event.stopPropagation(); deleteSheet('${d.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition"><i class="fas fa-trash text-[10px]"></i></button>` : ''}
+                        <button onclick="event.stopPropagation(); deleteSheet('${d.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500"><i class="fas fa-trash text-[10px]"></i></button>
                     </div>
-                    <h4 class="font-bold text-xl pr-12 line-clamp-2 text-slate-800">${s.name}</h4>
-                    <div class="flex justify-between items-end border-t border-slate-50 pt-4">
+                    <h4 class="font-bold text-lg text-slate-800 mb-4">${s.name}</h4>
+                    <div class="flex justify-between items-end">
                         <span class="text-3xl font-black text-blue-600">${s.total}</span>
-                        <div class="text-right">
-                            <p class="text-[8px] font-black uppercase text-slate-300">Updated</p>
-                            <p class="text-[10px] font-bold text-slate-500">${new Date(s.updatedAt).toLocaleDateString()}</p>
-                        </div>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">${s.accessList[0]}</span>
                     </div>
                 </div>`;
             });
         });
 
-        // SHEET EDITOR FUNCTIONS
         window.openSheet = (id) => {
             const s = window.cachedSheets[id];
-            if(!s) return;
             editingId = id; currentEntries = s.entries || [];
             document.getElementById('sheetNameInput').value = s.name;
             goToStep2();
@@ -272,7 +224,6 @@
         window.openNewSheetModal = () => {
             editingId = null; currentEntries = [];
             document.getElementById('sheetNameInput').value = '';
-            document.getElementById('exportGroup').classList.add('hidden');
             document.getElementById('step1').classList.remove('hidden');
             document.getElementById('step2').classList.add('hidden');
             document.getElementById('modalOverlay').classList.remove('hidden');
@@ -282,171 +233,97 @@
         window.goToStep2 = () => {
             if(!document.getElementById('sheetNameInput').value.trim()) return;
             document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('step2').classList.add('flex');
-            document.getElementById('exportGroup').classList.remove('hidden');
+            document.getElementById('step2').classList.remove('hidden').classList.add('flex');
         };
 
         window.addEntry = () => {
             const d1 = document.getElementById('dateIn').value, t1 = document.getElementById('timeIn').value;
             const d2 = document.getElementById('dateOut').value, t2 = document.getElementById('timeOut').value;
-            if(!d1 || !t1 || !d2 || !t2) return uiDialog("Error", "Missing date or time fields.", "alert");
+            if(!d1 || !t1 || !d2 || !t2) return uiDialog("Error", "All fields required", "alert");
             
-            // Decimal format standard calculation
-            const diff = ((new Date(`${d2}T${t2}`) - new Date(`${d1}T${t1}`)) / 3600000).toFixed(2);
-            currentEntries.push({ dIn: d1, tIn: t1, dOut: d2, tOut: t2, duration: diff });
+            // Calculate HH.MM for this entry
+            const diffMs = new Date(`${d2}T${t2}`) - new Date(`${d1}T${t1}`);
+            const totalMins = Math.floor(diffMs / 60000);
+            const h = Math.floor(totalMins / 60);
+            const m = totalMins % 60;
+            currentEntries.push({ d1, t1, d2, t2, duration: `${h}.${String(m).padStart(2, '0')}` });
             renderEntries();
         };
 
-        window.editRow = (i) => {
-            const e = currentEntries[i];
-            document.getElementById('dateIn').value = e.dIn; document.getElementById('timeIn').value = e.tIn;
-            document.getElementById('dateOut').value = e.dOut; document.getElementById('timeOut').value = e.tOut;
-            currentEntries.splice(i, 1);
-            renderEntries();
-        };
+        function renderEntries() {
+            document.getElementById('modalTableBody').innerHTML = currentEntries.map((e, i) => `
+                <tr class="text-sm">
+                    <td class="p-4 font-bold">${e.d1} <span class="text-slate-300 font-normal">${e.t1}</span></td>
+                    <td class="p-4 font-bold">${e.d2} <span class="text-slate-300 font-normal">${e.t2}</span></td>
+                    <td class="p-4 text-right font-black text-slate-700">${e.duration}</td>
+                    <td class="p-4 text-center">
+                        <button onclick="removeRow(${i})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`).join('');
+            document.getElementById('modalGrandTotal').innerText = calculateTotalTime(currentEntries);
+        }
 
         window.removeRow = (i) => { currentEntries.splice(i, 1); renderEntries(); };
 
-        function renderEntries() {
-            // FIX: Map database JSON standard fields ("dIn", "duration", etc.)
-            document.getElementById('modalTableBody').innerHTML = currentEntries.map((e, i) => `
-                <tr class="hover:bg-slate-50 text-sm">
-                    <td class="p-4 font-bold text-slate-700">${e.dIn} <span class="text-slate-300 font-normal ml-1">${e.tIn}</span></td>
-                    <td class="p-4 font-bold text-slate-700">${e.dOut} <span class="text-slate-300 font-normal ml-1">${e.tOut}</span></td>
-                    <td class="p-4 text-right font-black text-slate-800">${parseFloat(e.duration).toFixed(2)}</td>
-                    <td class="p-4 text-center">
-                        <button onclick="editRow(${i})" class="text-blue-500 mr-4 hover:bg-blue-50 p-2 rounded-lg transition"><i class="fas fa-pen"></i></button>
-                        <button onclick="removeRow(${i})" class="text-red-400 hover:bg-red-50 p-2 rounded-lg transition"><i class="fas fa-trash-alt"></i></button>
-                    </td>
-                </tr>`).join('');
-            // FIX: Standardize Summation Engine
-            const total = currentEntries.reduce((acc, curr) => acc + parseFloat(curr.duration || 0), 0).toFixed(2);
-            document.getElementById('modalGrandTotal').innerText = total;
-        }
-
         window.finalSave = async () => {
-            // FIX: Sync Total with DB Standard
-            const total = document.getElementById('modalGrandTotal').innerText;
+            const total = calculateTotalTime(currentEntries);
             const payload = {
                 name: document.getElementById('sheetNameInput').value,
                 entries: currentEntries,
                 total: total,
                 updatedAt: new Date().toISOString()
             };
-            try {
-                if(editingId) await updateDoc(doc(db, "timesheets", editingId), payload);
-                else {
-                    payload.accessList = [session.username];
-                    await addDoc(collection(db, "timesheets"), payload);
-                }
-                closeModal('modalOverlay');
-                uiDialog("Saved", "Database updated successfully.", "alert");
-            } catch(e) { uiDialog("Error", e.message, "alert"); }
+            if(editingId) await updateDoc(doc(db, "timesheets", editingId), payload);
+            else {
+                payload.accessList = [session.username];
+                await addDoc(collection(db, "timesheets"), payload);
+            }
+            closeModal('modalOverlay');
+            uiDialog("Saved", "Time sheet successfully updated", "alert");
         };
 
-        window.deleteSheet = (id) => uiDialog("Delete", "Permanently remove this sheet?", "confirm", async () => await deleteDoc(doc(db, "timesheets", id)));
+        window.deleteSheet = (id) => uiDialog("Delete", "Remove this sheet permanently?", "confirm", async () => await deleteDoc(doc(db, "timesheets", id)));
 
-        // PERMISSIONS SYSTEM
-        window.openPermissions = async (id) => {
-            activeSheetId = id;
-            const s = window.cachedSheets[id];
-            if(!s) return;
-            document.getElementById('currentAccessList').innerHTML = (s.accessList || []).map(u => `
-                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border modal-animate">
-                    <span class="font-bold text-slate-700">${u}</span>
-                    <button onclick="revokeAccess('${u}')" class="text-red-500 hover:bg-red-50 p-2 rounded-xl transition"><i class="fas fa-user-minus"></i></button>
-                </div>`).join('');
-            const userSnap = await getDocs(collection(db, "users"));
-            document.getElementById('shareUserSelect').innerHTML = '';
-            userSnap.forEach(u => {
-                const uname = u.data().username;
-                if(!(s.accessList || []).includes(uname)) document.getElementById('shareUserSelect').innerHTML += `<option value="${uname}">${uname}</option>`;
-            });
-            document.getElementById('shareModal').classList.remove('hidden');
-        };
-
-        window.confirmShare = async () => {
-            const target = document.getElementById('shareUserSelect').value;
-            if(!target) return;
-            const ref = doc(db, "timesheets", activeSheetId);
-            const s = await getDoc(ref);
-            let acc = s.data().accessList || [];
-            if(!acc.includes(target)) acc.push(target);
-            await updateDoc(ref, { accessList: acc });
-            openPermissions(activeSheetId);
-        };
-
-        window.revokeAccess = async (uname) => {
-            if(uname === 'admin') return uiDialog("Notice", "Cannot revoke master admin access.", "alert");
-            const ref = doc(db, "timesheets", activeSheetId);
-            const s = await getDoc(ref);
-            let acc = s.data().accessList.filter(u => u !== uname);
-            await updateDoc(ref, { accessList: acc });
-            openPermissions(activeSheetId);
-        };
-
-        // USER MANAGEMENT (ADMIN)
+        // --- ADMIN / USERS ---
         window.openAdminModal = () => { document.getElementById('adminModal').classList.remove('hidden'); fetchUsers(); };
         async function fetchUsers() {
             const snap = await getDocs(collection(db, "users"));
-            const table = document.getElementById('adminUserTable'); table.innerHTML = '';
+            const table = document.getElementById('adminUserTable');
+            table.innerHTML = '';
             snap.forEach(d => {
                 const u = d.data();
-                table.innerHTML += `
-                    <tr class="hover:bg-slate-50 text-slate-700">
-                        <td class="p-4 font-bold">${u.username}</td>
-                        <td class="p-4"><span class="px-2 py-1 rounded-md bg-slate-100 text-[8px] font-black uppercase text-slate-500">${u.role}</span></td>
-                        <td class="p-4 text-right pr-12">
-                            <button onclick="showPassPrompt('${d.id}', '${u.username}')" class="text-blue-500 mr-4 font-bold text-xs hover:bg-blue-50 px-2 py-1 rounded-md"><i class="fas fa-key mr-1"></i>Reset Pass</button>
-                            ${u.username !== session.username ? `<button onclick="deleteUser('${d.id}')" class="text-red-400 hover:bg-red-50 px-2 py-1 rounded-md"><i class="fas fa-trash-alt"></i></button>` : ''}
-                        </td>
-                    </tr>`;
+                table.innerHTML += `<tr class="border-b">
+                    <td class="p-4 font-bold">${u.username}</td>
+                    <td class="p-4 uppercase text-[10px] text-slate-400 font-black">${u.role}</td>
+                    <td class="p-4 text-right">
+                        <button onclick="showResetPrompt('${d.id}', '${u.username}')" class="text-blue-500 mr-4"><i class="fas fa-key"></i></button>
+                        ${u.username !== session.username ? `<button onclick="deleteUser('${d.id}')" class="text-red-400"><i class="fas fa-trash"></i></button>` : ''}
+                    </td>
+                </tr>`;
             });
         }
 
-        window.createUser = async () => {
-            const u = document.getElementById('newUsername').value, p = document.getElementById('newPassword').value, r = document.getElementById('newRole').value;
-            if(!u || !p) return uiDialog("Error", "Username/Password required.", "alert");
-            await addDoc(collection(db, "users"), { username: u, password: p, role: r });
-            uiDialog("Success", "User created.", "alert");
-            document.getElementById('newUsername').value=''; document.getElementById('newPassword').value='';
-            fetchUsers();
-        };
-
-        window.deleteUser = (id) => uiDialog("Delete User", "Delete this account permanently?", "confirm", async () => { await deleteDoc(doc(db, "users", id)); fetchUsers(); });
-
-        window.showPassPrompt = (id, username) => {
-            document.getElementById('passPromptUser').innerText = `Target Account: ${username}`;
-            document.getElementById('passPromptInput').value = '';
+        window.showResetPrompt = (id, uname) => {
+            document.getElementById('passPromptUser').innerText = "Target: " + uname;
             document.getElementById('passwordPromptModal').classList.remove('hidden');
             document.getElementById('passSaveBtn').onclick = async () => {
-                const newP = document.getElementById('passPromptInput').value.trim();
-                if(!newP) return uiDialog("Error", "Password cannot be empty.", "alert");
-                await updateDoc(doc(db, "users", id), { password: newP });
+                const np = document.getElementById('passPromptInput').value;
+                if(!np) return;
+                await updateDoc(doc(db, "users", id), { password: np });
                 closeModal('passwordPromptModal');
-                uiDialog("Success", `Password updated for ${username}.`, "alert");
+                uiDialog("Success", "Password Updated", "alert");
             };
         };
 
-        // EXPORTS
-        function prepPrint() {
+        window.logout = () => { sessionStorage.removeItem('sessionUser'); window.location.href = 'index.html'; };
+
+        // --- PRINT ---
+        window.printDocument = () => {
             document.getElementById('printSheetName').innerText = document.getElementById('sheetNameInput').value;
-            document.getElementById('printDate').innerText = "Run Date: " + new Date().toLocaleDateString();
-            document.getElementById('printOwner').innerText = "Operator: " + session.username;
-            // FIX: Map database standard ("dIn", "duration", etc.)
             document.getElementById('printTableBody').innerHTML = currentEntries.map(e => `
-                <tr><td>${e.dIn} ${e.tIn}</td><td>${e.dOut} ${e.tOut}</td><td class="text-right font-black">${parseFloat(e.duration).toFixed(2)}</td></tr>`).join('');
-            document.getElementById('printGrandTotal').innerText = document.getElementById('modalGrandTotal').innerText;
-        }
-        window.printDocument = () => { if(currentEntries.length>0){prepPrint(); window.print();}};
-        
-        window.exportPDF = () => {
-            if(currentEntries.length === 0) return;
-            prepPrint();
-            const el = document.getElementById('printArea');
-            el.classList.remove('hidden');
-            html2pdf().set({ margin: 0.2, filename: `${document.getElementById('sheetNameInput').value}.pdf`, html2canvas:{scale:3}, jsPDF: { format: 'a4' } }).from(el).save().then(()=>el.classList.add('hidden'));
+                <tr style="border-bottom: 1px solid #eee;"><td>${e.d1} ${e.t1}</td><td>${e.d2} ${e.t2}</td><td align="right">${e.duration}</td></tr>`).join('');
+            document.getElementById('printGrandTotal').innerText = calculateTotalTime(currentEntries);
+            window.print();
         };
 
     </script>
