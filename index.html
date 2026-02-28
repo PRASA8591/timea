@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Hours Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Work Hours Calculator</h1>
+            <p class="text-gray-600">Track your shifts and calculate total hours automatically.</p>
+        </header>
+
+        <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Date In</label>
+                    <input type="date" id="dateIn" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Time In</label>
+                    <input type="time" id="timeIn" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Date Out</label>
+                    <input type="date" id="dateOut" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Time Out</label>
+                    <input type="time" id="timeOut" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="addEntry()" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">
+                        Add Shift
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Started</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Finished</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="entryTable" class="divide-y divide-gray-200">
+                    </tbody>
+                <tfoot class="bg-gray-50">
+                    <tr>
+                        <td colspan="2" class="px-6 py-4 text-right font-bold text-gray-700">Total Working Hours:</td>
+                        <td id="grandTotal" class="px-6 py-4 font-black text-blue-600 text-xl">0.00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 1. Initialize Dexie Database
+        const db = new Dexie("WorkHoursDB");
+        db.version(1).stores({
+            shifts: '++id, dateIn, timeIn, dateOut, timeOut, duration'
+        });
+
+        // 2. Add Entry Function
+        async function addEntry() {
+            const dateIn = document.getElementById('dateIn').value;
+            const timeIn = document.getElementById('timeIn').value;
+            const dateOut = document.getElementById('dateOut').value;
+            const timeOut = document.getElementById('timeOut').value;
+
+            if (!dateIn || !timeIn || !dateOut || !timeOut) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            // Calculate Duration
+            const start = new Date(`${dateIn}T${timeIn}`);
+            const end = new Date(`${dateOut}T${timeOut}`);
+            
+            if (end <= start) {
+                alert("Out time must be after In time.");
+                return;
+            }
+
+            const diffMs = end - start;
+            const duration = (diffMs / (1000 * 60 * 60)).toFixed(2); // Convert to decimal hours
+
+            // Save to Dexie
+            await db.shifts.add({
+                dateIn, timeIn, dateOut, timeOut, duration: parseFloat(duration)
+            });
+
+            renderEntries();
+            clearInputs();
+        }
+
+        // 3. Render Entries to Table
+        async function renderEntries() {
+            const shifts = await db.shifts.toArray();
+            const tbody = document.getElementById('entryTable');
+            const totalDisplay = document.getElementById('grandTotal');
+            
+            tbody.innerHTML = '';
+            let totalHours = 0;
+
+            shifts.forEach(shift => {
+                totalHours += shift.duration;
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-600">${shift.dateIn} <span class="text-xs text-gray-400">@</span> ${shift.timeIn}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">${shift.dateOut} <span class="text-xs text-gray-400">@</span> ${shift.timeOut}</td>
+                        <td class="px-6 py-4 text-sm font-bold text-gray-800">${shift.duration} hrs</td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="deleteEntry(${shift.id})" class="text-red-500 hover:text-red-700 text-sm font-medium">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            totalDisplay.innerText = totalHours.toFixed(2);
+        }
+
+        // 4. Delete Entry
+        async function deleteEntry(id) {
+            await db.shifts.delete(id);
+            renderEntries();
+        }
+
+        function clearInputs() {
+            document.getElementById('dateIn').value = '';
+            document.getElementById('timeIn').value = '';
+            document.getElementById('dateOut').value = '';
+            document.getElementById('timeOut').value = '';
+        }
+
+        // Initial Load
+        renderEntries();
+    </script>
+</body>
+</html>
