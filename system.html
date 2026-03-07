@@ -7,26 +7,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <style>
+        .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .modal-animate { animation: modalIn 0.2s ease-out; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
         @media print {
-            @page { margin: 0.5cm; size: A4; }
             body * { visibility: hidden; }
             #printArea, #printArea * { visibility: visible; }
             #printArea { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
             .no-print { display: none !important; }
         }
-        .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .modal-animate { animation: modalIn 0.2s ease-out; }
-        @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
 
-    <div id="customDialog" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print">
+    <div id="customDialog" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[250] p-4 no-print">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate">
             <div id="dialogIcon" class="text-4xl mb-4"></div>
             <h3 id="dialogTitle" class="text-2xl font-black mb-2 text-slate-800"></h3>
@@ -35,7 +36,7 @@
         </div>
     </div>
 
-    <div id="passwordPromptModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[150] p-4 no-print">
+    <div id="passwordPromptModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate">
             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-key text-2xl"></i>
@@ -45,7 +46,7 @@
             <input type="text" id="passPromptInput" class="w-full border-2 rounded-xl p-3 focus:border-emerald-500 outline-none mb-6 text-center font-bold text-lg" placeholder="New Password">
             <div class="flex gap-3">
                 <button onclick="closeModal('passwordPromptModal')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Cancel</button>
-                <button id="passSaveBtn" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold">Update</button>
+                <button id="passSaveBtn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">Update</button>
             </div>
         </div>
     </div>
@@ -53,14 +54,14 @@
     <div class="max-w-7xl mx-auto p-4 md:p-8 no-print">
         <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 gap-4">
             <div>
-                <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tighter">TimeSheet <span class="text-blue-600">Pro</span></h1>
-                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">Operator: <span id="displayUsername" class="text-blue-600"></span></p>
+                <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tighter">TimeSheet <span class="text-emerald-600">Pro</span></h1>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">Operator: <span id="displayUsername" class="text-emerald-600"></span></p>
             </div>
             <div class="flex flex-wrap gap-2">
                 <button id="adminBtn" onclick="openAdminModal()" class="hidden bg-slate-800 hover:bg-black text-white px-5 py-3 rounded-xl font-bold transition flex items-center">
-                    <i class="fas fa-users-cog mr-2"></i> Admin
+                    <i class="fas fa-users-cog mr-2"></i> Admin Panel
                 </button>
-                <button onclick="openNewSheetModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-100 transition">
+                <button onclick="openNewSheetModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-emerald-100 transition">
                     <i class="fas fa-plus mr-2"></i> New Sheet
                 </button>
                 <button onclick="logout()" class="bg-red-50 text-red-600 px-4 py-3 rounded-xl font-bold hover:bg-red-500 hover:text-white transition">
@@ -75,9 +76,9 @@
     <div id="modalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-40 p-2 md:p-4 no-print">
         <div class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[95vh] md:h-auto md:max-h-[90vh] modal-animate">
             <div class="p-4 border-b flex flex-wrap justify-between items-center gap-2">
-                <h2 class="text-xl font-black text-slate-800">Sheet Editor</h2>
+                <h2 id="modalSheetTitle" class="text-xl font-black text-slate-800">Sheet Editor</h2>
                 <div class="flex gap-2">
-                    <button onclick="printDocument()" title="Print" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white transition"><i class="fas fa-print"></i></button>
+                    <button onclick="printDocument()" title="Print" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-800 hover:bg-slate-800 hover:text-white transition"><i class="fas fa-print"></i></button>
                     <button onclick="exportPDF()" title="Download PDF" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-red-500 hover:bg-red-500 hover:text-white transition"><i class="fas fa-file-pdf"></i></button>
                     <button onclick="exportExcel()" title="Download Excel" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition"><i class="fas fa-file-excel"></i></button>
                     <button onclick="closeModal('modalOverlay')" title="Close" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition ml-2"><i class="fas fa-times"></i></button>
@@ -86,74 +87,83 @@
 
             <div id="step1" class="p-10 text-center">
                 <h3 class="text-2xl font-black mb-4">Project Name</h3>
-                <input type="text" id="sheetNameInput" class="w-full max-w-md mx-auto block border-2 rounded-2xl p-4 text-center font-bold text-lg outline-none focus:border-blue-500">
-                <button onclick="goToStep2()" class="mt-8 bg-blue-600 text-white px-12 py-4 rounded-2xl font-bold">Continue</button>
+                <input type="text" id="sheetNameInput" class="w-full max-w-md mx-auto block border-2 rounded-2xl p-4 text-center font-bold text-lg outline-none focus:border-emerald-500" placeholder="e.g., Weekly Report">
+                <button onclick="goToStep2()" class="mt-8 bg-emerald-600 text-white px-12 py-4 rounded-2xl font-bold">Continue</button>
             </div>
 
             <div id="step2" class="hidden flex-col h-full overflow-hidden">
                 <div class="p-4 bg-slate-50 border-b grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Start Date</label><input type="date" id="dateIn" class="w-full border rounded-xl p-3 outline-none focus:border-blue-500"></div>
-                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Start Time</label><input type="time" id="timeIn" class="w-full border rounded-xl p-3 outline-none focus:border-blue-500"></div>
-                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">End Date</label><input type="date" id="dateOut" class="w-full border rounded-xl p-3 outline-none focus:border-blue-500"></div>
-                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">End Time</label><input type="time" id="timeOut" class="w-full border rounded-xl p-3 outline-none focus:border-blue-500"></div>
-                    <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
-                        <button id="addUpdateBtn" onclick="addEntry()" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold transition">Add Row</button>
-                        <button id="cancelEditBtn" onclick="cancelEdit()" class="hidden w-12 bg-slate-300 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-400 transition" title="Cancel Edit"><i class="fas fa-times"></i></button>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Start Date</label><input type="date" id="dateIn" class="w-full border rounded-xl p-3"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Start Time</label><input type="time" id="timeIn" class="w-full border rounded-xl p-3"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">End Date</label><input type="date" id="dateOut" class="w-full border rounded-xl p-3"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">End Time</label><input type="time" id="timeOut" class="w-full border rounded-xl p-3"></div>
+                    <div class="flex items-end gap-2">
+                        <button id="addUpdateBtn" onclick="addEntry()" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold">Add Row</button>
+                        <button id="cancelEditBtn" onclick="cancelEdit()" class="hidden w-12 bg-slate-300 text-slate-700 py-3 rounded-xl font-bold"><i class="fas fa-times"></i></button>
                     </div>
                 </div>
                 
                 <div class="flex-1 overflow-x-auto overflow-y-auto bg-white custom-scroll">
                     <table class="w-full text-left min-w-[600px]">
                         <thead class="bg-white sticky top-0 border-b z-10 text-[10px] font-black uppercase text-slate-400">
-                            <tr><th class="p-4">Start</th><th class="p-4">End</th><th class="p-4 text-right">Duration (HH.MM)</th><th class="p-4 text-center">Actions</th></tr>
+                            <tr><th class="p-4">Start</th><th class="p-4">End</th><th class="p-4 text-right">Hours (HH.MM)</th><th class="p-4 text-center">Action</th></tr>
                         </thead>
                         <tbody id="modalTableBody" class="divide-y divide-slate-50"></tbody>
                     </table>
                 </div>
                 
                 <div class="p-5 border-t flex flex-wrap justify-between items-center bg-slate-50 gap-4">
-                    <div><p class="text-[10px] font-black text-slate-400 uppercase">Total (Base-60)</p><span id="modalGrandTotal" class="text-3xl md:text-4xl font-black text-blue-600">00:00</span></div>
-                    <button onclick="finalSave()" class="w-full sm:w-auto bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl hover:bg-blue-700 transition">Save to Cloud</button>
+                    <div><p class="text-[10px] font-black text-slate-400 uppercase">Grand Total (HH:MM)</p><span id="modalGrandTotal" class="text-3xl md:text-4xl font-black text-emerald-600">00:00</span></div>
+                    <button onclick="finalSave()" class="w-full sm:w-auto bg-emerald-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl">Save to Cloud</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[150] p-4 no-print">
         <div class="bg-white rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] modal-animate">
             <div class="p-6 border-b flex justify-between items-center bg-slate-900 text-white">
-                <h2 class="text-xl font-black">User Directory</h2>
+                <h2 class="text-xl font-black">User Management</h2>
                 <button onclick="closeModal('adminModal')"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-6 overflow-y-auto bg-slate-50">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <input type="text" id="newUsername" placeholder="Username" class="border p-3 rounded-xl">
-                    <input type="text" id="newPassword" placeholder="Password" class="border p-3 rounded-xl">
-                    <select id="newRole" class="border p-3 rounded-xl"><option value="user">User</option><option value="admin">Admin</option></select>
-                    <button onclick="createUser()" class="bg-blue-600 text-white rounded-xl font-bold">Create User</button>
+                    <input type="text" id="newUsername" placeholder="Username" class="border p-3 rounded-xl font-bold outline-none focus:border-emerald-500">
+                    <input type="text" id="newPassword" placeholder="Password" class="border p-3 rounded-xl font-bold outline-none focus:border-emerald-500">
+                    <select id="newRole" class="border p-3 rounded-xl font-bold">
+                        <option value="user">Standard User</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                    <button onclick="createUser()" class="bg-emerald-600 text-white rounded-xl font-bold py-3 hover:bg-emerald-700 transition">Create User</button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left bg-white rounded-2xl overflow-hidden shadow-sm min-w-[400px]">
-                        <thead class="bg-slate-100 text-[10px] font-black"><tr><th class="p-4">User</th><th class="p-4">Role</th><th class="p-4 text-right">Actions</th></tr></thead>
-                        <tbody id="adminUserTable"></tbody>
+                        <thead class="bg-slate-100 text-[10px] font-black uppercase text-slate-400"><tr><th class="p-4">Account</th><th class="p-4">Role</th><th class="p-4 text-right">Actions</th></tr></thead>
+                        <tbody id="adminUserTable" class="divide-y divide-slate-50"></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="printArea" class="hidden p-8">
-        <div style="border-bottom: 3px solid #1e293b; padding-bottom: 10px; margin-bottom: 20px;">
-            <h1 id="printSheetName" style="font-size: 24pt; font-weight: 900; color: #1e293b;"></h1>
-            <p style="font-size: 10pt; color: #64748b; text-transform: uppercase; font-weight: bold;">Certified Time Report</p>
+    <div id="printArea" class="hidden p-10 bg-white text-slate-900">
+        <div class="border-b-4 border-slate-900 pb-4 mb-6">
+            <h1 id="printSheetName" class="text-3xl font-black"></h1>
+            <p class="text-xs font-bold text-slate-500 uppercase">Certified Time Attendance Ledger</p>
         </div>
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead><tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;"><th style="padding:10px; text-align:left;">Start Date/Time</th><th style="padding:10px; text-align:left;">End Date/Time</th><th style="padding:10px; text-align:right;">Hours</th></tr></thead>
+        <table class="w-full">
+            <thead>
+                <tr class="bg-slate-100 border-b-2 border-slate-300">
+                    <th class="p-3 text-left font-black text-sm">Start Point</th>
+                    <th class="p-3 text-left font-black text-sm">End Point</th>
+                    <th class="p-3 text-right font-black text-sm">Duration</th>
+                </tr>
+            </thead>
             <tbody id="printTableBody"></tbody>
         </table>
-        <div style="text-align: right; margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
-            <p style="font-size: 10pt; font-weight: bold; color: #64748b;">TOTAL HOURS (HH:MM)</p>
-            <h2 id="printGrandTotal" style="font-size: 30pt; font-weight: 900; color: #2563eb;"></h2>
+        <div class="mt-8 pt-6 border-t border-slate-200 text-right">
+            <p class="text-[10px] font-black text-slate-400 uppercase">Total Logged (HH:MM)</p>
+            <h2 id="printGrandTotal" class="text-5xl font-black text-emerald-600"></h2>
         </div>
     </div>
 
@@ -175,29 +185,25 @@
 
         let currentEntries = [];
         let editingId = null;
-        let editingRowIndex = null; // Tracks if we are editing an existing row
+        let editingRowIndex = null;
         window.cachedSheets = {};
 
-        // --- CALCULATION ENGINE ---
+        // --- CALCULATION LOGIC ---
         function calculateTotalTime(entries) {
             let totalMinutes = 0;
             entries.forEach(e => {
-                const parts = e.duration.split('.');
-                const hours = parseInt(parts[0]) || 0;
-                const minutes = parseInt(parts[1]) || 0;
-                totalMinutes += (hours * 60) + minutes;
+                const parts = (e.duration || "0.00").split('.');
+                totalMinutes += (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
             });
-            const h = Math.floor(totalMinutes / 60);
-            const m = totalMinutes % 60;
-            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            return `${String(Math.floor(totalMinutes / 60)).padStart(2, '0')}:${String(totalMinutes % 60).padStart(2, '0')}`;
         }
 
-        // --- UI DIALOG SYSTEM ---
+        // --- UI UTILITIES ---
         window.uiDialog = (title, message, type = 'alert', cb = null) => {
             document.getElementById('dialogTitle').innerText = title;
             document.getElementById('dialogMessage').innerText = message;
             const icon = document.getElementById('dialogIcon');
-            icon.innerHTML = type === 'alert' ? '<i class="fas fa-info-circle text-blue-500"></i>' : '<i class="fas fa-trash-alt text-red-500"></i>';
+            icon.innerHTML = type === 'alert' ? '<i class="fas fa-check-circle text-emerald-500"></i>' : '<i class="fas fa-exclamation-circle text-red-500"></i>';
             const btns = document.getElementById('dialogButtons');
             btns.innerHTML = type === 'alert' ? 
                 `<button onclick="closeDialog()" class="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold">OK</button>` :
@@ -208,7 +214,7 @@
         window.closeDialog = () => document.getElementById('customDialog').classList.add('hidden');
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
-        // --- DATA SYNC ---
+        // --- CLOUD SYNC ---
         const sheetQ = session.role === 'admin' ? collection(db, "timesheets") : query(collection(db, "timesheets"), where("accessList", "array-contains", session.username));
         onSnapshot(sheetQ, (snap) => {
             const list = document.getElementById('sheetsList');
@@ -221,36 +227,32 @@
                     <div class="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition">
                         <button onclick="event.stopPropagation(); deleteSheet('${d.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition"><i class="fas fa-trash text-[10px]"></i></button>
                     </div>
-                    <h4 class="font-bold text-lg text-slate-800 mb-4 truncate pr-6">${s.name}</h4>
+                    <h4 class="font-bold text-lg text-slate-800 mb-4 truncate">${s.name}</h4>
                     <div class="flex justify-between items-end">
-                        <span class="text-3xl font-black text-blue-600">${s.total || '00:00'}</span>
-                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest truncate max-w-[80px]">${s.accessList ? s.accessList[0] : ''}</span>
+                        <span class="text-3xl font-black text-emerald-600">${s.total || '00:00'}</span>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">${s.accessList ? s.accessList[0] : ''}</span>
                     </div>
                 </div>`;
             });
         });
 
-        // --- OPEN & SETUP MODAL ---
+        // --- SHEET ACTIONS ---
         window.openSheet = (id) => {
             const s = window.cachedSheets[id];
-            if (!s) return;
             editingId = id; 
             currentEntries = s.entries || [];
-            cancelEdit(); // reset form state
             document.getElementById('sheetNameInput').value = s.name;
-            
+            document.getElementById('modalSheetTitle').innerText = s.name;
             document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('step2').classList.add('flex');
+            document.getElementById('step2').classList.replace('hidden', 'flex');
             document.getElementById('modalOverlay').classList.remove('hidden');
             renderEntries();
         };
 
         window.openNewSheetModal = () => {
-            editingId = null; 
-            currentEntries = [];
-            cancelEdit();
+            editingId = null; currentEntries = [];
             document.getElementById('sheetNameInput').value = '';
+            document.getElementById('modalSheetTitle').innerText = 'New Sheet';
             document.getElementById('step1').classList.remove('hidden');
             document.getElementById('step2').classList.add('hidden');
             document.getElementById('modalOverlay').classList.remove('hidden');
@@ -258,94 +260,60 @@
         };
 
         window.goToStep2 = () => {
-            if(!document.getElementById('sheetNameInput').value.trim()) return uiDialog("Error", "Name required", "alert");
+            if(!document.getElementById('sheetNameInput').value.trim()) return;
             document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('step2').classList.add('flex');
-        };
-
-        // --- EDITING LOGIC ---
-        window.editRow = (i) => {
-            const e = currentEntries[i];
-            document.getElementById('dateIn').value = e.dIn;
-            document.getElementById('timeIn').value = e.tIn;
-            document.getElementById('dateOut').value = e.dOut;
-            document.getElementById('timeOut').value = e.tOut;
-            
-            editingRowIndex = i;
-            
-            // Change button appearance to indicate editing
-            const btn = document.getElementById('addUpdateBtn');
-            btn.innerText = "Update Row";
-            btn.classList.replace('bg-emerald-500', 'bg-blue-500');
-            document.getElementById('cancelEditBtn').classList.remove('hidden');
-        };
-
-        window.cancelEdit = () => {
-            editingRowIndex = null;
-            document.getElementById('dateIn').value = '';
-            document.getElementById('timeIn').value = '';
-            document.getElementById('dateOut').value = '';
-            document.getElementById('timeOut').value = '';
-            
-            // Revert button appearance
-            const btn = document.getElementById('addUpdateBtn');
-            btn.innerText = "Add Row";
-            btn.classList.replace('bg-blue-500', 'bg-emerald-500');
-            document.getElementById('cancelEditBtn').classList.add('hidden');
+            document.getElementById('step2').classList.replace('hidden', 'flex');
+            document.getElementById('modalSheetTitle').innerText = document.getElementById('sheetNameInput').value;
         };
 
         window.addEntry = () => {
-            const dIn = document.getElementById('dateIn').value;
-            const tIn = document.getElementById('timeIn').value;
-            const dOut = document.getElementById('dateOut').value;
-            const tOut = document.getElementById('timeOut').value;
-            
-            if(!dIn || !tIn || !dOut || !tOut) return uiDialog("Error", "Fill all fields", "alert");
-            
-            const diffMs = new Date(`${dOut}T${tOut}`) - new Date(`${dIn}T${tIn}`);
-            if(diffMs < 0) return uiDialog("Error", "End time cannot be before start time", "alert");
+            const dIn = document.getElementById('dateIn').value, tIn = document.getElementById('timeIn').value;
+            const dOut = document.getElementById('dateOut').value, tOut = document.getElementById('timeOut').value;
+            if(!dIn || !tIn || !dOut || !tOut) return uiDialog("Missing Data", "Fill all date/time fields.", "alert");
 
-            const totalMins = Math.floor(diffMs / 60000);
-            const h = Math.floor(totalMins / 60);
-            const m = totalMins % 60;
-            const duration = `${h}.${String(m).padStart(2, '0')}`;
-            
-            const newEntryObj = { dIn, tIn, dOut, tOut, duration };
+            const diff = new Date(`${dOut}T${tOut}`) - new Date(`${dIn}T${tIn}`);
+            if(diff < 0) return uiDialog("Error", "Check-out cannot be earlier than check-in.", "alert");
 
-            if (editingRowIndex !== null) {
-                // Update existing row
-                currentEntries[editingRowIndex] = newEntryObj;
-                cancelEdit(); // Reset UI
-            } else {
-                // Add new row
-                currentEntries.push(newEntryObj);
-            }
+            const tm = Math.floor(diff / 60000);
+            const duration = `${Math.floor(tm / 60)}.${String(tm % 60).padStart(2, '0')}`;
             
-            renderEntries();
+            if(editingRowIndex !== null) currentEntries[editingRowIndex] = { dIn, tIn, dOut, tOut, duration };
+            else currentEntries.push({ dIn, tIn, dOut, tOut, duration });
+            
+            cancelEdit(); renderEntries();
         };
 
         function renderEntries() {
             document.getElementById('modalTableBody').innerHTML = currentEntries.map((e, i) => `
-                <tr class="text-sm hover:bg-slate-50 transition ${editingRowIndex === i ? 'bg-blue-50' : ''}">
-                    <td class="p-4 font-bold text-slate-700 whitespace-nowrap">${e.dIn} <span class="text-slate-400 font-normal ml-1">${e.tIn}</span></td>
-                    <td class="p-4 font-bold text-slate-700 whitespace-nowrap">${e.dOut} <span class="text-slate-400 font-normal ml-1">${e.tOut}</span></td>
+                <tr class="text-sm hover:bg-slate-50 transition">
+                    <td class="p-4 font-bold text-slate-700">${e.dIn} <span class="text-slate-400 font-normal ml-1">${e.tIn}</span></td>
+                    <td class="p-4 font-bold text-slate-700">${e.dOut} <span class="text-slate-400 font-normal ml-1">${e.tOut}</span></td>
                     <td class="p-4 text-right font-black text-slate-800">${e.duration}</td>
                     <td class="p-4 text-center">
-                        <div class="flex justify-center gap-1">
-                            <button onclick="editRow(${i})" class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white transition"><i class="fas fa-edit text-xs"></i></button>
-                            <button onclick="removeRow(${i})" class="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition"><i class="fas fa-trash text-xs"></i></button>
-                        </div>
+                        <button onclick="editRow(${i})" class="text-emerald-500 mr-3"><i class="fas fa-edit"></i></button>
+                        <button onclick="removeRow(${i})" class="text-red-400"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`).join('');
             document.getElementById('modalGrandTotal').innerText = calculateTotalTime(currentEntries);
         }
 
-        window.removeRow = (i) => { 
-            if (editingRowIndex === i) cancelEdit(); // Prevent deleting a row currently being edited
-            currentEntries.splice(i, 1); 
-            renderEntries(); 
+        window.editRow = (i) => {
+            const e = currentEntries[i];
+            document.getElementById('dateIn').value = e.dIn; document.getElementById('timeIn').value = e.tIn;
+            document.getElementById('dateOut').value = e.dOut; document.getElementById('timeOut').value = e.tOut;
+            editingRowIndex = i;
+            document.getElementById('addUpdateBtn').innerText = "Update Row";
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
         };
+
+        window.cancelEdit = () => {
+            editingRowIndex = null;
+            document.getElementById('addUpdateBtn').innerText = "Add Row";
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+            ['dateIn', 'timeIn', 'dateOut', 'timeOut'].forEach(id => document.getElementById(id).value = '');
+        };
+
+        window.removeRow = (i) => { currentEntries.splice(i, 1); renderEntries(); };
 
         window.finalSave = async () => {
             const payload = {
@@ -360,99 +328,97 @@
                 await addDoc(collection(db, "timesheets"), payload);
             }
             closeModal('modalOverlay');
-            uiDialog("Success", "Sheet saved to cloud", "alert");
+            uiDialog("Saved", "Cloud data updated successfully.", "alert");
         };
 
-        window.deleteSheet = (id) => uiDialog("Delete", "Permanently delete this sheet?", "confirm", async () => await deleteDoc(doc(db, "timesheets", id)));
+        window.deleteSheet = (id) => uiDialog("Delete", "Delete sheet permanently?", "confirm", async () => await deleteDoc(doc(db, "timesheets", id)));
 
-        // --- ADMIN ---
-        window.openAdminModal = () => { document.getElementById('adminModal').classList.remove('hidden'); fetchUsers(); };
+        // --- ADMIN: USER MANAGEMENT & PASSWORD CHANGE ---
+        window.openAdminModal = async () => {
+            document.getElementById('adminModal').classList.remove('hidden');
+            await fetchUsers();
+        };
+
         async function fetchUsers() {
             const snap = await getDocs(collection(db, "users"));
             const table = document.getElementById('adminUserTable');
             table.innerHTML = '';
             snap.forEach(d => {
                 const u = d.data();
-                table.innerHTML += `<tr class="border-b">
-                    <td class="p-4 font-bold">${u.username}</td>
-                    <td class="p-4 uppercase text-[10px] text-slate-400 font-black">${u.role}</td>
+                table.innerHTML += `
+                <tr>
+                    <td class="p-4 font-bold text-slate-800">${u.username}</td>
+                    <td class="p-4 uppercase text-[10px] font-black text-slate-400">${u.role}</td>
                     <td class="p-4 text-right">
-                        <button onclick="showResetPrompt('${d.id}', '${u.username}')" class="text-blue-500 mr-4"><i class="fas fa-key"></i></button>
-                        ${u.username !== session.username ? `<button onclick="deleteUser('${d.id}')" class="text-red-400"><i class="fas fa-trash"></i></button>` : ''}
+                        <button onclick="promptPassUpdate('${d.id}', '${u.username}')" class="text-emerald-500 mr-4" title="Change Password"><i class="fas fa-key"></i></button>
+                        ${u.username !== session.username ? `<button onclick="deleteUser('${d.id}')" class="text-red-400"><i class="fas fa-user-minus"></i></button>` : ''}
                     </td>
                 </tr>`;
             });
         }
 
-        window.showResetPrompt = (id, uname) => {
+        window.promptPassUpdate = (id, uname) => {
             document.getElementById('passPromptUser').innerText = "Account: " + uname;
+            document.getElementById('passPromptInput').value = '';
             document.getElementById('passwordPromptModal').classList.remove('hidden');
             document.getElementById('passSaveBtn').onclick = async () => {
-                const np = document.getElementById('passPromptInput').value;
-                if(!np) return;
-                await updateDoc(doc(db, "users", id), { password: np });
+                const newPass = document.getElementById('passPromptInput').value.trim();
+                if(!newPass) return;
+                await updateDoc(doc(db, "users", id), { password: newPass });
                 closeModal('passwordPromptModal');
-                uiDialog("Success", "Password updated", "alert");
+                uiDialog("Success", "Password updated for " + uname, "alert");
             };
         };
 
-        window.logout = () => { sessionStorage.removeItem('sessionUser'); window.location.href = 'index.html'; };
+        window.createUser = async () => {
+            const u = document.getElementById('newUsername').value.trim(), p = document.getElementById('newPassword').value.trim(), r = document.getElementById('newRole').value;
+            if(!u || !p) return;
+            await addDoc(collection(db, "users"), { username: u, password: p, role: r });
+            document.getElementById('newUsername').value = ''; document.getElementById('newPassword').value = '';
+            fetchUsers();
+        };
 
-        // --- EXPORT: PRINT, PDF, EXCEL ---
-        function prepPrint() {
-            document.getElementById('printSheetName').innerText = document.getElementById('sheetNameInput').value || 'TimeSheet';
-            document.getElementById('printTableBody').innerHTML = currentEntries.map(e => `
-                <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding:8px">${e.dIn} ${e.tIn}</td>
-                    <td style="padding:8px">${e.dOut} ${e.tOut}</td>
-                    <td align="right" style="padding:8px; font-weight:bold;">${e.duration}</td>
-                </tr>`).join('');
-            document.getElementById('printGrandTotal').innerText = calculateTotalTime(currentEntries);
-        }
+        window.deleteUser = (id) => uiDialog("Remove", "Delete this user?", "confirm", async () => { await deleteDoc(doc(db, "users", id)); fetchUsers(); });
 
+        // --- EXPORT & PRINT ---
         window.printDocument = () => {
-            prepPrint();
+            document.getElementById('printSheetName').innerText = document.getElementById('sheetNameInput').value;
+            document.getElementById('printGrandTotal').innerText = calculateTotalTime(currentEntries);
+            document.getElementById('printTableBody').innerHTML = currentEntries.map(e => `
+                <tr class="border-b border-slate-200">
+                    <td class="p-3 text-sm">${e.dIn} ${e.tIn}</td>
+                    <td class="p-3 text-sm">${e.dOut} ${e.tOut}</td>
+                    <td class="p-3 text-right font-bold text-sm">${e.duration}</td>
+                </tr>`).join('');
             window.print();
         };
 
         window.exportPDF = () => {
-            prepPrint();
-            const element = document.getElementById('printArea');
-            const opt = { 
-                margin: 0.5, 
-                filename: `${document.getElementById('sheetNameInput').value || 'TimeSheet'}.pdf`, 
-                html2canvas: { scale: 2 }, 
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } 
-            };
-            html2pdf().set(opt).from(element).save();
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const name = document.getElementById('sheetNameInput').value || "TimeSheet";
+            doc.setFontSize(22); doc.text(name, 14, 20);
+            doc.setFontSize(10); doc.setTextColor(150); doc.text("Authenticated Time Record", 14, 28);
+            const tableData = currentEntries.map(e => [`${e.dIn} ${e.tIn}`, `${e.dOut} ${e.tOut}`, e.duration]);
+            doc.autoTable({
+                startY: 35, head: [['Start Session', 'End Session', 'Duration']], body: tableData,
+                foot: [['', 'TOTAL TIME', calculateTotalTime(currentEntries)]],
+                theme: 'striped', headStyles: { fillColor: [5, 150, 105] }
+            });
+            doc.save(`${name}.pdf`);
         };
 
         window.exportExcel = () => {
-            const sheetName = document.getElementById('sheetNameInput').value || "TimeSheet";
-            
-            // Map the data for Excel format
-            const excelData = currentEntries.map(e => ({
-                "Start Date": e.dIn,
-                "Start Time": e.tIn,
-                "End Date": e.dOut,
-                "End Time": e.tOut,
-                "Duration (Hours.Mins)": e.duration
-            }));
-            
-            // Append the Total Row at the bottom
-            excelData.push({
-                "Start Date": "TOTAL TIME (HH:MM)",
-                "Start Time": "",
-                "End Date": "",
-                "End Time": "",
-                "Duration (Hours.Mins)": calculateTotalTime(currentEntries)
-            });
-
-            const worksheet = XLSX.utils.json_to_sheet(excelData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Logged Hours");
-            XLSX.writeFile(workbook, `${sheetName}.xlsx`);
+            const name = document.getElementById('sheetNameInput').value || "TimeSheet";
+            const data = currentEntries.map(e => ({ "Start": `${e.dIn} ${e.tIn}`, "End": `${e.dOut} ${e.tOut}`, "Hours": e.duration }));
+            data.push({ "Start": "", "End": "GRAND TOTAL", "Hours": calculateTotalTime(currentEntries) });
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Hours");
+            XLSX.writeFile(wb, `${name}.xlsx`);
         };
+
+        window.logout = () => { sessionStorage.clear(); window.location.href = 'index.html'; };
     </script>
 </body>
 </html>
