@@ -1,34 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TimeSheet Pro | PrasaTek System Solutions</title>
     <script src="https://cdn.tailwindcss.com"></script>
- <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    
+
     <style>
-        .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .modal-animate { animation: modalIn 0.2s ease-out; }
-        @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .custom-scroll::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .modal-animate {
+            animation: modalIn 0.2s ease-out;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
 
         @media print {
-            body * { visibility: hidden; }
-            #printArea, #printArea * { visibility: visible; }
-            #printArea { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
-            .no-print { display: none !important; }
+            body * {
+                visibility: hidden;
+            }
+
+            #printArea,
+            #printArea * {
+                visibility: visible;
+            }
+
+            #printArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                display: block !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
+
 <body class="bg-slate-50 min-h-screen flex flex-col text-slate-800 font-sans">
 
-    <div id="customDialog" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[300] p-4 no-print">
+    <div id="customDialog"
+        class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[300] p-4 no-print">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate">
             <div id="dialogIcon" class="text-4xl mb-4"></div>
             <h3 id="dialogTitle" class="text-2xl font-black mb-2 text-slate-800"></h3>
@@ -37,94 +77,187 @@
         </div>
     </div>
 
-    <div id="passwordPromptModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print">
+    <div id="passwordPromptModal"
+        class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate">
-            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div
+                class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-key text-2xl"></i>
             </div>
             <h3 class="text-xl font-black mb-2">Update Password</h3>
             <p id="passPromptUser" class="text-slate-500 text-sm mb-6"></p>
-            <input type="text" id="passPromptInput" class="w-full border-2 rounded-xl p-3 focus:border-emerald-500 outline-none mb-6 text-center font-bold text-lg" placeholder="New Password">
+            <input type="text" id="passPromptInput"
+                class="w-full border-2 rounded-xl p-3 focus:border-emerald-500 outline-none mb-6 text-center font-bold text-lg"
+                placeholder="New Password">
             <div class="flex gap-3">
-                <button onclick="closeModal('passwordPromptModal')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Cancel</button>
-                <button id="passSaveBtn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">Update</button>
+                <button onclick="closeModal('passwordPromptModal')"
+                    class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Cancel</button>
+                <button id="passSaveBtn"
+                    class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">Update</button>
             </div>
         </div>
     </div>
 
-    <div id="salaryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print">
+    <div id="salaryModal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden modal-animate">
             <div class="p-6 bg-emerald-600 text-white flex justify-between items-center">
                 <h2 class="text-xl font-black"><i class="fas fa-calculator mr-2"></i> Salary Calculator</h2>
                 <button onclick="closeModal('salaryModal')"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-6 space-y-4">
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400">Month / Report Name</label>
+                    <input type="text" id="sal_name"
+                        class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500"
+                        placeholder="e.g., January Salary">
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-[10px] font-black uppercase text-slate-400">Basic Salary</label>
-                        <input type="number" id="sal_basic" oninput="runSalaryCalc()" class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500" placeholder="0.00">
+                        <input type="number" id="sal_basic" oninput="runSalaryCalc()"
+                            class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500"
+                            placeholder="0.00">
                     </div>
                     <div>
                         <label class="text-[10px] font-black uppercase text-slate-400">Allowance</label>
-                        <input type="number" id="sal_allowance" oninput="runSalaryCalc()" class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500" placeholder="0.00">
+                        <input type="number" id="sal_allowance" oninput="runSalaryCalc()"
+                            class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500"
+                            placeholder="0.00">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-[10px] font-black uppercase text-slate-400">Normal OT (Hrs)</label>
-                        <input type="number" id="sal_normal_ot" oninput="runSalaryCalc()" class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500" placeholder="0">
+                        <input type="number" id="sal_normal_ot" oninput="runSalaryCalc()"
+                            class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500"
+                            placeholder="0">
                     </div>
                     <div>
                         <label class="text-[10px] font-black uppercase text-slate-400">Mercantile OT (Hrs)</label>
-                        <input type="number" id="sal_merc_ot" oninput="runSalaryCalc()" class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500" placeholder="0">
+                        <input type="number" id="sal_merc_ot" oninput="runSalaryCalc()"
+                            class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500"
+                            placeholder="0">
                     </div>
                 </div>
                 <div>
                     <label class="text-[10px] font-black uppercase text-slate-400">Other Deductions</label>
-                    <input type="number" id="sal_deduction" oninput="runSalaryCalc()" class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500" placeholder="0.00">
+                    <input type="number" id="sal_deduction" oninput="runSalaryCalc()"
+                        class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500"
+                        placeholder="0.00">
                 </div>
 
                 <div class="bg-slate-50 p-4 rounded-2xl space-y-2 text-sm border border-slate-100">
-                    <div class="flex justify-between"><span>Normal OT Pay:</span><span id="res_normal" class="font-bold">0.00</span></div>
-                    <div class="flex justify-between"><span>Mercantile OT Pay:</span><span id="res_merc" class="font-bold">0.00</span></div>
-                    <div class="flex justify-between text-red-500"><span>EPF Deduction (8%):</span><span id="res_epf" class="font-bold">0.00</span></div>
+                    <div class="flex justify-between"><span>Normal OT Pay:</span><span id="res_normal"
+                            class="font-bold">0.00</span></div>
+                    <div class="flex justify-between"><span>Mercantile OT Pay:</span><span id="res_merc"
+                            class="font-bold">0.00</span></div>
+                    <div class="flex justify-between text-red-500"><span>EPF Deduction (8%):</span><span id="res_epf"
+                            class="font-bold">0.00</span></div>
                     <div class="flex justify-between text-xl font-black text-emerald-600 border-t pt-2 mt-2">
                         <span>Final Salary:</span><span id="res_total">0.00</span>
                     </div>
                 </div>
 
-                <button onclick="saveSalaryToSheet()" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition uppercase tracking-widest">
+                <button onclick="saveSalaryToSheet()"
+                    class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition uppercase tracking-widest">
                     Save to Dashboard
                 </button>
             </div>
         </div>
     </div>
 
+    <div id="viewSalaryModal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden modal-animate">
+            <div class="p-6 bg-emerald-600 text-white flex justify-between items-center">
+                <h2 class="text-xl font-black"><i class="fas fa-file-invoice-dollar mr-2"></i> Salary Details</h2>
+                <div class="flex gap-3">
+                    <button onclick="printSalary()" title="Print Payslip" class="hover:text-emerald-200 transition"><i
+                            class="fas fa-print"></i></button>
+                    <button onclick="exportSalaryPDF()" title="Download PDF"
+                        class="hover:text-emerald-200 transition"><i class="fas fa-file-pdf"></i></button>
+                    <button onclick="exportSalaryExcel()" title="Download Excel"
+                        class="hover:text-emerald-200 transition"><i class="fas fa-file-excel"></i></button>
+                    <button onclick="editSalary()" title="Edit Salary" class="hover:text-emerald-200 transition"><i
+                            class="fas fa-edit"></i></button>
+                    <button onclick="closeModal('viewSalaryModal')" class="ml-2 hover:text-red-300 transition"><i
+                            class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <h3 id="viewSalName" class="text-2xl font-black text-center mb-4 text-slate-800"></h3>
+                <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-slate-400">Basic Salary</p>
+                        <p id="viewSalBasic" class="font-bold border-b pb-1 text-slate-700"></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-slate-400">Allowance</p>
+                        <p id="viewSalAllowance" class="font-bold border-b pb-1 text-slate-700"></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-slate-400">Normal OT (Hrs)</p>
+                        <p id="viewSalNormalOT" class="font-bold border-b pb-1 text-slate-700"></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-slate-400">Mercantile OT (Hrs)</p>
+                        <p id="viewSalMercOT" class="font-bold border-b pb-1 text-slate-700"></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-slate-400">Other Deductions</p>
+                        <p id="viewSalDeduction" class="font-bold border-b pb-1 text-slate-700"></p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl space-y-2 text-sm border border-slate-100">
+                    <div class="flex justify-between text-slate-700"><span>Normal OT Pay:</span><span
+                            id="viewSalResNormal" class="font-bold">0.00</span></div>
+                    <div class="flex justify-between text-slate-700"><span>Mercantile OT Pay:</span><span
+                            id="viewSalResMerc" class="font-bold">0.00</span></div>
+                    <div class="flex justify-between text-red-500"><span>EPF Deduction (8%):</span><span
+                            id="viewSalResEpf" class="font-bold">0.00</span></div>
+                    <div class="flex justify-between text-xl font-black text-emerald-600 border-t pt-2 mt-2">
+                        <span>Final Salary:</span><span id="viewSalTotal">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-8 no-print">
-        
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 gap-4">
+
+        <header
+            class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 gap-4">
             <div>
                 <div class="flex items-center gap-3 mb-1">
                     <img src="logo.png" alt="PrasaTek System Solutions Logo" class="h-10 w-auto object-contain">
-                    <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tighter">TimeSheet <span class="text-emerald-600">Pro</span></h1>
+                    <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tighter">TimeSheet <span
+                            class="text-emerald-600">Pro</span></h1>
                 </div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">by PrasaTek System Solutions</p>
-                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Operator: <span id="displayUsername" class="text-emerald-600"></span></p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">by PrasaTek System
+                    Solutions</p>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Operator: <span
+                        id="displayUsername" class="text-emerald-600"></span></p>
             </div>
-            
+
             <div class="flex flex-wrap gap-2">
-                <button id="adminBtn" onclick="openAdminModal()" class="hidden bg-slate-800 hover:bg-black text-white px-5 py-3 rounded-xl font-bold transition flex items-center">
+                <button id="adminBtn" onclick="openAdminModal()"
+                    class="hidden bg-slate-800 hover:bg-black text-white px-5 py-3 rounded-xl font-bold transition flex items-center">
                     <i class="fas fa-users-cog mr-2"></i> Admin Panel
                 </button>
-                
-                <button onclick="openSalaryModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold transition flex items-center border border-slate-200">
+
+                <button onclick="openSalaryModal()"
+                    class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold transition flex items-center border border-slate-200">
                     <i class="fas fa-calculator mr-2 text-emerald-600"></i> Calculate Salary
                 </button>
-                
-                <button onclick="openNewSheetModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-emerald-100 transition">
+
+                <button onclick="openNewSheetModal()"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-emerald-100 transition">
                     <i class="fas fa-plus mr-2"></i> New Sheet
                 </button>
-                <button onclick="logout()" class="bg-red-50 text-red-600 px-4 py-3 rounded-xl font-bold hover:bg-red-500 hover:text-white transition">
+                <button onclick="logout()"
+                    class="bg-red-50 text-red-600 px-4 py-3 rounded-xl font-bold hover:bg-red-500 hover:text-white transition">
                     <i class="fas fa-power-off"></i>
                 </button>
             </div>
@@ -137,74 +270,161 @@
         &copy; 2026 PrasaTek System Solutions. All rights reserved.
     </footer>
 
-    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-40 p-2 md:p-4 no-print">
-        <div class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[95vh] md:h-auto md:max-h-[90vh] modal-animate">
+    <div id="modalOverlay"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-40 p-2 md:p-4 no-print">
+        <div
+            class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[95vh] md:h-auto md:max-h-[90vh] modal-animate">
             <div class="p-4 border-b flex flex-wrap justify-between items-center gap-2">
                 <h2 id="modalSheetTitle" class="text-xl font-black text-slate-800">Sheet Editor</h2>
                 <div class="flex gap-2">
-                    <button onclick="printDocument()" title="Print" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-800 hover:bg-slate-800 hover:text-white transition"><i class="fas fa-print"></i></button>
-                    <button onclick="exportPDF()" title="Download PDF" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-red-500 hover:bg-red-500 hover:text-white transition"><i class="fas fa-file-pdf"></i></button>
-                    <button onclick="exportExcel()" title="Download Excel" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition"><i class="fas fa-file-excel"></i></button>
-                    <button onclick="closeModal('modalOverlay')" title="Close" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition ml-2"><i class="fas fa-times"></i></button>
+                    <button onclick="printDocument()" title="Print"
+                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-800 hover:bg-slate-800 hover:text-white transition"><i
+                            class="fas fa-print"></i></button>
+                    <button onclick="exportPDF()" title="Download PDF"
+                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-red-500 hover:bg-red-500 hover:text-white transition"><i
+                            class="fas fa-file-pdf"></i></button>
+                    <button onclick="exportExcel()" title="Download Excel"
+                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition"><i
+                            class="fas fa-file-excel"></i></button>
+                    <button onclick="closeModal('modalOverlay')" title="Close"
+                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition ml-2"><i
+                            class="fas fa-times"></i></button>
                 </div>
             </div>
 
             <div id="step1" class="p-10 text-center">
                 <h3 class="text-2xl font-black mb-4">Project Name</h3>
-                <input type="text" id="sheetNameInput" class="w-full max-w-md mx-auto block border-2 rounded-2xl p-4 text-center font-bold text-lg outline-none focus:border-emerald-500" placeholder="e.g., Weekly Report">
-                <button onclick="goToStep2()" class="mt-8 bg-emerald-600 text-white px-12 py-4 rounded-2xl font-bold">Continue</button>
+                <input type="text" id="sheetNameInput"
+                    class="w-full max-w-md mx-auto block border-2 rounded-2xl p-4 text-center font-bold text-lg outline-none focus:border-emerald-500"
+                    placeholder="e.g., Weekly Report">
+                <button onclick="goToStep2()"
+                    class="mt-8 bg-emerald-600 text-white px-12 py-4 rounded-2xl font-bold">Continue</button>
             </div>
 
             <div id="step2" class="hidden flex-col h-full overflow-hidden">
                 <div class="p-4 bg-slate-50 border-b grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Start Date</label><input type="date" id="dateIn" class="w-full border rounded-xl p-3"></div>
-                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Start Time</label><input type="time" id="timeIn" class="w-full border rounded-xl p-3"></div>
-                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">End Date</label><input type="date" id="dateOut" class="w-full border rounded-xl p-3"></div>
-                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">End Time</label><input type="time" id="timeOut" class="w-full border rounded-xl p-3"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Start
+                            Date</label><input type="date" id="dateIn" class="w-full border rounded-xl p-3"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Start
+                            Time</label><input type="time" id="timeIn" class="w-full border rounded-xl p-3"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">End Date</label><input
+                            type="date" id="dateOut" class="w-full border rounded-xl p-3"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">End Time</label><input
+                            type="time" id="timeOut" class="w-full border rounded-xl p-3"></div>
                     <div class="flex items-end gap-2">
-                        <button id="addUpdateBtn" onclick="addEntry()" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold">Add Row</button>
-                        <button id="cancelEditBtn" onclick="cancelEdit()" class="hidden w-12 bg-slate-300 text-slate-700 py-3 rounded-xl font-bold"><i class="fas fa-times"></i></button>
+                        <button id="addUpdateBtn" onclick="addEntry()"
+                            class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold">Add Row</button>
+                        <button id="cancelEditBtn" onclick="cancelEdit()"
+                            class="hidden w-12 bg-slate-300 text-slate-700 py-3 rounded-xl font-bold"><i
+                                class="fas fa-times"></i></button>
                     </div>
                 </div>
-                
+
                 <div class="flex-1 overflow-x-auto overflow-y-auto bg-white custom-scroll">
                     <table class="w-full text-left min-w-[600px]">
-                        <thead class="bg-white sticky top-0 border-b z-10 text-[10px] font-black uppercase text-slate-400">
-                            <tr><th class="p-4">Start</th><th class="p-4">End</th><th class="p-4 text-right">Hours (HH.MM)</th><th class="p-4 text-center">Action</th></tr>
+                        <thead
+                            class="bg-white sticky top-0 border-b z-10 text-[10px] font-black uppercase text-slate-400">
+                            <tr>
+                                <th class="p-4">Start</th>
+                                <th class="p-4">End</th>
+                                <th class="p-4 text-right">Hours (HH.MM)</th>
+                                <th class="p-4 text-center">Action</th>
+                            </tr>
                         </thead>
                         <tbody id="modalTableBody" class="divide-y divide-slate-50"></tbody>
                     </table>
                 </div>
-                
+
                 <div class="p-5 border-t flex flex-wrap justify-between items-center bg-slate-50 gap-4">
-                    <div><p class="text-[10px] font-black text-slate-400 uppercase">Grand Total (HH:MM)</p><span id="modalGrandTotal" class="text-3xl md:text-4xl font-black text-emerald-600">00:00</span></div>
-                    <button onclick="finalSave()" class="w-full sm:w-auto bg-emerald-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl">Save to Cloud</button>
+                    <div class="flex gap-4 md:gap-8">
+                        <div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase">Grand Total</p>
+                            <span id="modalGrandTotal" class="text-3xl font-black text-emerald-600">00:00</span>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase">Mercantile OT</p>
+                            <span id="modalMercTotal" class="text-3xl font-black text-orange-500">00:00</span>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase">Normal Hrs</p>
+                            <span id="modalNormTotal" class="text-3xl font-black text-blue-500">00:00</span>
+                        </div>
+                    </div>
+                    <button onclick="finalSave()"
+                        class="w-full md:w-auto bg-emerald-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl">Save
+                        to Cloud</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[150] p-4 no-print">
+    <div id="adminModal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[150] p-4 no-print">
         <div class="bg-white rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] modal-animate">
             <div class="p-6 border-b flex justify-between items-center bg-slate-900 text-white">
-                <h2 class="text-xl font-black">User Management</h2>
+                <h2 class="text-xl font-black">Admin Panel</h2>
                 <button onclick="closeModal('adminModal')"><i class="fas fa-times"></i></button>
             </div>
-            <div class="p-6 overflow-y-auto bg-slate-50">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <input type="text" id="newUsername" placeholder="Username" class="border p-3 rounded-xl font-bold outline-none focus:border-emerald-500">
-                    <input type="text" id="newPassword" placeholder="Password" class="border p-3 rounded-xl font-bold outline-none focus:border-emerald-500">
-                    <select id="newRole" class="border p-3 rounded-xl font-bold">
-                        <option value="user">Standard User</option>
-                        <option value="admin">Administrator</option>
-                    </select>
-                    <button onclick="createUser()" class="bg-emerald-600 text-white rounded-xl font-bold py-3 hover:bg-emerald-700 transition">Create User</button>
+            <div class="p-6 overflow-y-auto bg-slate-50 flex flex-col md:flex-row gap-8">
+                <!-- User mgmt -->
+                <div class="flex-1">
+                    <h3 class="font-bold text-lg mb-4">User Management</h3>
+                    <div class="flex flex-col gap-3 mb-6">
+                        <input type="text" id="newUsername" placeholder="Username"
+                            class="border p-3 rounded-xl font-bold outline-none focus:border-emerald-500">
+                        <input type="text" id="newPassword" placeholder="Password"
+                            class="border p-3 rounded-xl font-bold outline-none focus:border-emerald-500">
+                        <select id="newRole" class="border p-3 rounded-xl font-bold">
+                            <option value="user">Standard User</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                        <button onclick="createUser()"
+                            class="bg-emerald-600 text-white rounded-xl font-bold py-3 hover:bg-emerald-700 transition">Create
+                            User</button>
+                    </div>
+                    <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-100">
+                        <table class="w-full text-left min-w-[300px]">
+                            <thead class="bg-slate-100 text-[10px] font-black uppercase text-slate-400">
+                                <tr>
+                                    <th class="p-4">Account</th>
+                                    <th class="p-4">Role</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUserTable" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left bg-white rounded-2xl overflow-hidden shadow-sm min-w-[400px]">
-                        <thead class="bg-slate-100 text-[10px] font-black uppercase text-slate-400"><tr><th class="p-4">Account</th><th class="p-4">Role</th><th class="p-4 text-right">Actions</th></tr></thead>
-                        <tbody id="adminUserTable" class="divide-y divide-slate-50"></tbody>
-                    </table>
+
+                <!-- Mercantile Calendar mgmt -->
+                <div class="flex-1 border-t md:border-t-0 md:border-l border-slate-200 pt-6 md:pt-0 md:pl-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-lg">Mercantile Calendar</h3>
+                        <button onclick="fetchSLHolidays(event)"
+                            class="text-[10px] uppercase font-bold tracking-widest bg-orange-100 text-orange-600 px-3 py-1 rounded-xl shadow-sm hover:bg-orange-200 transition"><i
+                                class="fas fa-cloud-download-alt mr-1"></i> Auto Fetch</button>
+                    </div>
+                    <div class="flex flex-col gap-3 mb-6">
+                        <input type="date" id="newMercDay"
+                            class="border p-3 rounded-xl font-bold outline-none focus:border-orange-500">
+                        <input type="text" id="newMercName" placeholder="Holiday Title"
+                            class="border p-3 rounded-xl font-bold outline-none focus:border-orange-500">
+                        <button onclick="addMercDay()"
+                            class="bg-orange-500 text-white rounded-xl font-bold py-3 hover:bg-orange-600 transition">Add
+                            to Calendar</button>
+                    </div>
+                    <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-100">
+                        <table class="w-full text-left min-w-[300px] text-sm">
+                            <thead class="bg-slate-100 text-[10px] font-black uppercase text-slate-400">
+                                <tr>
+                                    <th class="p-3">Date</th>
+                                    <th class="p-3">Title</th>
+                                    <th class="p-3 text-right">Del</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminMercTable" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -225,9 +445,19 @@
             </thead>
             <tbody id="printTableBody"></tbody>
         </table>
-        <div class="mt-8 pt-6 border-t border-slate-200 text-right">
-            <p class="text-[10px] font-black text-slate-400 uppercase">Total Logged (HH:MM)</p>
-            <h2 id="printGrandTotal" class="text-5xl font-black text-emerald-600"></h2>
+        <div class="mt-8 pt-6 border-t border-slate-200 flex justify-end gap-12 text-right">
+            <div>
+                <p class="text-[10px] font-black text-slate-400 uppercase">Normal Hrs</p>
+                <h2 id="printNormTotal" class="text-3xl font-black text-blue-600"></h2>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-slate-400 uppercase">Mercantile OT</p>
+                <h2 id="printMercTotal" class="text-3xl font-black text-orange-600"></h2>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-slate-400 uppercase">Grand Total</p>
+                <h2 id="printGrandTotal" class="text-4xl font-black text-emerald-600"></h2>
+            </div>
         </div>
     </div>
 
@@ -235,14 +465,14 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const app = initializeApp({ 
-            apiKey: "AIzaSyBJHqn-KIG7ntbsc9OZik7hf5lhObx7Ecg", 
-            authDomain: "hours-80ce8.firebaseapp.com", 
-            projectId: "hours-80ce8" 
+        const app = initializeApp({
+            apiKey: "AIzaSyBJHqn-KIG7ntbsc9OZik7hf5lhObx7Ecg",
+            authDomain: "hours-80ce8.firebaseapp.com",
+            projectId: "hours-80ce8"
         });
         const db = getFirestore(app);
         const session = JSON.parse(sessionStorage.getItem('sessionUser'));
-        
+
         if (!session) window.location.href = 'index.html';
         document.getElementById('displayUsername').innerText = session.username;
         if (session.role === 'admin') document.getElementById('adminBtn').classList.remove('hidden');
@@ -251,10 +481,25 @@
         let editingId = null;
         let editingRowIndex = null;
         window.cachedSheets = {};
+        window.mercantileDays = new Set();
+
+        onSnapshot(collection(db, "mercantile_days"), (snap) => {
+            window.mercantileDays.clear();
+            snap.forEach(d => window.mercantileDays.add(d.data().date));
+            if (editingId || currentEntries.length > 0) renderEntries();
+        });
+
+        let currentViewingSalaryId = null;
 
         // --- SALARY CALCULATOR LOGIC ---
-        window.openSalaryModal = () => document.getElementById('salaryModal').classList.remove('hidden');
-        
+        window.openSalaryModal = () => {
+            editingId = null;
+            document.getElementById("sal_name").value = '';
+            ['sal_basic', 'sal_allowance', 'sal_normal_ot', 'sal_merc_ot', 'sal_deduction'].forEach(id => document.getElementById(id).value = '');
+            window.runSalaryCalc();
+            document.getElementById('salaryModal').classList.remove('hidden');
+        };
+
         window.runSalaryCalc = () => {
             let basic = parseFloat(document.getElementById("sal_basic").value) || 0;
             let normalOT = parseFloat(document.getElementById("sal_normal_ot").value) || 0;
@@ -270,35 +515,133 @@
             document.getElementById("res_normal").innerText = normalPay.toFixed(2);
             document.getElementById("res_merc").innerText = mercPay.toFixed(2);
             document.getElementById("res_epf").innerText = epf.toFixed(2);
-            document.getElementById("res_total").innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById("res_total").innerText = total.toLocaleString(undefined, { minimumFractionDigits: 2 });
             return { basic, total };
         };
 
         window.saveSalaryToSheet = async () => {
             const data = window.runSalaryCalc();
-            if(data.basic <= 0) return uiDialog("Error", "Please enter a Basic Salary to save.", "alert");
-            
+            if (data.basic <= 0) return uiDialog("Error", "Please enter a Basic Salary to save.", "alert");
+
+            const reportName = document.getElementById("sal_name").value.trim() || `Salary Report - ${new Date().toLocaleDateString()}`;
+
             const payload = {
-                name: `Salary Report - ${new Date().toLocaleDateString()}`,
-                total: `Rs.${data.total.toLocaleString(undefined, {minimumFractionDigits: 2})}`,
+                name: reportName,
+                total: `Rs.${data.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
                 isSalaryReport: true, // This flag separates it from regular timesheets
-                accessList: [session.username],
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                breakdown: {
+                    basic: document.getElementById("sal_basic").value || 0,
+                    allowance: document.getElementById("sal_allowance").value || 0,
+                    normalOT: document.getElementById("sal_normal_ot").value || 0,
+                    mercOT: document.getElementById("sal_merc_ot").value || 0,
+                    deduction: document.getElementById("sal_deduction").value || 0,
+                    normalPay: document.getElementById("res_normal").innerText,
+                    mercPay: document.getElementById("res_merc").innerText,
+                    epf: document.getElementById("res_epf").innerText
+                }
             };
 
-            await addDoc(collection(db, "timesheets"), payload);
+            if (editingId) {
+                await updateDoc(doc(db, "timesheets", editingId), payload);
+            } else {
+                payload.accessList = [session.username];
+                await addDoc(collection(db, "timesheets"), payload);
+            }
+
             closeModal('salaryModal');
             uiDialog("Success", "Salary data saved to your dashboard!", "alert");
+            document.getElementById("sal_name").value = "";
+        };
+
+        window.openViewSalaryModal = (id) => {
+            currentViewingSalaryId = id;
+            const s = window.cachedSheets[id];
+            document.getElementById('viewSalName').innerText = s.name;
+            document.getElementById('viewSalTotal').innerText = s.total;
+            if (s.breakdown) {
+                document.getElementById('viewSalBasic').innerText = s.breakdown.basic || '0.00';
+                document.getElementById('viewSalAllowance').innerText = s.breakdown.allowance || '0.00';
+                document.getElementById('viewSalNormalOT').innerText = s.breakdown.normalOT || '0';
+                document.getElementById('viewSalMercOT').innerText = s.breakdown.mercOT || '0';
+                document.getElementById('viewSalDeduction').innerText = s.breakdown.deduction || '0.00';
+                document.getElementById('viewSalResNormal').innerText = s.breakdown.normalPay || '0.00';
+                document.getElementById('viewSalResMerc').innerText = s.breakdown.mercPay || '0.00';
+                document.getElementById('viewSalResEpf').innerText = s.breakdown.epf || '0.00';
+            } else {
+                document.getElementById('viewSalBasic').innerText = 'N/A';
+                document.getElementById('viewSalAllowance').innerText = 'N/A';
+                document.getElementById('viewSalNormalOT').innerText = 'N/A';
+                document.getElementById('viewSalMercOT').innerText = 'N/A';
+                document.getElementById('viewSalDeduction').innerText = 'N/A';
+                document.getElementById('viewSalResNormal').innerText = 'N/A';
+                document.getElementById('viewSalResMerc').innerText = 'N/A';
+                document.getElementById('viewSalResEpf').innerText = 'N/A';
+            }
+            document.getElementById('viewSalaryModal').classList.remove('hidden');
+        };
+
+        window.editSalary = () => {
+            closeModal('viewSalaryModal');
+            const s = window.cachedSheets[currentViewingSalaryId];
+            editingId = currentViewingSalaryId;
+            document.getElementById("sal_name").value = s.name || '';
+            if (s.breakdown) {
+                document.getElementById("sal_basic").value = s.breakdown.basic || '';
+                document.getElementById("sal_allowance").value = s.breakdown.allowance || '';
+                document.getElementById("sal_normal_ot").value = s.breakdown.normalOT || '';
+                document.getElementById("sal_merc_ot").value = s.breakdown.mercOT || '';
+                document.getElementById("sal_deduction").value = s.breakdown.deduction || '';
+            }
+            window.runSalaryCalc();
+            document.getElementById('salaryModal').classList.remove('hidden');
         };
 
         // --- CALCULATION LOGIC ---
-        function calculateTotalTime(entries) {
-            let totalMinutes = 0;
+        window.isMercantile = (dateStr) => {
+            if (!dateStr) return false;
+            return window.mercantileDays.has(dateStr);
+        };
+
+        function calculateTotals(entries) {
+            let totalMins = 0;
+            let mercMins = 0;
+
             entries.forEach(e => {
-                const parts = (e.duration || "0.00").split('.');
-                totalMinutes += (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
+                const start = new Date(`${e.dIn}T${e.tIn}`);
+                const end = new Date(`${e.dOut}T${e.tOut}`);
+                const durationMins = Math.max(0, Math.floor((end - start) / 60000));
+                totalMins += durationMins;
+
+                // Determine precise crossover into mercantile boundaries
+                let current = new Date(start);
+                while (current < end) {
+                    const currentYYYYMMDD = current.getFullYear() + '-' + String(current.getMonth() + 1).padStart(2, '0') + '-' + String(current.getDate()).padStart(2, '0');
+                    const isMerc = window.isMercantile(currentYYYYMMDD);
+
+                    // Find the end of this current day (midnight) or the shift end, whichever comes first
+                    const nextMidnight = new Date(current);
+                    nextMidnight.setHours(24, 0, 0, 0); // Sets to next midnight
+
+                    const chunkEnd = end < nextMidnight ? end : nextMidnight;
+                    const chunkMins = Math.floor((chunkEnd - current) / 60000);
+
+                    if (isMerc) {
+                        mercMins += chunkMins;
+                    }
+
+                    // Move current pointer to start of next chunk
+                    current = new Date(chunkEnd);
+                }
             });
-            return `${String(Math.floor(totalMinutes / 60)).padStart(2, '0')}:${String(totalMinutes % 60).padStart(2, '0')}`;
+
+            const normMins = totalMins - mercMins;
+            const format = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+            return {
+                totalStr: format(totalMins),
+                mercStr: format(mercMins),
+                normStr: format(normMins)
+            };
         }
 
         // --- UI UTILITIES ---
@@ -308,10 +651,10 @@
             const icon = document.getElementById('dialogIcon');
             icon.innerHTML = type === 'alert' ? '<i class="fas fa-check-circle text-emerald-500"></i>' : '<i class="fas fa-exclamation-circle text-red-500"></i>';
             const btns = document.getElementById('dialogButtons');
-            btns.innerHTML = type === 'alert' ? 
+            btns.innerHTML = type === 'alert' ?
                 `<button onclick="closeDialog()" class="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold">OK</button>` :
                 `<button onclick="closeDialog()" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Cancel</button><button id="confBtn" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold">Confirm</button>`;
-            if(type === 'confirm') document.getElementById('confBtn').onclick = () => { closeDialog(); if(cb) cb(); };
+            if (type === 'confirm') document.getElementById('confBtn').onclick = () => { closeDialog(); if (cb) cb(); };
             document.getElementById('customDialog').classList.remove('hidden');
         };
         window.closeDialog = () => document.getElementById('customDialog').classList.add('hidden');
@@ -326,12 +669,13 @@
                 const s = d.data();
                 window.cachedSheets[d.id] = s;
                 const isSal = s.isSalaryReport; // Check if it's a salary or a timesheet
-                
+
                 list.innerHTML += `
-                <div class="bg-white p-6 rounded-3xl border ${isSal ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-100'} hover:shadow-xl transition-all cursor-pointer relative group" onclick="${isSal ? '' : `openSheet('${d.id}')`}">
+                <div class="bg-white p-6 rounded-3xl border ${isSal ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-100'} hover:shadow-xl transition-all cursor-pointer relative group" onclick="${isSal ? `openViewSalaryModal('${d.id}')` : `openSheet('${d.id}')`}">
+                    ${session.role === 'admin' ? `
                     <div class="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition">
                         <button onclick="event.stopPropagation(); deleteSheet('${d.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition"><i class="fas fa-trash text-[10px]"></i></button>
-                    </div>
+                    </div>` : ''}
                     <h4 class="font-bold text-lg text-slate-800 mb-4 truncate">
                         ${isSal ? '<i class="fas fa-file-invoice-dollar text-emerald-500 mr-2"></i>' : ''}${s.name}
                     </h4>
@@ -346,7 +690,7 @@
         // --- SHEET ACTIONS ---
         window.openSheet = (id) => {
             const s = window.cachedSheets[id];
-            editingId = id; 
+            editingId = id;
             currentEntries = s.entries || [];
             document.getElementById('sheetNameInput').value = s.name;
             document.getElementById('modalSheetTitle').innerText = s.name;
@@ -367,7 +711,7 @@
         };
 
         window.goToStep2 = () => {
-            if(!document.getElementById('sheetNameInput').value.trim()) return;
+            if (!document.getElementById('sheetNameInput').value.trim()) return;
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.replace('hidden', 'flex');
             document.getElementById('modalSheetTitle').innerText = document.getElementById('sheetNameInput').value;
@@ -376,32 +720,54 @@
         window.addEntry = () => {
             const dIn = document.getElementById('dateIn').value, tIn = document.getElementById('timeIn').value;
             const dOut = document.getElementById('dateOut').value, tOut = document.getElementById('timeOut').value;
-            if(!dIn || !tIn || !dOut || !tOut) return uiDialog("Missing Data", "Fill all date/time fields.", "alert");
+            if (!dIn || !tIn || !dOut || !tOut) return uiDialog("Missing Data", "Fill all date/time fields.", "alert");
 
             const diff = new Date(`${dOut}T${tOut}`) - new Date(`${dIn}T${tIn}`);
-            if(diff < 0) return uiDialog("Error", "Check-out cannot be earlier than check-in.", "alert");
+            if (diff < 0) return uiDialog("Error", "Check-out cannot be earlier than check-in.", "alert");
 
             const tm = Math.floor(diff / 60000);
             const duration = `${Math.floor(tm / 60)}.${String(tm % 60).padStart(2, '0')}`;
-            
-            if(editingRowIndex !== null) currentEntries[editingRowIndex] = { dIn, tIn, dOut, tOut, duration };
+
+            if (editingRowIndex !== null) currentEntries[editingRowIndex] = { dIn, tIn, dOut, tOut, duration };
             else currentEntries.push({ dIn, tIn, dOut, tOut, duration });
-            
+
             cancelEdit(); renderEntries();
         };
 
         function renderEntries() {
-            document.getElementById('modalTableBody').innerHTML = currentEntries.map((e, i) => `
-                <tr class="text-sm hover:bg-slate-50 transition">
-                    <td class="p-4 font-bold text-slate-700">${e.dIn} <span class="text-slate-400 font-normal ml-1">${e.tIn}</span></td>
-                    <td class="p-4 font-bold text-slate-700">${e.dOut} <span class="text-slate-400 font-normal ml-1">${e.tOut}</span></td>
-                    <td class="p-4 text-right font-black text-slate-800">${e.duration}</td>
+            document.getElementById('modalTableBody').innerHTML = currentEntries.map((e, i) => {
+                const startMerc = window.isMercantile(e.dIn);
+                const endMerc = window.isMercantile(e.dOut);
+
+                let highlightClass = 'text-slate-700 hover:bg-slate-50';
+                let startIcon = '';
+                let endIcon = '';
+
+                // If either start or end is on a mercantile day, give the row a subtle highlight
+                if (startMerc || endMerc) {
+                    highlightClass = 'bg-orange-50/50 hover:bg-orange-50';
+                }
+
+                // Place mercantile star icons strictly next to the dates that apply
+                if (startMerc) startIcon = '<i class="fas fa-star text-orange-400 text-[10px] ml-1" title="Mercantile / Sunday"></i>';
+                if (endMerc) endIcon = '<i class="fas fa-star text-orange-400 text-[10px] ml-1" title="Mercantile / Sunday"></i>';
+
+                return `
+                <tr class="text-sm transition ${highlightClass}">
+                    <td class="p-4 font-bold ${startMerc ? 'text-orange-800' : 'text-slate-700'}">${e.dIn} <span class="${startMerc ? 'text-orange-600' : 'text-slate-400'} font-normal ml-1">${e.tIn}</span> ${startIcon}</td>
+                    <td class="p-4 font-bold ${endMerc ? 'text-orange-800' : 'text-slate-700'}">${e.dOut} <span class="${endMerc ? 'text-orange-600' : 'text-slate-400'} font-normal ml-1">${e.tOut}</span> ${endIcon}</td>
+                    <td class="p-4 text-right font-black ${startMerc || endMerc ? 'text-orange-700' : 'text-slate-800'}">${e.duration}</td>
                     <td class="p-4 text-center">
                         <button onclick="editRow(${i})" class="text-emerald-500 mr-3"><i class="fas fa-edit"></i></button>
                         <button onclick="removeRow(${i})" class="text-red-400"><i class="fas fa-trash"></i></button>
                     </td>
-                </tr>`).join('');
-            document.getElementById('modalGrandTotal').innerText = calculateTotalTime(currentEntries);
+                </tr>`;
+            }).join('');
+
+            const totals = calculateTotals(currentEntries);
+            document.getElementById('modalGrandTotal').innerText = totals.totalStr;
+            document.getElementById('modalMercTotal').innerText = totals.mercStr;
+            document.getElementById('modalNormTotal').innerText = totals.normStr;
         }
 
         window.editRow = (i) => {
@@ -423,13 +789,16 @@
         window.removeRow = (i) => { currentEntries.splice(i, 1); renderEntries(); };
 
         window.finalSave = async () => {
+            const totals = calculateTotals(currentEntries);
             const payload = {
                 name: document.getElementById('sheetNameInput').value,
                 entries: currentEntries,
-                total: calculateTotalTime(currentEntries),
+                total: totals.totalStr,
+                mercTotal: totals.mercStr,
+                normTotal: totals.normStr,
                 updatedAt: new Date().toISOString()
             };
-            if(editingId) await updateDoc(doc(db, "timesheets", editingId), payload);
+            if (editingId) await updateDoc(doc(db, "timesheets", editingId), payload);
             else {
                 payload.accessList = [session.username];
                 await addDoc(collection(db, "timesheets"), payload);
@@ -444,6 +813,7 @@
         window.openAdminModal = async () => {
             document.getElementById('adminModal').classList.remove('hidden');
             await fetchUsers();
+            await fetchMercDays();
         };
 
         async function fetchUsers() {
@@ -470,7 +840,7 @@
             document.getElementById('passwordPromptModal').classList.remove('hidden');
             document.getElementById('passSaveBtn').onclick = async () => {
                 const newPass = document.getElementById('passPromptInput').value.trim();
-                if(!newPass) return;
+                if (!newPass) return;
                 await updateDoc(doc(db, "users", id), { password: newPass });
                 closeModal('passwordPromptModal');
                 uiDialog("Success", "Password updated for " + uname, "alert");
@@ -479,7 +849,7 @@
 
         window.createUser = async () => {
             const u = document.getElementById('newUsername').value.trim(), p = document.getElementById('newPassword').value.trim(), r = document.getElementById('newRole').value;
-            if(!u || !p) return;
+            if (!u || !p) return;
             await addDoc(collection(db, "users"), { username: u, password: p, role: r });
             document.getElementById('newUsername').value = ''; document.getElementById('newPassword').value = '';
             fetchUsers();
@@ -487,13 +857,61 @@
 
         window.deleteUser = (id) => uiDialog("Remove", "Delete this user?", "confirm", async () => { await deleteDoc(doc(db, "users", id)); fetchUsers(); });
 
+        async function fetchMercDays() {
+            const snap = await getDocs(collection(db, "mercantile_days"));
+            const table = document.getElementById('adminMercTable');
+            table.innerHTML = '';
+            snap.forEach(d => {
+                const h = d.data();
+                table.innerHTML += `<tr><td class="p-3 font-bold">${h.date}</td><td class="p-3">${h.name}</td><td class="p-3 text-right"><button onclick="deleteMercDay('${d.id}')" class="text-red-400"><i class="fas fa-trash"></i></button></td></tr>`;
+            });
+        }
+        window.addMercDay = async () => {
+            const d = document.getElementById("newMercDay").value, n = document.getElementById("newMercName").value.trim() || 'Custom Holiday';
+            if (!d) return uiDialog("Error", "Select a date.", "alert");
+            await addDoc(collection(db, "mercantile_days"), { date: d, name: n });
+            document.getElementById("newMercDay").value = ''; document.getElementById("newMercName").value = '';
+            fetchMercDays();
+        };
+        window.deleteMercDay = (id) => uiDialog("Remove", "Remove holiday?", "confirm", async () => { await deleteDoc(doc(db, "mercantile_days", id)); fetchMercDays(); });
+
+        window.fetchSLHolidays = async (event) => {
+            try {
+                const btn = event.currentTarget;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching...';
+                const year = new Date().getFullYear();
+                const res = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/LK`);
+                if (!res.ok) throw new Error();
+                const holidays = await res.json();
+
+                let added = 0;
+                for (const h of holidays) {
+                    const q = query(collection(db, "mercantile_days"), where("date", "==", h.date));
+                    const snap = await getDocs(q);
+                    if (snap.empty) {
+                        await addDoc(collection(db, "mercantile_days"), { date: h.date, name: h.name });
+                        added++;
+                    }
+                }
+                uiDialog("Success", `Imported ${added} new public holidays for ${year}.`, "alert");
+                fetchMercDays();
+                btn.innerHTML = '<i class="fas fa-cloud-download-alt mr-1"></i> Auto Fetch';
+            } catch (e) {
+                uiDialog("Error", "Could not fetch API.", "alert");
+                event.currentTarget.innerHTML = '<i class="fas fa-cloud-download-alt mr-1"></i> Auto Fetch';
+            }
+        };
+
         // --- EXPORT & PRINT LOGIC ---
         window.printDocument = () => {
+            const totals = calculateTotals(currentEntries);
             document.getElementById('printSheetName').innerText = document.getElementById('sheetNameInput').value;
-            document.getElementById('printGrandTotal').innerText = calculateTotalTime(currentEntries);
+            document.getElementById('printNormTotal').innerText = totals.normStr;
+            document.getElementById('printMercTotal').innerText = totals.mercStr;
+            document.getElementById('printGrandTotal').innerText = totals.totalStr;
             document.getElementById('printTableBody').innerHTML = currentEntries.map(e => `
                 <tr class="border-b border-slate-200">
-                    <td class="p-3 text-sm">${e.dIn} ${e.tIn}</td>
+                    <td class="p-3 text-sm">${e.dIn} ${e.tIn} ${window.isMercantile(e.dIn) ? '*' : ''}</td>
                     <td class="p-3 text-sm">${e.dOut} ${e.tOut}</td>
                     <td class="p-3 text-right font-bold text-sm">${e.duration}</td>
                 </tr>`).join('');
@@ -503,29 +921,117 @@
         window.exportPDF = () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            const totals = calculateTotals(currentEntries);
             const name = document.getElementById('sheetNameInput').value || "TimeSheet";
             doc.setFontSize(22); doc.text(name, 14, 20);
             doc.setFontSize(10); doc.setTextColor(150); doc.text("Authenticated Time Record", 14, 28);
-            const tableData = currentEntries.map(e => [`${e.dIn} ${e.tIn}`, `${e.dOut} ${e.tOut}`, e.duration]);
+            const tableData = currentEntries.map(e => [`${e.dIn} ${e.tIn} ${window.isMercantile(e.dIn) ? '(Merc)' : ''}`, `${e.dOut} ${e.tOut}`, e.duration]);
             doc.autoTable({
                 startY: 35, head: [['Start Session', 'End Session', 'Duration']], body: tableData,
-                foot: [['', 'TOTAL TIME', calculateTotalTime(currentEntries)]],
+                foot: [
+                    ['', 'NORMAL HRS', totals.normStr],
+                    ['', 'MERCANTILE OT', totals.mercStr],
+                    ['', 'GRAND TOTAL', totals.totalStr]
+                ],
                 theme: 'striped', headStyles: { fillColor: [5, 150, 105] }
             });
             doc.save(`${name}.pdf`);
         };
 
         window.exportExcel = () => {
+            const totals = calculateTotals(currentEntries);
             const name = document.getElementById('sheetNameInput').value || "TimeSheet";
-            const data = currentEntries.map(e => ({ "Start": `${e.dIn} ${e.tIn}`, "End": `${e.dOut} ${e.tOut}`, "Hours": e.duration }));
-            data.push({ "Start": "", "End": "GRAND TOTAL", "Hours": calculateTotalTime(currentEntries) });
+            const data = currentEntries.map(e => ({ "Start": `${e.dIn} ${e.tIn} ${window.isMercantile(e.dIn) ? '(Merc)' : ''}`, "End": `${e.dOut} ${e.tOut}`, "Hours": e.duration }));
+            data.push({ "Start": "", "End": "", "Hours": "" });
+            data.push({ "Start": "", "End": "NORMAL HRS", "Hours": totals.normStr });
+            data.push({ "Start": "", "End": "MERCANTILE OT", "Hours": totals.mercStr });
+            data.push({ "Start": "", "End": "GRAND TOTAL", "Hours": totals.totalStr });
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Hours");
             XLSX.writeFile(wb, `${name}.xlsx`);
         };
 
+        window.printSalary = () => {
+            const s = window.cachedSheets[currentViewingSalaryId];
+            const bd = s.breakdown || {};
+
+            const payslipHTML = `
+                <div class="border-b-4 border-emerald-600 pb-4 mb-6">
+                    <h1 class="text-3xl font-black">${s.name}</h1>
+                    <p class="text-xs font-bold text-slate-500 uppercase">Certified Payslip</p>
+                </div>
+                <table class="w-full mb-8">
+                    <tbody class="text-sm">
+                        <tr class="border-b"><td class="p-3 font-bold">Basic Salary</td><td class="p-3 text-right">${bd.basic || '0.00'}</td></tr>
+                        <tr class="border-b"><td class="p-3 font-bold">Allowance</td><td class="p-3 text-right">${bd.allowance || '0.00'}</td></tr>
+                        <tr class="border-b"><td class="p-3 font-bold">Normal OT (${bd.normalOT || '0'} hrs)</td><td class="p-3 text-right">${bd.normalPay || '0.00'}</td></tr>
+                        <tr class="border-b"><td class="p-3 font-bold">Mercantile OT (${bd.mercOT || '0'} hrs)</td><td class="p-3 text-right">${bd.mercPay || '0.00'}</td></tr>
+                        <tr class="border-b text-red-600"><td class="p-3 font-bold">EPF Deduction (8%)</td><td class="p-3 text-right">-${bd.epf || '0.00'}</td></tr>
+                        <tr class="border-b text-red-600"><td class="p-3 font-bold">Other Deductions</td><td class="p-3 text-right">-${bd.deduction || '0.00'}</td></tr>
+                    </tbody>
+                </table>
+                <div class="text-right border-t pt-4">
+                    <p class="text-[10px] font-black text-slate-400 uppercase">Net Pay</p>
+                    <h2 class="text-5xl font-black text-emerald-600">${s.total}</h2>
+                </div>
+            `;
+
+            const originalPrintContent = document.getElementById('printArea').innerHTML;
+            document.getElementById('printArea').innerHTML = payslipHTML;
+            window.print();
+            document.getElementById('printArea').innerHTML = originalPrintContent;
+        };
+
+        window.exportSalaryPDF = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const s = window.cachedSheets[currentViewingSalaryId];
+            const bd = s.breakdown || {};
+
+            doc.setFontSize(22); doc.text(s.name, 14, 20);
+            doc.setFontSize(10); doc.setTextColor(150); doc.text("Certified Payslip", 14, 28);
+
+            const tableData = [
+                ['Basic Salary', bd.basic || '0.00'],
+                ['Allowance', bd.allowance || '0.00'],
+                [`Normal OT (${bd.normalOT || '0'} hrs)`, bd.normalPay || '0.00'],
+                [`Mercantile OT (${bd.mercOT || '0'} hrs)`, bd.mercPay || '0.00'],
+                ['EPF Deduction (8%)', `-${bd.epf || '0.00'}`],
+                ['Other Deductions', `-${bd.deduction || '0.00'}`]
+            ];
+
+            doc.autoTable({
+                startY: 35, head: [['Description', 'Amount']], body: tableData,
+                foot: [['NET PAY', s.total]],
+                theme: 'striped', headStyles: { fillColor: [5, 150, 105] }
+            });
+            doc.save(`${s.name}.pdf`);
+        };
+
+        window.exportSalaryExcel = () => {
+            const s = window.cachedSheets[currentViewingSalaryId];
+            const bd = s.breakdown || {};
+
+            const data = [
+                { "Description": "Basic Salary", "Amount": bd.basic || '0.00' },
+                { "Description": "Allowance", "Amount": bd.allowance || '0.00' },
+                { "Description": `Normal OT (${bd.normalOT || '0'} hrs)`, "Amount": bd.normalPay || '0.00' },
+                { "Description": `Mercantile OT (${bd.mercOT || '0'} hrs)`, "Amount": bd.mercPay || '0.00' },
+                { "Description": "EPF Deduction (8%)", "Amount": `-${bd.epf || '0.00'}` },
+                { "Description": "Other Deductions", "Amount": `-${bd.deduction || '0.00'}` },
+                { "Description": "", "Amount": "" },
+                { "Description": "NET PAY", "Amount": s.total }
+            ];
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Payslip");
+            XLSX.writeFile(wb, `${s.name}.xlsx`);
+        };
+
         window.logout = () => { sessionStorage.clear(); window.location.href = 'index.html'; };
     </script>
 </body>
+
 </html>
