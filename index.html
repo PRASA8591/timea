@@ -2,703 +2,89 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Secure Cloud Pass Vault</title>
-    <style>
-        :root {
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --surface-hover: #334155;
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --danger: #ef4444;
-            --success: #22c55e;
-            --warning: #f59e0b;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        
-        body { background-color: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
-        
-        .container { width: 100%; max-width: 540px; display: flex; flex-direction: column; gap: 20px; }
-        
-        h2, h3 { text-align: center; margin-bottom: 20px; color: var(--text); }
-        
-        .card { background: var(--surface); padding: 24px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
-        
-        input[type="text"], input[type="password"] { width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; transition: border 0.2s; }
-        input[type="text"]:focus, input[type="password"]:focus { outline: none; border-color: var(--primary); }
-        
-        .input-group { position: relative; margin-bottom: 12px; }
-        .input-group input { margin-bottom: 0; padding-right: 40px; }
-        .input-group .icon-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 8px; width: auto; font-size: 18px; }
-        .input-group .icon-btn:hover { color: var(--text); }
-
-        button { width: 100%; padding: 14px; border-radius: 8px; border: none; background: var(--primary); color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        button:hover { background: var(--primary-hover); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
-        .btn-secondary:hover { background: var(--surface-hover); border-color: var(--text-muted); }
-        .btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
-        .btn-danger:hover { background: rgba(239, 68, 68, 0.1); }
-        .btn-warning { background: transparent; border: 1px solid var(--warning); color: var(--warning); }
-        .btn-warning:hover { background: rgba(245, 158, 11, 0.1); }
-        .btn-small { padding: 8px 12px; font-size: 14px; font-weight: 500; width: auto; flex: 1; }
-
-        /* Vault List Styles */
-        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .header-bar h2 { margin: 0; }
-        .header-actions { display: flex; gap: 10px; }
-        
-        .search-bar { margin-bottom: 20px; }
-        
-        .pass-item { background: var(--bg); border: 1px solid var(--border); padding: 16px; border-radius: 10px; margin-bottom: 12px; transition: transform 0.1s, border 0.2s; }
-        .pass-item:hover { border-color: var(--primary); transform: translateY(-1px); }
-        
-        .pass-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        .pass-header h4 { color: var(--primary); font-size: 18px; margin: 0; word-break: break-all; }
-        
-        .pass-detail { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; background: var(--surface); padding: 10px 12px; border-radius: 6px; }
-        .pass-detail span.label { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .pass-detail span.val { font-family: monospace; font-size: 15px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0 10px; flex-grow: 1; }
-        
-        #popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 8px; color: white; font-weight: 500; font-size: 14px; display: none; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideDown 0.3s ease-out; }
-        
-        @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
-        
-        .hidden { display: none !important; }
-        .strength-meter { height: 4px; border-radius: 2px; background: var(--border); margin-top: -8px; margin-bottom: 12px; transition: 0.3s; width: 0%; }
-        
-        /* Range slider */
-        .slider-container { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
-        .slider-container input[type="range"] { flex-grow: 1; accent-color: var(--primary); }
-        .slider-label { font-size: 12px; color: var(--text-muted); min-width: 50px; }
-
-        .biometric-btn { background: var(--surface-hover); border: 1px solid var(--border); margin-top: 15px; }
-        .biometric-btn:hover { border-color: var(--primary); }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Work Hours Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
 
-<body>
-
-<div id="popup"></div>
-
-<div class="container">
-
-    <div id="login-view" class="card">
-        <h2>🔐 Cloud Pass Vault</h2>
-        <p style="text-align:center; color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">Firebase Secure Storage</p>
-        
-        <input type="password" id="master" placeholder="Enter Master Password" autocomplete="current-password">
-        <button id="loginBtn">Unlock Vault</button>
-
-        <button id="biometricLoginBtn" class="biometric-btn hidden">👆 Log in with Face ID / Fingerprint</button>
-        
-        <p style="font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 15px;">
-            If this is your first time, entering a password will create a new encrypted database.
-        </p>
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full font-bold shadow-xl transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2">
+        <i class="fas fa-exclamation-circle"></i> <span id="toastMsg">Error</span>
     </div>
 
-    <div id="vault-view" class="hidden">
-        <div class="header-bar">
-            <h2>Your Vault</h2>
-            <div class="header-actions">
-                <button id="exportBtn" class="btn-warning btn-small" title="Export Vault Data">📥 Export</button>
-                <button id="settingsBtn" class="btn-secondary btn-small" title="Biometric Settings">⚙️</button>
-                <button id="lockBtn" class="btn-danger btn-small">🔒 Lock</button>
+    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-xl w-full max-w-md">
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">
+                <i class="fas fa-clock"></i>
             </div>
+            <h1 class="text-2xl font-black text-slate-800">Welcome Back</h1>
+            <p class="text-slate-500 text-sm mt-1">Sign in to manage your timesheets</p>
         </div>
-        
-        <div class="search-bar">
-            <input type="text" id="search" placeholder="🔍 Search sites, usernames...">
-        </div>
-        
-        <button id="showAddBtn" style="margin-bottom: 20px;">+ Add New Password</button>
-        
-        <div id="list">
+
+        <form id="loginForm" class="space-y-5">
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-1">Username</label>
+                <input type="text" id="username" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 outline-none transition" placeholder="Enter username" required>
             </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-1">Password</label>
+                <input type="password" id="password" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 outline-none transition" placeholder="••••••••" required>
+            </div>
+            <button type="submit" id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex justify-center items-center gap-2">
+                <span>Login</span> <i class="fas fa-sign-in-alt"></i>
+            </button>
+        </form>
     </div>
 
-    <div id="add-view" class="card hidden">
-        <h3 id="formTitle">Add Password</h3>
-        
-        <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Website / App Name</label>
-        <input type="text" id="site" placeholder="e.g., github.com">
-        
-        <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Username / Email</label>
-        <input type="text" id="user" placeholder="user@example.com">
-        
-        <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Password</label>
-        <div class="input-group">
-            <input type="password" id="pass" placeholder="Enter or generate password">
-            <button type="button" class="icon-btn" id="togglePassVisibility">👁️</button>
-        </div>
-        <div id="strength" class="strength-meter"></div>
-        
-        <div class="slider-container">
-            <span class="slider-label" id="lenLabel">Len: 16</span>
-            <input type="range" id="passLength" min="8" max="32" value="16">
-        </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        <div class="btn-group">
-            <button type="button" id="generateBtn" class="btn-secondary" style="font-size: 14px;">🎲 Generate Strong Pass</button>
-        </div>
+        const app = initializeApp({
+            apiKey: "AIzaSyBJHqn-KIG7ntbsc9OZik7hf5lhObx7Ecg",
+            authDomain: "hours-80ce8.firebaseapp.com",
+            projectId: "hours-80ce8"
+        });
+        const db = getFirestore(app);
 
-        <div class="btn-group" style="margin-top: 20px;">
-            <button id="saveBtn">Save to Vault</button>
-            <button id="cancelBtn" class="btn-secondary">Cancel</button>
-        </div>
-    </div>
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            t.classList.remove('opacity-0', 'pointer-events-none');
+            t.classList.add('opacity-100');
+            setTimeout(() => { t.classList.remove('opacity-100'); t.classList.add('opacity-0', 'pointer-events-none'); }, 3000);
+        }
 
-</div>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+            btn.disabled = true;
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value;
 
-// --- FIREBASE CONFIG ---
-const firebaseConfig = {
-    apiKey: "AIzaSyCTMFecKL6ab82UC_sfhEVPK8CPe6ZnFEI",
-    authDomain: "my-password-92eb6.firebaseapp.com",
-    projectId: "my-password-92eb6",
-    storageBucket: "my-password-92eb6.firebasestorage.app",
-    messagingSenderId: "784477596349",
-    appId: "1:784477596349:web:5017c577de3d35f7ab25d4"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// --- STATE ---
-let encryptionKey = null;
-let currentEditId = null;
-let vaultDataCache = [];
-let inactivityTimer;
-const AUTO_LOCK_MINUTES = 5;
-
-// --- UTILS ---
-function showToast(msg, type = "success") {
-    const p = document.getElementById("popup");
-    p.innerText = msg;
-    p.style.background = type === "success" ? "var(--success)" : (type === "warning" ? "var(--warning)" : "var(--danger)");
-    p.style.display = "block";
-    setTimeout(() => { p.style.display = "none"; }, 3000);
-}
-
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        showToast("Copied to clipboard!");
-    }).catch(err => {
-        console.error('Failed to copy: ', err);
-        showToast("Failed to copy", "error");
-    });
-}
-
-function generateSecurePassword(length = 16) {
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
-    let password = "";
-    const values = new Uint32Array(length);
-    crypto.getRandomValues(values);
-    for (let i = 0; i < length; i++) {
-        password += charset[values[i] % charset.length];
-    }
-    return password;
-}
-
-function checkPasswordStrength(pass) {
-    const meter = document.getElementById('strength');
-    let strength = 0;
-    if (pass.length > 7) strength += 25;
-    if (pass.length > 12) strength += 25;
-    if (/[A-Z]/.test(pass)) strength += 15;
-    if (/[0-9]/.test(pass)) strength += 15;
-    if (/[^A-Za-z0-9]/.test(pass)) strength += 20;
-    
-    meter.style.width = strength + '%';
-    meter.style.backgroundColor = strength < 50 ? 'var(--danger)' : (strength < 80 ? 'var(--warning)' : 'var(--success)');
-}
-
-// --- SECURITY & INACTIVITY ---
-function resetInactivityTimer() {
-    clearTimeout(inactivityTimer);
-    if (encryptionKey) { // Only run timer if logged in
-        inactivityTimer = setTimeout(() => {
-            showToast("Vault auto-locked due to inactivity", "warning");
-            setTimeout(() => location.reload(), 1500);
-        }, AUTO_LOCK_MINUTES * 60 * 1000);
-    }
-}
-
-// Track user activity to prevent auto-lock while active
-['mousemove', 'keydown', 'touchstart', 'scroll'].forEach(evt => 
-    window.addEventListener(evt, resetInactivityTimer)
-);
-
-// --- CRYPTO ---
-async function hashText(text) {
-    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-    return btoa(String.fromCharCode(...new Uint8Array(buf)));
-}
-
-async function deriveKey(password, saltBase64) {
-    const saltBuffer = Uint8Array.from(atob(saltBase64), c => c.charCodeAt(0));
-    const material = await crypto.subtle.importKey(
-        "raw", new TextEncoder().encode(password), {name: "PBKDF2"}, false, ["deriveKey"]
-    );
-    return crypto.subtle.deriveKey(
-        { name: "PBKDF2", salt: saltBuffer, iterations: 100000, hash: "SHA-256" },
-        material, {name: "AES-GCM", length: 256}, true, ["encrypt", "decrypt"] // Made extractable for Biometrics
-    );
-}
-
-async function encryptPayload(dataObj) {
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const cipherBuffer = await crypto.subtle.encrypt(
-        {name: "AES-GCM", iv}, encryptionKey, new TextEncoder().encode(JSON.stringify(dataObj))
-    );
-    
-    const bundle = new Uint8Array(iv.length + cipherBuffer.byteLength);
-    bundle.set(iv, 0);
-    bundle.set(new Uint8Array(cipherBuffer), iv.length);
-    return btoa(String.fromCharCode(...bundle));
-}
-
-async function decryptPayload(base64String) {
-    try {
-        const binaryStr = atob(base64String);
-        const bundle = new Uint8Array(binaryStr.length);
-        for(let i=0; i<binaryStr.length; i++) bundle[i] = binaryStr.charCodeAt(i);
-        
-        const iv = bundle.slice(0, 12);
-        const ciphertext = bundle.slice(12);
-        
-        const decryptedBuffer = await crypto.subtle.decrypt(
-            {name: "AES-GCM", iv}, encryptionKey, ciphertext
-        );
-        return JSON.parse(new TextDecoder().decode(decryptedBuffer));
-    } catch (e) {
-        console.error("Decryption failed", e);
-        return null;
-    }
-}
-
-// Backwards compatibility for old records
-async function oldDecryptString(jsonString) {
-    try {
-        const obj = JSON.parse(jsonString);
-        const decrypted = await crypto.subtle.decrypt(
-            {name: "AES-GCM", iv: new Uint8Array(obj.iv)}, 
-            encryptionKey, 
-            new Uint8Array(obj.data)
-        );
-        return new TextDecoder().decode(decrypted);
-    } catch (e) {
-        return "Decryption Error";
-    }
-}
-
-// --- BIOMETRICS (WebAuthn) ---
-async function setupBiometrics() {
-    if (!window.PublicKeyCredential) {
-        return showToast("Biometrics not supported by this browser.", "error");
-    }
-    
-    try {
-        const challenge = crypto.getRandomValues(new Uint8Array(32));
-        const userId = crypto.getRandomValues(new Uint8Array(16));
-        
-        const credential = await navigator.credentials.create({
-            publicKey: {
-                challenge: challenge,
-                rp: { name: "Cloud Pass Vault", id: window.location.hostname || "localhost" },
-                user: { id: userId, name: "vault_user", displayName: "Vault Owner" },
-                pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
-                authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
-                timeout: 60000,
+            try {
+                const q = query(collection(db, "users"), where("username", "==", user), where("password", "==", pass));
+                const snap = await getDocs(q);
+                
+                if (!snap.empty) {
+                    const userData = snap.docs[0].data();
+                    // CHANGED: Using sessionStorage so multiple tabs can have different logins
+                    sessionStorage.setItem('sessionUser', JSON.stringify({ username: userData.username, role: userData.role }));
+                    window.location.href = 'system.html';
+                } else {
+                    showToast("Invalid username or password!");
+                    btn.innerHTML = '<span>Login</span> <i class="fas fa-sign-in-alt"></i>';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                showToast("Database connection error.");
+                btn.innerHTML = '<span>Login</span> <i class="fas fa-sign-in-alt"></i>';
+                btn.disabled = false;
             }
         });
-
-        // Securely export the current derived AES key to local storage
-        // This key will ONLY be used if WebAuthn (Face/Touch ID) authenticates successfully later.
-        const exportedKey = await crypto.subtle.exportKey("raw", encryptionKey);
-        const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
-        
-        localStorage.setItem("bioCredId", btoa(String.fromCharCode(...new Uint8Array(credential.rawId))));
-        localStorage.setItem("localVaultKey", keyBase64);
-        
-        showToast("✅ Biometrics / Passkey Enabled!");
-        document.getElementById("biometricLoginBtn").classList.remove("hidden");
-    } catch (e) {
-        console.error("Biometric Setup Error:", e);
-        showToast("Biometric setup cancelled or failed.", "error");
-    }
-}
-
-async function loginWithBiometrics() {
-    try {
-        const credIdBase64 = localStorage.getItem("bioCredId");
-        const localKeyBase64 = localStorage.getItem("localVaultKey");
-        
-        if (!credIdBase64 || !localKeyBase64) {
-            return showToast("Biometrics not set up on this device.", "error");
-        }
-
-        const credId = Uint8Array.from(atob(credIdBase64), c => c.charCodeAt(0));
-        const challenge = crypto.getRandomValues(new Uint8Array(32));
-
-        // Prompt OS Biometrics (Face ID / Fingerprint)
-        await navigator.credentials.get({
-            publicKey: {
-                challenge: challenge,
-                allowCredentials: [{ type: "public-key", id: credId }],
-                userVerification: "required"
-            }
-        });
-
-        // If OS authenticates, reconstruct the encryption key
-        const rawKey = Uint8Array.from(atob(localKeyBase64), c => c.charCodeAt(0));
-        encryptionKey = await crypto.subtle.importKey(
-            "raw", rawKey, {name: "AES-GCM", length: 256}, true, ["encrypt", "decrypt"]
-        );
-
-        showToast("Unlocked via Biometrics 🔓");
-        openVaultView();
-    } catch (e) {
-        console.error("Biometric Login Error:", e);
-        showToast("Biometric authentication failed.", "error");
-    }
-}
-
-// Check on load if biometrics are available locally
-if (localStorage.getItem("bioCredId") && localStorage.getItem("localVaultKey")) {
-    document.getElementById("biometricLoginBtn").classList.remove("hidden");
-}
-
-// --- CORE APP LOGIC ---
-async function handleLogin() {
-    const passwordInput = document.getElementById("master").value;
-    if (!passwordInput) return showToast("Enter Master Password", "error");
-
-    const loginBtn = document.getElementById("loginBtn");
-    loginBtn.disabled = true;
-    loginBtn.innerText = "Decrypting...";
-
-    try {
-        const hashPass = await hashText(passwordInput);
-        const userRef = doc(db, "users", "vaultUser");
-        const snap = await getDoc(userRef);
-
-        if (!snap.exists()) {
-            // First time setup
-            const newSalt = crypto.getRandomValues(new Uint8Array(16));
-            const saltBase64 = btoa(String.fromCharCode(...newSalt));
-            
-            await setDoc(userRef, { masterHash: hashPass, salt: saltBase64 });
-            encryptionKey = await deriveKey(passwordInput, saltBase64);
-            
-            showToast("New Secure Vault Created");
-            openVaultView();
-        } else {
-            // Existing user
-            const data = snap.data();
-            if (hashPass !== data.masterHash) {
-                showToast("Incorrect Password", "error");
-                loginBtn.disabled = false;
-                loginBtn.innerText = "Unlock Vault";
-                return;
-            }
-            
-            let saltBase64 = data.salt || btoa(String.fromCharCode(...new Uint8Array([1,2,3,4,5])));
-            encryptionKey = await deriveKey(passwordInput, saltBase64);
-            
-            showToast("Vault Unlocked");
-            openVaultView();
-        }
-    } catch (error) {
-        console.error(error);
-        showToast("Connection Error", "error");
-    } finally {
-        loginBtn.disabled = false;
-        loginBtn.innerText = "Unlock Vault";
-    }
-}
-
-async function loadVaultData() {
-    const list = document.getElementById("list");
-    list.innerHTML = `<p style="text-align:center; color: var(--text-muted); padding: 20px;">Decrypting database...</p>`;
-    vaultDataCache = []; 
-
-    try {
-        const snap = await getDocs(collection(db, "users", "vaultUser", "passwords"));
-        
-        for (const docSnap of snap.docs) {
-            const data = docSnap.data();
-            let decryptedData = { site: "Unknown", user: "Unknown", pass: "Unknown" };
-
-            if (data.payload) {
-                const parsed = await decryptPayload(data.payload);
-                if (parsed) decryptedData = parsed;
-            } else if (data.site) {
-                decryptedData.site = await oldDecryptString(data.site);
-                decryptedData.user = await oldDecryptString(data.user);
-                decryptedData.pass = await oldDecryptString(data.pass);
-            }
-
-            vaultDataCache.push({
-                id: docSnap.id,
-                ...decryptedData
-            });
-        }
-        
-        // Sort alphabetically by site name
-        vaultDataCache.sort((a, b) => a.site.localeCompare(b.site));
-        renderPasswords(vaultDataCache);
-        
-    } catch (e) {
-        console.error(e);
-        showToast("Error loading vault", "error");
-        list.innerHTML = `<p style="color:var(--danger); text-align:center;">Failed to read data.</p>`;
-    }
-}
-
-function renderPasswords(dataArray) {
-    const list = document.getElementById("list");
-    list.innerHTML = "";
-
-    if (dataArray.length === 0) {
-        list.innerHTML = `<p style="text-align:center; color: var(--text-muted); padding: 20px;">Vault is empty.</p>`;
-        return;
-    }
-
-    dataArray.forEach(item => {
-        const maskedPass = "•".repeat(8);
-        const html = `
-            <div class="pass-item">
-                <div class="pass-header">
-                    <h4>${escapeHTML(item.site)}</h4>
-                    <div class="btn-group" style="margin: 0; flex-wrap: nowrap;">
-                        <button class="btn-secondary btn-small action-btn" data-action="edit" data-id="${item.id}">✏️</button>
-                        <button class="btn-danger btn-small action-btn" data-action="delete" data-id="${item.id}">🗑️</button>
-                    </div>
-                </div>
-                
-                <div class="pass-detail">
-                    <span class="label">User</span>
-                    <span class="val">${escapeHTML(item.user)}</span>
-                    <button class="btn-secondary btn-small action-btn" data-action="copy" data-val="${escapeHTML(item.user)}" title="Copy User">📋</button>
-                </div>
-                
-                <div class="pass-detail">
-                    <span class="label">Pass</span>
-                    <span class="val" id="mask-${item.id}">${maskedPass}</span>
-                    <div style="display:flex; gap: 5px;">
-                        <button class="btn-secondary btn-small action-btn" data-action="toggle" data-id="${item.id}" title="Show/Hide">👁️</button>
-                        <button class="btn-secondary btn-small action-btn" data-action="copy" data-val="${escapeHTML(item.pass)}" title="Copy Pass">📋</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        list.insertAdjacentHTML('beforeend', html);
-    });
-}
-
-async function saveEntry() {
-    const site = document.getElementById("site").value.trim();
-    const user = document.getElementById("user").value.trim();
-    const pass = document.getElementById("pass").value;
-
-    if (!site || !user || !pass) return showToast("All fields are required", "error");
-
-    const saveBtn = document.getElementById("saveBtn");
-    saveBtn.disabled = true;
-    saveBtn.innerText = "Encrypting...";
-
-    try {
-        const encryptedPayload = await encryptPayload({ site, user, pass });
-
-        if (currentEditId) {
-            await updateDoc(doc(db, "users", "vaultUser", "passwords", currentEditId), {
-                payload: encryptedPayload,
-                site: null, user: null, pass: null 
-            });
-            showToast("Password Updated");
-        } else {
-            await addDoc(collection(db, "users", "vaultUser", "passwords"), {
-                payload: encryptedPayload
-            });
-            showToast("Password Added");
-        }
-
-        closeAddView();
-        loadVaultData();
-    } catch (e) {
-        console.error(e);
-        showToast("Error saving data", "error");
-    } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerText = "Save to Vault";
-    }
-}
-
-async function deleteEntry(id) {
-    if (!confirm("Are you sure you want to delete this entry?")) return;
-    try {
-        await deleteDoc(doc(db, "users", "vaultUser", "passwords", id));
-        showToast("Entry Deleted");
-        loadVaultData();
-    } catch (e) {
-        showToast("Error deleting", "error");
-    }
-}
-
-// Data Export Function
-function exportVaultData() {
-    if (vaultDataCache.length === 0) return showToast("Vault is empty", "warning");
-    
-    // Create a clean JSON array (without internal DB IDs if preferred, but included here for completeness)
-    const exportData = JSON.stringify(vaultDataCache, null, 2);
-    const blob = new Blob([exportData], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `CloudPass_Backup_${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast("Vault Exported Securely");
-}
-
-function openEditView(id) {
-    const item = vaultDataCache.find(x => x.id === id);
-    if (!item) return;
-
-    currentEditId = id;
-    document.getElementById("formTitle").innerText = "Edit Password";
-    document.getElementById("site").value = item.site;
-    document.getElementById("user").value = item.user;
-    document.getElementById("pass").value = item.pass;
-    checkPasswordStrength(item.pass);
-    
-    document.getElementById("vault-view").classList.add("hidden");
-    document.getElementById("add-view").classList.remove("hidden");
-}
-
-function openVaultView() {
-    document.getElementById("login-view").classList.add("hidden");
-    document.getElementById("master").value = "";
-    document.getElementById("vault-view").classList.remove("hidden");
-    resetInactivityTimer(); // Start the auto-lock timer
-    loadVaultData();
-}
-
-function closeAddView() {
-    currentEditId = null;
-    document.getElementById("site").value = "";
-    document.getElementById("user").value = "";
-    document.getElementById("pass").value = "";
-    document.getElementById("strength").style.width = "0%";
-    
-    document.getElementById("add-view").classList.add("hidden");
-    document.getElementById("vault-view").classList.remove("hidden");
-}
-
-function escapeHTML(str) {
-    return str.replace(/[&<>'"]/g, 
-        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-    );
-}
-
-// --- EVENT LISTENERS ---
-
-// Login & Biometrics
-document.getElementById("loginBtn").addEventListener("click", handleLogin);
-document.getElementById("master").addEventListener("keypress", (e) => {
-    if (e.key === 'Enter') handleLogin();
-});
-document.getElementById("biometricLoginBtn").addEventListener("click", loginWithBiometrics);
-document.getElementById("settingsBtn").addEventListener("click", () => {
-    if (confirm("Would you like to register Face ID / Touch ID / Windows Hello for quick login on this device?")) {
-        setupBiometrics();
-    }
-});
-
-// Vault Actions
-document.getElementById("showAddBtn").addEventListener("click", () => {
-    currentEditId = null;
-    document.getElementById("formTitle").innerText = "Add New Password";
-    document.getElementById("vault-view").classList.add("hidden");
-    document.getElementById("add-view").classList.remove("hidden");
-});
-document.getElementById("cancelBtn").addEventListener("click", closeAddView);
-document.getElementById("lockBtn").addEventListener("click", () => location.reload());
-document.getElementById("exportBtn").addEventListener("click", exportVaultData);
-
-// Form & Password Generator logic
-document.getElementById("saveBtn").addEventListener("click", saveEntry);
-document.getElementById("pass").addEventListener("input", (e) => checkPasswordStrength(e.target.value));
-
-const passLengthSlider = document.getElementById("passLength");
-const lenLabel = document.getElementById("lenLabel");
-passLengthSlider.addEventListener("input", (e) => {
-    lenLabel.innerText = `Len: ${e.target.value}`;
-});
-
-document.getElementById("generateBtn").addEventListener("click", () => {
-    const newPass = generateSecurePassword(parseInt(passLengthSlider.value));
-    const passInput = document.getElementById("pass");
-    passInput.value = newPass;
-    passInput.type = "text"; 
-    checkPasswordStrength(newPass);
-});
-
-document.getElementById("togglePassVisibility").addEventListener("click", () => {
-    const passInput = document.getElementById("pass");
-    passInput.type = passInput.type === "password" ? "text" : "password";
-});
-
-// Search Filter
-document.getElementById("search").addEventListener("input", (e) => {
-    const query = e.target.value.toLowerCase();
-    const filtered = vaultDataCache.filter(item => 
-        item.site.toLowerCase().includes(query) || 
-        item.user.toLowerCase().includes(query)
-    );
-    renderPasswords(filtered);
-});
-
-// List Actions
-document.getElementById("list").addEventListener("click", (e) => {
-    const btn = e.target.closest('.action-btn');
-    if (!btn) return;
-    
-    const action = btn.dataset.action;
-    const id = btn.dataset.id;
-    const val = btn.dataset.val;
-
-    if (action === 'copy') {
-        copyToClipboard(val);
-    } else if (action === 'delete') {
-        deleteEntry(id);
-    } else if (action === 'edit') {
-        openEditView(id);
-    } else if (action === 'toggle') {
-        const span = document.getElementById(`mask-${id}`);
-        const item = vaultDataCache.find(x => x.id === id);
-        if (span.innerText.includes("•")) {
-            span.innerText = item.pass;
-        } else {
-            span.innerText = "•".repeat(8);
-        }
-    }
-});
-
-</script>
+    </script>
 </body>
 </html>
