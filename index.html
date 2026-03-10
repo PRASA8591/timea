@@ -3,44 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Work Hours Pro</title>
+    <title>TimeSheet Pro | PrasaTek System Solutions</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4 font-sans text-slate-800">
 
     <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full font-bold shadow-xl transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2">
         <i class="fas fa-exclamation-circle"></i> <span id="toastMsg">Error</span>
     </div>
 
-    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-xl w-full max-w-md">
-        <div class="text-center mb-8">
-            <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">
-                <i class="fas fa-clock"></i>
+    <main class="flex-grow flex items-center justify-center w-full">
+        <div class="bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100 w-full max-w-md">
+            
+            <div class="text-center mb-8">
+                <img src="logo.png" alt="PrasaTek Logo" class="h-16 w-auto mx-auto mb-4 object-contain">
+                
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">PrasaTek System Solutions</p>
+                <h1 class="text-3xl font-black text-slate-800 mb-6 tracking-tighter">
+                    TimeSheet <span class="text-emerald-600">Pro</span>
+                </h1>
+                
+                <h2 class="text-xl font-bold text-slate-700">Welcome Back</h2>
+                <p class="text-slate-500 text-sm mt-1">Sign in to manage your timesheets</p>
             </div>
-            <h1 class="text-2xl font-black text-slate-800">Welcome Back</h1>
-            <p class="text-slate-500 text-sm mt-1">Sign in to manage your timesheets</p>
-        </div>
 
-        <form id="loginForm" class="space-y-5">
-            <div>
-                <label class="block text-sm font-bold text-slate-700 mb-1">Username</label>
-                <input type="text" id="username" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 outline-none transition" placeholder="Enter username" required>
-            </div>
-            <div>
-                <label class="block text-sm font-bold text-slate-700 mb-1">Password</label>
-                <input type="password" id="password" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 outline-none transition" placeholder="••••••••" required>
-            </div>
-            <button type="submit" id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex justify-center items-center gap-2">
-                <span>Login</span> <i class="fas fa-sign-in-alt"></i>
-            </button>
-        </form>
-    </div>
+            <form id="loginForm" class="space-y-5">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Username</label>
+                    <input type="text" id="username" class="w-full border-2 border-slate-100 rounded-xl p-3 focus:border-emerald-500 outline-none transition font-medium bg-slate-50 focus:bg-white" placeholder="Enter username" required>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Password</label>
+                    <input type="password" id="password" class="w-full border-2 border-slate-100 rounded-xl p-3 focus:border-emerald-500 outline-none transition font-medium bg-slate-50 focus:bg-white" placeholder="••••••••" required>
+                </div>
+                <button type="submit" id="loginBtn" class="w-full bg-emerald-600 text-white font-black py-4 rounded-xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-100 flex justify-center items-center gap-2 uppercase tracking-widest text-sm">
+                    <span>Login</span> <i class="fas fa-sign-in-alt"></i>
+                </button>
+                <p class="text-center text-[10px] font-bold text-slate-400 mt-4 uppercase">
+                    A product by PrasaTek System Solutions
+                </p>
+            </form>
+        </div>
+    </main>
+
+    <footer class="w-full text-center py-6 border-t border-slate-200 text-slate-400 text-[11px] font-bold uppercase tracking-wider">
+        &copy; 2026 PrasaTek System Solutions. All rights reserved.
+    </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Firebase Configuration
         const app = initializeApp({
             apiKey: "AIzaSyBJHqn-KIG7ntbsc9OZik7hf5lhObx7Ecg",
             authDomain: "hours-80ce8.firebaseapp.com",
@@ -66,12 +81,13 @@
             const pass = document.getElementById('password').value;
 
             try {
+                // Querying users from Firestore
                 const q = query(collection(db, "users"), where("username", "==", user), where("password", "==", pass));
                 const snap = await getDocs(q);
                 
                 if (!snap.empty) {
                     const userData = snap.docs[0].data();
-                    // CHANGED: Using sessionStorage so multiple tabs can have different logins
+                    // Store session for system.html access
                     sessionStorage.setItem('sessionUser', JSON.stringify({ username: userData.username, role: userData.role }));
                     window.location.href = 'system.html';
                 } else {
