@@ -80,8 +80,7 @@
     <div id="passwordPromptModal"
         class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate">
-            <div
-                class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-key text-2xl"></i>
             </div>
             <h3 class="text-xl font-black mb-2">Update Password</h3>
@@ -90,10 +89,8 @@
                 class="w-full border-2 rounded-xl p-3 focus:border-emerald-500 outline-none mb-6 text-center font-bold text-lg"
                 placeholder="New Password">
             <div class="flex gap-3">
-                <button onclick="closeModal('passwordPromptModal')"
-                    class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Cancel</button>
-                <button id="passSaveBtn"
-                    class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">Update</button>
+                <button onclick="closeModal('passwordPromptModal')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Cancel</button>
+                <button id="passSaveBtn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">Update</button>
             </div>
         </div>
     </div>
@@ -108,59 +105,43 @@
             <div class="p-6 space-y-4">
                 <div>
                     <label class="text-[10px] font-black uppercase text-slate-400">Month / Report Name</label>
-                    <input type="text" id="sal_name"
-                        class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500"
-                        placeholder="e.g., January Salary">
+                    <input type="text" id="sal_name" class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500" placeholder="e.g., January Salary">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-[10px] font-black uppercase text-slate-400">Basic Salary</label>
-                        <input type="number" id="sal_basic" oninput="runSalaryCalc()"
-                            class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500"
-                            placeholder="0.00">
+                        <input type="number" id="sal_basic" oninput="runSalaryCalc()" class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500" placeholder="0.00">
                     </div>
                     <div>
                         <label class="text-[10px] font-black uppercase text-slate-400">Allowance</label>
-                        <input type="number" id="sal_allowance" oninput="runSalaryCalc()"
-                            class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500"
-                            placeholder="0.00">
+                        <input type="number" id="sal_allowance" oninput="runSalaryCalc()" class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500" placeholder="0.00">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-[10px] font-black uppercase text-slate-400">Normal OT (Hrs)</label>
-                        <input type="number" id="sal_normal_ot" oninput="runSalaryCalc()"
-                            class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500"
-                            placeholder="0">
+                        <input type="number" id="sal_normal_ot" oninput="runSalaryCalc()" class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500" placeholder="0">
                     </div>
                     <div>
                         <label class="text-[10px] font-black uppercase text-slate-400">Mercantile OT (Hrs)</label>
-                        <input type="number" id="sal_merc_ot" oninput="runSalaryCalc()"
-                            class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500"
-                            placeholder="0">
+                        <input type="number" id="sal_merc_ot" oninput="runSalaryCalc()" class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500" placeholder="0">
                     </div>
                 </div>
                 <div>
                     <label class="text-[10px] font-black uppercase text-slate-400">Other Deductions</label>
-                    <input type="number" id="sal_deduction" oninput="runSalaryCalc()"
-                        class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500"
-                        placeholder="0.00">
+                    <input type="number" id="sal_deduction" oninput="runSalaryCalc()" class="w-full border-2 rounded-xl p-3 mt-1 font-bold outline-none focus:border-emerald-500" placeholder="0.00">
                 </div>
 
                 <div class="bg-slate-50 p-4 rounded-2xl space-y-2 text-sm border border-slate-100">
-                    <div class="flex justify-between"><span>Normal OT Pay:</span><span id="res_normal"
-                            class="font-bold">0.00</span></div>
-                    <div class="flex justify-between"><span>Mercantile OT Pay:</span><span id="res_merc"
-                            class="font-bold">0.00</span></div>
-                    <div class="flex justify-between text-red-500"><span>EPF Deduction (8%):</span><span id="res_epf"
-                            class="font-bold">0.00</span></div>
+                    <div class="flex justify-between"><span>Normal OT Pay:</span><span id="res_normal" class="font-bold">0.00</span></div>
+                    <div class="flex justify-between"><span>Mercantile OT Pay:</span><span id="res_merc" class="font-bold">0.00</span></div>
+                    <div class="flex justify-between text-red-500"><span>EPF Deduction (8%):</span><span id="res_epf" class="font-bold">0.00</span></div>
                     <div class="flex justify-between text-xl font-black text-emerald-600 border-t pt-2 mt-2">
                         <span>Final Salary:</span><span id="res_total">0.00</span>
                     </div>
                 </div>
 
-                <button onclick="saveSalaryToSheet()"
-                    class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition uppercase tracking-widest">
+                <button onclick="saveSalaryToSheet()" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition uppercase tracking-widest">
                     Save to Dashboard
                 </button>
             </div>
@@ -173,50 +154,27 @@
             <div class="p-6 bg-emerald-600 text-white flex justify-between items-center">
                 <h2 class="text-xl font-black"><i class="fas fa-file-invoice-dollar mr-2"></i> Salary Details</h2>
                 <div class="flex gap-3">
-                    <button onclick="printSalary()" title="Print Payslip" class="hover:text-emerald-200 transition"><i
-                            class="fas fa-print"></i></button>
-                    <button onclick="exportSalaryPDF()" title="Download PDF"
-                        class="hover:text-emerald-200 transition"><i class="fas fa-file-pdf"></i></button>
-                    <button onclick="exportSalaryExcel()" title="Download Excel"
-                        class="hover:text-emerald-200 transition"><i class="fas fa-file-excel"></i></button>
-                    <button onclick="editSalary()" title="Edit Salary" class="hover:text-emerald-200 transition"><i
-                            class="fas fa-edit"></i></button>
-                    <button onclick="closeModal('viewSalaryModal')" class="ml-2 hover:text-red-300 transition"><i
-                            class="fas fa-times"></i></button>
+                    <button onclick="printSalary()" title="Print Payslip" class="hover:text-emerald-200 transition"><i class="fas fa-print"></i></button>
+                    <button onclick="exportSalaryPDF()" title="Download PDF" class="hover:text-emerald-200 transition"><i class="fas fa-file-pdf"></i></button>
+                    <button onclick="exportSalaryExcel()" title="Download Excel" class="hover:text-emerald-200 transition"><i class="fas fa-file-excel"></i></button>
+                    <button onclick="editSalary()" title="Edit Salary" class="hover:text-emerald-200 transition"><i class="fas fa-edit"></i></button>
+                    <button onclick="closeModal('viewSalaryModal')" class="ml-2 hover:text-red-300 transition"><i class="fas fa-times"></i></button>
                 </div>
             </div>
             <div class="p-6 space-y-4">
                 <h3 id="viewSalName" class="text-2xl font-black text-center mb-4 text-slate-800"></h3>
                 <div class="grid grid-cols-2 gap-4 text-sm mb-4">
-                    <div>
-                        <p class="text-[10px] font-black uppercase text-slate-400">Basic Salary</p>
-                        <p id="viewSalBasic" class="font-bold border-b pb-1 text-slate-700"></p>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black uppercase text-slate-400">Allowance</p>
-                        <p id="viewSalAllowance" class="font-bold border-b pb-1 text-slate-700"></p>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black uppercase text-slate-400">Normal OT (Hrs)</p>
-                        <p id="viewSalNormalOT" class="font-bold border-b pb-1 text-slate-700"></p>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black uppercase text-slate-400">Mercantile OT (Hrs)</p>
-                        <p id="viewSalMercOT" class="font-bold border-b pb-1 text-slate-700"></p>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black uppercase text-slate-400">Other Deductions</p>
-                        <p id="viewSalDeduction" class="font-bold border-b pb-1 text-slate-700"></p>
-                    </div>
+                    <div><p class="text-[10px] font-black uppercase text-slate-400">Basic Salary</p><p id="viewSalBasic" class="font-bold border-b pb-1 text-slate-700"></p></div>
+                    <div><p class="text-[10px] font-black uppercase text-slate-400">Allowance</p><p id="viewSalAllowance" class="font-bold border-b pb-1 text-slate-700"></p></div>
+                    <div><p class="text-[10px] font-black uppercase text-slate-400">Normal OT (Hrs)</p><p id="viewSalNormalOT" class="font-bold border-b pb-1 text-slate-700"></p></div>
+                    <div><p class="text-[10px] font-black uppercase text-slate-400">Mercantile OT (Hrs)</p><p id="viewSalMercOT" class="font-bold border-b pb-1 text-slate-700"></p></div>
+                    <div><p class="text-[10px] font-black uppercase text-slate-400">Other Deductions</p><p id="viewSalDeduction" class="font-bold border-b pb-1 text-slate-700"></p></div>
                 </div>
 
                 <div class="bg-slate-50 p-4 rounded-2xl space-y-2 text-sm border border-slate-100">
-                    <div class="flex justify-between text-slate-700"><span>Normal OT Pay:</span><span
-                            id="viewSalResNormal" class="font-bold">0.00</span></div>
-                    <div class="flex justify-between text-slate-700"><span>Mercantile OT Pay:</span><span
-                            id="viewSalResMerc" class="font-bold">0.00</span></div>
-                    <div class="flex justify-between text-red-500"><span>EPF Deduction (8%):</span><span
-                            id="viewSalResEpf" class="font-bold">0.00</span></div>
+                    <div class="flex justify-between text-slate-700"><span>Normal OT Pay:</span><span id="viewSalResNormal" class="font-bold">0.00</span></div>
+                    <div class="flex justify-between text-slate-700"><span>Mercantile OT Pay:</span><span id="viewSalResMerc" class="font-bold">0.00</span></div>
+                    <div class="flex justify-between text-red-500"><span>EPF Deduction (8%):</span><span id="viewSalResEpf" class="font-bold">0.00</span></div>
                     <div class="flex justify-between text-xl font-black text-emerald-600 border-t pt-2 mt-2">
                         <span>Final Salary:</span><span id="viewSalTotal">0.00</span>
                     </div>
@@ -226,38 +184,27 @@
     </div>
 
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-8 no-print">
-
-        <header
-            class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 gap-4">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 gap-4">
             <div>
                 <div class="flex items-center gap-3 mb-1">
                     <img src="logo.png" alt="PrasaTek System Solutions Logo" class="h-10 w-auto object-contain">
-                    <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tighter">TimeSheet <span
-                            class="text-emerald-600">Pro</span></h1>
+                    <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tighter">TimeSheet <span class="text-emerald-600">Pro</span></h1>
                 </div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">by PrasaTek System
-                    Solutions</p>
-                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Operator: <span
-                        id="displayUsername" class="text-emerald-600"></span></p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">by PrasaTek System Solutions</p>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Operator: <span id="displayUsername" class="text-emerald-600"></span></p>
             </div>
 
             <div class="flex flex-wrap gap-2">
-                <button id="adminBtn" onclick="openAdminModal()"
-                    class="hidden bg-slate-800 hover:bg-black text-white px-5 py-3 rounded-xl font-bold transition flex items-center">
+                <button id="adminBtn" onclick="openAdminModal()" class="hidden bg-slate-800 hover:bg-black text-white px-5 py-3 rounded-xl font-bold transition flex items-center">
                     <i class="fas fa-users-cog mr-2"></i> Admin Panel
                 </button>
-
-                <button onclick="openSalaryModal()"
-                    class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold transition flex items-center border border-slate-200">
+                <button onclick="openSalaryModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold transition flex items-center border border-slate-200">
                     <i class="fas fa-calculator mr-2 text-emerald-600"></i> Calculate Salary
                 </button>
-
-                <button onclick="openNewSheetModal()"
-                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-emerald-100 transition">
+                <button onclick="openNewSheetModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-emerald-100 transition">
                     <i class="fas fa-plus mr-2"></i> New Sheet
                 </button>
-                <button onclick="logout()"
-                    class="bg-red-50 text-red-600 px-4 py-3 rounded-xl font-bold hover:bg-red-500 hover:text-white transition">
+                <button onclick="logout()" class="bg-red-50 text-red-600 px-4 py-3 rounded-xl font-bold hover:bg-red-500 hover:text-white transition">
                     <i class="fas fa-power-off"></i>
                 </button>
             </div>
@@ -270,72 +217,47 @@
         &copy; 2026 PrasaTek System Solutions. All rights reserved.
     </footer>
 
-    <div id="modalOverlay"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-40 p-2 md:p-4 no-print">
-        <div
-            class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[95vh] md:h-auto md:max-h-[90vh] modal-animate">
+    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-40 p-2 md:p-4 no-print">
+        <div class="bg-white w-full max-w-6xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[95vh] md:h-auto md:max-h-[90vh] modal-animate">
             <div class="p-4 border-b flex flex-wrap justify-between items-center gap-2">
                 <h2 id="modalSheetTitle" class="text-xl font-black text-slate-800">Sheet Editor</h2>
                 <div class="flex gap-2">
-                    <button onclick="printDocument()" title="Print"
-                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-800 hover:bg-slate-800 hover:text-white transition"><i
-                            class="fas fa-print"></i></button>
-                    <button onclick="exportPDF()" title="Download PDF"
-                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-red-500 hover:bg-red-500 hover:text-white transition"><i
-                            class="fas fa-file-pdf"></i></button>
-                    <button onclick="exportExcel()" title="Download Excel"
-                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition"><i
-                            class="fas fa-file-excel"></i></button>
-                    <button onclick="closeModal('modalOverlay')" title="Close"
-                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition ml-2"><i
-                            class="fas fa-times"></i></button>
+                    <button onclick="printDocument()" title="Print" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-800 hover:bg-slate-800 hover:text-white transition"><i class="fas fa-print"></i></button>
+                    <button onclick="exportPDF()" title="Download PDF" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-red-500 hover:bg-red-500 hover:text-white transition"><i class="fas fa-file-pdf"></i></button>
+                    <button onclick="exportExcel()" title="Download Excel" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition"><i class="fas fa-file-excel"></i></button>
+                    <button onclick="closeModal('modalOverlay')" title="Close" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition ml-2"><i class="fas fa-times"></i></button>
                 </div>
             </div>
 
             <div id="step1" class="p-10 text-center">
                 <h3 class="text-2xl font-black mb-4">Project Name</h3>
-                <input type="text" id="sheetNameInput"
-                    class="w-full max-w-md mx-auto block border-2 rounded-2xl p-4 text-center font-bold text-lg outline-none focus:border-emerald-500"
-                    placeholder="e.g., Weekly Report">
-                <button onclick="goToStep2()"
-                    class="mt-8 bg-emerald-600 text-white px-12 py-4 rounded-2xl font-bold">Continue</button>
+                <input type="text" id="sheetNameInput" class="w-full max-w-md mx-auto block border-2 rounded-2xl p-4 text-center font-bold text-lg outline-none focus:border-emerald-500" placeholder="e.g., Weekly Report">
+                
+                <div id="monthSelectorContainer" class="mt-8">
+                    <h3 class="text-xl font-black mb-4">Select Month (Auto-fill)</h3>
+                    <input type="month" id="sheetMonthInput" class="w-full max-w-md mx-auto block border-2 rounded-2xl p-4 text-center font-bold text-lg outline-none focus:border-emerald-500">
+                </div>
+
+                <button onclick="goToStep2()" class="mt-8 bg-emerald-600 text-white px-12 py-4 rounded-2xl font-bold shadow-lg hover:bg-emerald-700 transition">Continue</button>
             </div>
 
             <div id="step2" class="hidden flex-col h-full overflow-hidden">
-                <div class="p-4 bg-slate-50 border-b grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Start
-                            Date</label><input type="date" id="dateIn" class="w-full border rounded-xl p-3"></div>
-                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Start
-                            Time</label><input type="time" id="timeIn" class="w-full border rounded-xl p-3"></div>
-                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">End Date</label><input
-                            type="date" id="dateOut" class="w-full border rounded-xl p-3"></div>
-                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">End Time</label><input
-                            type="time" id="timeOut" class="w-full border rounded-xl p-3"></div>
-                    <div class="flex items-end gap-2">
-                        <button id="addUpdateBtn" onclick="addEntry()"
-                            class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold">Add Row</button>
-                        <button id="cancelEditBtn" onclick="cancelEdit()"
-                            class="hidden w-12 bg-slate-300 text-slate-700 py-3 rounded-xl font-bold"><i
-                                class="fas fa-times"></i></button>
-                    </div>
-                </div>
-
-                <div class="flex-1 overflow-x-auto overflow-y-auto bg-white custom-scroll">
-                    <table class="w-full text-left min-w-[600px]">
-                        <thead
-                            class="bg-white sticky top-0 border-b z-10 text-[10px] font-black uppercase text-slate-400">
+                <div class="flex-1 overflow-x-auto overflow-y-auto bg-slate-50 custom-scroll p-4">
+                    <table class="w-full text-left min-w-[900px] border-collapse bg-white rounded-xl shadow-sm overflow-hidden">
+                        <thead class="bg-slate-100 text-[10px] font-black uppercase text-slate-400">
                             <tr>
-                                <th class="p-4">Start</th>
-                                <th class="p-4">End</th>
-                                <th class="p-4 text-right">Hours (HH.MM)</th>
-                                <th class="p-4 text-center">Action</th>
+                                <th class="p-4 border-b border-slate-200">Start Point</th>
+                                <th class="p-4 border-b border-slate-200">End Point</th>
+                                <th class="p-4 border-b border-slate-200 text-right">Hours (HH.MM)</th>
+                                <th class="p-4 border-b border-slate-200">Remark</th>
+                                <th class="p-4 border-b border-slate-200 text-center w-16">Act</th>
                             </tr>
                         </thead>
-                        <tbody id="modalTableBody" class="divide-y divide-slate-50"></tbody>
+                        <tbody id="modalTableBody" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
 
-                <div class="p-5 border-t flex flex-wrap justify-between items-center bg-slate-50 gap-4">
+                <div class="p-5 border-t flex flex-wrap justify-between items-center bg-white gap-4 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] relative z-20">
                     <div class="flex gap-4 md:gap-8">
                         <div>
                             <p class="text-[10px] font-black text-slate-400 uppercase">Grand Total</p>
@@ -350,37 +272,29 @@
                             <span id="modalNormTotal" class="text-3xl font-black text-blue-500">00:00</span>
                         </div>
                     </div>
-                    <button onclick="finalSave()"
-                        class="w-full md:w-auto bg-emerald-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl">Save
-                        to Cloud</button>
+                    <button onclick="finalSave()" class="w-full md:w-auto bg-emerald-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl hover:bg-emerald-700 transition">Save to Cloud</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="adminModal"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[150] p-4 no-print">
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[150] p-4 no-print">
         <div class="bg-white rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] modal-animate">
             <div class="p-6 border-b flex justify-between items-center bg-slate-900 text-white">
                 <h2 class="text-xl font-black">Admin Panel</h2>
                 <button onclick="closeModal('adminModal')"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-6 overflow-y-auto bg-slate-50 flex flex-col md:flex-row gap-8">
-                <!-- User mgmt -->
                 <div class="flex-1">
                     <h3 class="font-bold text-lg mb-4">User Management</h3>
                     <div class="flex flex-col gap-3 mb-6">
-                        <input type="text" id="newUsername" placeholder="Username"
-                            class="border p-3 rounded-xl font-bold outline-none focus:border-emerald-500">
-                        <input type="text" id="newPassword" placeholder="Password"
-                            class="border p-3 rounded-xl font-bold outline-none focus:border-emerald-500">
+                        <input type="text" id="newUsername" placeholder="Username" class="border p-3 rounded-xl font-bold outline-none focus:border-emerald-500">
+                        <input type="text" id="newPassword" placeholder="Password" class="border p-3 rounded-xl font-bold outline-none focus:border-emerald-500">
                         <select id="newRole" class="border p-3 rounded-xl font-bold">
                             <option value="user">Standard User</option>
                             <option value="admin">Administrator</option>
                         </select>
-                        <button onclick="createUser()"
-                            class="bg-emerald-600 text-white rounded-xl font-bold py-3 hover:bg-emerald-700 transition">Create
-                            User</button>
+                        <button onclick="createUser()" class="bg-emerald-600 text-white rounded-xl font-bold py-3 hover:bg-emerald-700 transition">Create User</button>
                     </div>
                     <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-100">
                         <table class="w-full text-left min-w-[300px]">
@@ -396,22 +310,15 @@
                     </div>
                 </div>
 
-                <!-- Mercantile Calendar mgmt -->
                 <div class="flex-1 border-t md:border-t-0 md:border-l border-slate-200 pt-6 md:pt-0 md:pl-8">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-bold text-lg">Mercantile Calendar</h3>
-                        <button onclick="fetchSLHolidays(event)"
-                            class="text-[10px] uppercase font-bold tracking-widest bg-orange-100 text-orange-600 px-3 py-1 rounded-xl shadow-sm hover:bg-orange-200 transition"><i
-                                class="fas fa-cloud-download-alt mr-1"></i> Auto Fetch</button>
+                        <button onclick="fetchSLHolidays(event)" class="text-[10px] uppercase font-bold tracking-widest bg-orange-100 text-orange-600 px-3 py-1 rounded-xl shadow-sm hover:bg-orange-200 transition"><i class="fas fa-cloud-download-alt mr-1"></i> Auto Fetch</button>
                     </div>
                     <div class="flex flex-col gap-3 mb-6">
-                        <input type="date" id="newMercDay"
-                            class="border p-3 rounded-xl font-bold outline-none focus:border-orange-500">
-                        <input type="text" id="newMercName" placeholder="Holiday Title"
-                            class="border p-3 rounded-xl font-bold outline-none focus:border-orange-500">
-                        <button onclick="addMercDay()"
-                            class="bg-orange-500 text-white rounded-xl font-bold py-3 hover:bg-orange-600 transition">Add
-                            to Calendar</button>
+                        <input type="date" id="newMercDay" class="border p-3 rounded-xl font-bold outline-none focus:border-orange-500">
+                        <input type="text" id="newMercName" placeholder="Holiday Title" class="border p-3 rounded-xl font-bold outline-none focus:border-orange-500">
+                        <button onclick="addMercDay()" class="bg-orange-500 text-white rounded-xl font-bold py-3 hover:bg-orange-600 transition">Add to Calendar</button>
                     </div>
                     <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-100">
                         <table class="w-full text-left min-w-[300px] text-sm">
@@ -440,6 +347,7 @@
                 <tr class="bg-slate-100 border-b-2 border-slate-300">
                     <th class="p-3 text-left font-black text-sm">Start Point</th>
                     <th class="p-3 text-left font-black text-sm">End Point</th>
+                    <th class="p-3 text-left font-black text-sm">Remark</th>
                     <th class="p-3 text-right font-black text-sm">Duration</th>
                 </tr>
             </thead>
@@ -479,7 +387,6 @@
 
         let currentEntries = [];
         let editingId = null;
-        let editingRowIndex = null;
         window.cachedSheets = {};
         window.mercantileDays = new Set();
 
@@ -528,7 +435,7 @@
             const payload = {
                 name: reportName,
                 total: `Rs.${data.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
-                isSalaryReport: true, // This flag separates it from regular timesheets
+                isSalaryReport: true, 
                 updatedAt: new Date().toISOString(),
                 breakdown: {
                     basic: document.getElementById("sal_basic").value || 0,
@@ -608,35 +515,37 @@
             let mercMins = 0;
 
             entries.forEach(e => {
+                if (!e.tIn || !e.tOut || !e.dIn || !e.dOut) return; 
+
                 const start = new Date(`${e.dIn}T${e.tIn}`);
                 const end = new Date(`${e.dOut}T${e.tOut}`);
                 const durationMins = Math.max(0, Math.floor((end - start) / 60000));
-                totalMins += durationMins;
+                
+                if (durationMins > 0) {
+                    totalMins += durationMins;
 
-                // Determine precise crossover into mercantile boundaries
-                let current = new Date(start);
-                while (current < end) {
-                    const currentYYYYMMDD = current.getFullYear() + '-' + String(current.getMonth() + 1).padStart(2, '0') + '-' + String(current.getDate()).padStart(2, '0');
-                    const isMerc = window.isMercantile(currentYYYYMMDD);
+                    let current = new Date(start);
+                    while (current < end) {
+                        const currentYYYYMMDD = current.getFullYear() + '-' + String(current.getMonth() + 1).padStart(2, '0') + '-' + String(current.getDate()).padStart(2, '0');
+                        const isMerc = window.isMercantile(currentYYYYMMDD);
 
-                    // Find the end of this current day (midnight) or the shift end, whichever comes first
-                    const nextMidnight = new Date(current);
-                    nextMidnight.setHours(24, 0, 0, 0); // Sets to next midnight
+                        const nextMidnight = new Date(current);
+                        nextMidnight.setHours(24, 0, 0, 0); 
 
-                    const chunkEnd = end < nextMidnight ? end : nextMidnight;
-                    const chunkMins = Math.floor((chunkEnd - current) / 60000);
+                        const chunkEnd = end < nextMidnight ? end : nextMidnight;
+                        const chunkMins = Math.floor((chunkEnd - current) / 60000);
 
-                    if (isMerc) {
-                        mercMins += chunkMins;
+                        if (isMerc) {
+                            mercMins += chunkMins;
+                        }
+
+                        current = new Date(chunkEnd);
                     }
-
-                    // Move current pointer to start of next chunk
-                    current = new Date(chunkEnd);
                 }
             });
 
-            const normMins = totalMins - mercMins;
-            const format = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+            const normMins = Math.max(0, totalMins - mercMins);
+            const format = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}.${String(m % 60).padStart(2, '0')}`;
             return {
                 totalStr: format(totalMins),
                 mercStr: format(mercMins),
@@ -651,10 +560,10 @@
             const icon = document.getElementById('dialogIcon');
             icon.innerHTML = type === 'alert' ? '<i class="fas fa-check-circle text-emerald-500"></i>' : '<i class="fas fa-exclamation-circle text-red-500"></i>';
             const btns = document.getElementById('dialogButtons');
-            btns.innerHTML = type === 'alert' ?
-                `<button onclick="closeDialog()" class="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold">OK</button>` :
+            btns.innerHTML = type === 'alert' ? 
+                `<button onclick="closeDialog()" class="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold">OK</button>` : 
                 `<button onclick="closeDialog()" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Cancel</button><button id="confBtn" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold">Confirm</button>`;
-            if (type === 'confirm') document.getElementById('confBtn').onclick = () => { closeDialog(); if (cb) cb(); };
+            if (type === 'confirm') document.getElementById('confBtn').onclick = () => { closeDialog(); if(cb) cb(); };
             document.getElementById('customDialog').classList.remove('hidden');
         };
         window.closeDialog = () => document.getElementById('customDialog').classList.add('hidden');
@@ -668,7 +577,7 @@
             snap.forEach(d => {
                 const s = d.data();
                 window.cachedSheets[d.id] = s;
-                const isSal = s.isSalaryReport; // Check if it's a salary or a timesheet
+                const isSal = s.isSalaryReport; 
 
                 list.innerHTML += `
                 <div class="bg-white p-6 rounded-3xl border ${isSal ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-100'} hover:shadow-xl transition-all cursor-pointer relative group" onclick="${isSal ? `openViewSalaryModal('${d.id}')` : `openSheet('${d.id}')`}">
@@ -690,10 +599,11 @@
         // --- SHEET ACTIONS ---
         window.openSheet = (id) => {
             const s = window.cachedSheets[id];
-            editingId = id;
+            editingId = id; 
             currentEntries = s.entries || [];
             document.getElementById('sheetNameInput').value = s.name;
             document.getElementById('modalSheetTitle').innerText = s.name;
+            document.getElementById('monthSelectorContainer').classList.add('hidden'); 
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.replace('hidden', 'flex');
             document.getElementById('modalOverlay').classList.remove('hidden');
@@ -703,7 +613,9 @@
         window.openNewSheetModal = () => {
             editingId = null; currentEntries = [];
             document.getElementById('sheetNameInput').value = '';
+            document.getElementById('sheetMonthInput').value = '';
             document.getElementById('modalSheetTitle').innerText = 'New Sheet';
+            document.getElementById('monthSelectorContainer').classList.remove('hidden');
             document.getElementById('step1').classList.remove('hidden');
             document.getElementById('step2').classList.add('hidden');
             document.getElementById('modalOverlay').classList.remove('hidden');
@@ -711,27 +623,51 @@
         };
 
         window.goToStep2 = () => {
-            if (!document.getElementById('sheetNameInput').value.trim()) return;
+            const name = document.getElementById('sheetNameInput').value.trim();
+            const monthVal = document.getElementById('sheetMonthInput').value;
+
+            if (!name) return uiDialog("Missing Data", "Please enter a project name.", "alert");
+            
+            if (!editingId && currentEntries.length === 0) {
+                if (!monthVal) return uiDialog("Missing Data", "Please select a month to auto-fill.", "alert");
+                
+                const [year, month] = monthVal.split('-');
+                const daysInMonth = new Date(year, month, 0).getDate();
+                
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const dateStr = `${year}-${month}-${String(i).padStart(2, '0')}`;
+                    currentEntries.push({
+                        dIn: dateStr, tIn: '', dOut: dateStr, tOut: '', duration: '0.00', remark: ''
+                    });
+                }
+            }
+
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.replace('hidden', 'flex');
-            document.getElementById('modalSheetTitle').innerText = document.getElementById('sheetNameInput').value;
+            document.getElementById('modalSheetTitle').innerText = name;
+            renderEntries();
         };
 
-        window.addEntry = () => {
-            const dIn = document.getElementById('dateIn').value, tIn = document.getElementById('timeIn').value;
-            const dOut = document.getElementById('dateOut').value, tOut = document.getElementById('timeOut').value;
-            if (!dIn || !tIn || !dOut || !tOut) return uiDialog("Missing Data", "Fill all date/time fields.", "alert");
-
-            const diff = new Date(`${dOut}T${tOut}`) - new Date(`${dIn}T${tIn}`);
-            if (diff < 0) return uiDialog("Error", "Check-out cannot be earlier than check-in.", "alert");
-
-            const tm = Math.floor(diff / 60000);
-            const duration = `${Math.floor(tm / 60)}.${String(tm % 60).padStart(2, '0')}`;
-
-            if (editingRowIndex !== null) currentEntries[editingRowIndex] = { dIn, tIn, dOut, tOut, duration };
-            else currentEntries.push({ dIn, tIn, dOut, tOut, duration });
-
-            cancelEdit(); renderEntries();
+        // --- INLINE EDITING LOGIC ---
+        window.updateEntry = (i, field, value) => {
+            currentEntries[i][field] = value;
+            const e = currentEntries[i];
+            
+            // Recalculate duration if time or date fields are modified inline
+            if (['dIn', 'tIn', 'dOut', 'tOut'].includes(field)) {
+                if (e.dIn && e.tIn && e.dOut && e.tOut) {
+                    const diff = new Date(`${e.dOut}T${e.tOut}`) - new Date(`${e.dIn}T${e.tIn}`);
+                    if (diff >= 0) {
+                        const tm = Math.floor(diff / 60000);
+                        e.duration = `${Math.floor(tm / 60)}.${String(tm % 60).padStart(2, '0')}`;
+                    } else {
+                        e.duration = '0.00'; 
+                    }
+                } else {
+                    e.duration = '0.00';
+                }
+            }
+            renderEntries();
         };
 
         function renderEntries() {
@@ -739,27 +675,36 @@
                 const startMerc = window.isMercantile(e.dIn);
                 const endMerc = window.isMercantile(e.dOut);
 
-                let highlightClass = 'text-slate-700 hover:bg-slate-50';
-                let startIcon = '';
-                let endIcon = '';
-
-                // If either start or end is on a mercantile day, give the row a subtle highlight
-                if (startMerc || endMerc) {
-                    highlightClass = 'bg-orange-50/50 hover:bg-orange-50';
-                }
-
-                // Place mercantile star icons strictly next to the dates that apply
-                if (startMerc) startIcon = '<i class="fas fa-star text-orange-400 text-[10px] ml-1" title="Mercantile / Sunday"></i>';
-                if (endMerc) endIcon = '<i class="fas fa-star text-orange-400 text-[10px] ml-1" title="Mercantile / Sunday"></i>';
+                let rowClass = 'hover:bg-slate-50 transition-colors';
+                if (startMerc || endMerc) rowClass = 'bg-orange-50/40 hover:bg-orange-50 transition-colors';
 
                 return `
-                <tr class="text-sm transition ${highlightClass}">
-                    <td class="p-4 font-bold ${startMerc ? 'text-orange-800' : 'text-slate-700'}">${e.dIn} <span class="${startMerc ? 'text-orange-600' : 'text-slate-400'} font-normal ml-1">${e.tIn}</span> ${startIcon}</td>
-                    <td class="p-4 font-bold ${endMerc ? 'text-orange-800' : 'text-slate-700'}">${e.dOut} <span class="${endMerc ? 'text-orange-600' : 'text-slate-400'} font-normal ml-1">${e.tOut}</span> ${endIcon}</td>
-                    <td class="p-4 text-right font-black ${startMerc || endMerc ? 'text-orange-700' : 'text-slate-800'}">${e.duration}</td>
-                    <td class="p-4 text-center">
-                        <button onclick="editRow(${i})" class="text-emerald-500 mr-3"><i class="fas fa-edit"></i></button>
-                        <button onclick="removeRow(${i})" class="text-red-400"><i class="fas fa-trash"></i></button>
+                <tr class="${rowClass}">
+                    <td class="p-3 align-top">
+                        <div class="flex flex-col xl:flex-row gap-2">
+                            <input type="date" value="${e.dIn || ''}" onchange="updateEntry(${i}, 'dIn', this.value)" 
+                                class="border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 bg-white/70 w-full xl:w-32">
+                            <input type="time" value="${e.tIn || ''}" onchange="updateEntry(${i}, 'tIn', this.value)" 
+                                class="border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 bg-white/70 w-full xl:w-28">
+                        </div>
+                    </td>
+                    <td class="p-3 align-top">
+                        <div class="flex flex-col xl:flex-row gap-2">
+                            <input type="date" value="${e.dOut || ''}" onchange="updateEntry(${i}, 'dOut', this.value)" 
+                                class="border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 bg-white/70 w-full xl:w-32">
+                            <input type="time" value="${e.tOut || ''}" onchange="updateEntry(${i}, 'tOut', this.value)" 
+                                class="border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 bg-white/70 w-full xl:w-28">
+                        </div>
+                    </td>
+                    <td class="p-3 text-right align-top font-black text-base pt-5 ${startMerc || endMerc ? 'text-orange-700' : 'text-slate-800'}">
+                        ${e.duration || '0.00'}
+                    </td>
+                    <td class="p-3 align-top w-1/3">
+                        <input type="text" value="${e.remark || ''}" placeholder="-" onchange="updateEntry(${i}, 'remark', this.value)" 
+                            class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-600 outline-none focus:border-emerald-500 w-full bg-white/70 h-[34px]">
+                    </td>
+                    <td class="p-3 text-center align-top pt-4">
+                        <button onclick="removeRow(${i})" class="w-8 h-8 rounded-lg bg-red-50 text-red-400 hover:bg-red-500 hover:text-white transition" title="Delete Entry"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`;
             }).join('');
@@ -769,22 +714,6 @@
             document.getElementById('modalMercTotal').innerText = totals.mercStr;
             document.getElementById('modalNormTotal').innerText = totals.normStr;
         }
-
-        window.editRow = (i) => {
-            const e = currentEntries[i];
-            document.getElementById('dateIn').value = e.dIn; document.getElementById('timeIn').value = e.tIn;
-            document.getElementById('dateOut').value = e.dOut; document.getElementById('timeOut').value = e.tOut;
-            editingRowIndex = i;
-            document.getElementById('addUpdateBtn').innerText = "Update Row";
-            document.getElementById('cancelEditBtn').classList.remove('hidden');
-        };
-
-        window.cancelEdit = () => {
-            editingRowIndex = null;
-            document.getElementById('addUpdateBtn').innerText = "Add Row";
-            document.getElementById('cancelEditBtn').classList.add('hidden');
-            ['dateIn', 'timeIn', 'dateOut', 'timeOut'].forEach(id => document.getElementById(id).value = '');
-        };
 
         window.removeRow = (i) => { currentEntries.splice(i, 1); renderEntries(); };
 
@@ -911,9 +840,10 @@
             document.getElementById('printGrandTotal').innerText = totals.totalStr;
             document.getElementById('printTableBody').innerHTML = currentEntries.map(e => `
                 <tr class="border-b border-slate-200">
-                    <td class="p-3 text-sm">${e.dIn} ${e.tIn} ${window.isMercantile(e.dIn) ? '*' : ''}</td>
-                    <td class="p-3 text-sm">${e.dOut} ${e.tOut}</td>
-                    <td class="p-3 text-right font-bold text-sm">${e.duration}</td>
+                    <td class="p-3 text-sm">${e.dIn} ${e.tIn || '--:--'} ${window.isMercantile(e.dIn) ? '*' : ''}</td>
+                    <td class="p-3 text-sm">${e.dOut} ${e.tOut || '--:--'}</td>
+                    <td class="p-3 text-sm italic text-slate-500">${e.remark || '-'}</td>
+                    <td class="p-3 text-right font-bold text-sm">${e.duration || '0.00'}</td>
                 </tr>`).join('');
             window.print();
         };
@@ -925,13 +855,18 @@
             const name = document.getElementById('sheetNameInput').value || "TimeSheet";
             doc.setFontSize(22); doc.text(name, 14, 20);
             doc.setFontSize(10); doc.setTextColor(150); doc.text("Authenticated Time Record", 14, 28);
-            const tableData = currentEntries.map(e => [`${e.dIn} ${e.tIn} ${window.isMercantile(e.dIn) ? '(Merc)' : ''}`, `${e.dOut} ${e.tOut}`, e.duration]);
+            const tableData = currentEntries.map(e => [
+                `${e.dIn} ${e.tIn || '--:--'} ${window.isMercantile(e.dIn) ? '(Merc)' : ''}`, 
+                `${e.dOut} ${e.tOut || '--:--'}`, 
+                e.remark || '-',
+                e.duration || '0.00'
+            ]);
             doc.autoTable({
-                startY: 35, head: [['Start Session', 'End Session', 'Duration']], body: tableData,
+                startY: 35, head: [['Start Session', 'End Session', 'Remark', 'Duration']], body: tableData,
                 foot: [
-                    ['', 'NORMAL HRS', totals.normStr],
-                    ['', 'MERCANTILE OT', totals.mercStr],
-                    ['', 'GRAND TOTAL', totals.totalStr]
+                    ['', '', 'NORMAL HRS', totals.normStr],
+                    ['', '', 'MERCANTILE OT', totals.mercStr],
+                    ['', '', 'GRAND TOTAL', totals.totalStr]
                 ],
                 theme: 'striped', headStyles: { fillColor: [5, 150, 105] }
             });
@@ -941,11 +876,16 @@
         window.exportExcel = () => {
             const totals = calculateTotals(currentEntries);
             const name = document.getElementById('sheetNameInput').value || "TimeSheet";
-            const data = currentEntries.map(e => ({ "Start": `${e.dIn} ${e.tIn} ${window.isMercantile(e.dIn) ? '(Merc)' : ''}`, "End": `${e.dOut} ${e.tOut}`, "Hours": e.duration }));
-            data.push({ "Start": "", "End": "", "Hours": "" });
-            data.push({ "Start": "", "End": "NORMAL HRS", "Hours": totals.normStr });
-            data.push({ "Start": "", "End": "MERCANTILE OT", "Hours": totals.mercStr });
-            data.push({ "Start": "", "End": "GRAND TOTAL", "Hours": totals.totalStr });
+            const data = currentEntries.map(e => ({ 
+                "Start": `${e.dIn} ${e.tIn || '--:--'} ${window.isMercantile(e.dIn) ? '(Merc)' : ''}`, 
+                "End": `${e.dOut} ${e.tOut || '--:--'}`, 
+                "Remark": e.remark || '',
+                "Hours": e.duration || '0.00' 
+            }));
+            data.push({ "Start": "", "End": "", "Remark": "", "Hours": "" });
+            data.push({ "Start": "", "End": "", "Remark": "NORMAL HRS", "Hours": totals.normStr });
+            data.push({ "Start": "", "End": "", "Remark": "MERCANTILE OT", "Hours": totals.mercStr });
+            data.push({ "Start": "", "End": "", "Remark": "GRAND TOTAL", "Hours": totals.totalStr });
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Hours");
