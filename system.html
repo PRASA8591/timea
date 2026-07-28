@@ -9,9 +9,13 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+    <!-- Document Generation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <!-- Visual Analytics Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
@@ -187,6 +191,23 @@
             </div>
         </header>
 
+        <!-- Visual Analytics Dashboard -->
+        <div id="analyticsDashboard" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 hidden">
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <h3 class="font-black text-slate-700 mb-4"><i class="fas fa-chart-bar text-blue-500 mr-2"></i>Hours Tracked</h3>
+                <div class="relative h-48 w-full">
+                    <canvas id="hoursChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <h3 class="font-black text-slate-700 mb-4"><i class="fas fa-chart-line text-emerald-500 mr-2"></i>Salary Overview</h3>
+                <div class="relative h-48 w-full">
+                    <canvas id="salaryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timesheet & Salary Grid -->
         <div id="sheetsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
     </main>
 
@@ -371,6 +392,10 @@
         window.mercantileDays = new Set();
         window.usersRegistryMap = {}; 
 
+        // Chart.js Instances
+        window.hoursChartInst = null;
+        window.salChartInst = null;
+
         onSnapshot(collection(db, "mercantile_days"), (snap) => {
             window.mercantileDays.clear();
             snap.forEach(d => window.mercantileDays.add(d.data().date));
@@ -378,6 +403,82 @@
         });
 
         let currentViewingSalaryId = null;
+
+        // --- CHART & DASHBOARD ANALYTICS ENGINE ---
+        function parseTimeToDecimal(timeStr) {
+            if (!timeStr) return 0;
+            const parts = timeStr.split(':');
+            return parseInt(parts[0]) + (parseInt(parts[1]) / 60);
+        }
+
+        function updateAnalyticsDashboard(allData) {
+            const timesheets = [];
+            const salaries = [];
+            
+            // Sort data logically by creation/update (using rudimentary object sorting)
+            allData.forEach(s => {
+                if (s.isSalaryReport) salaries.push(s);
+                else timesheets.push(s);
+            });
+
+            const dashboard = document.getElementById('analyticsDashboard');
+            if (timesheets.length === 0 && salaries.length === 0) {
+                dashboard.classList.add('hidden');
+                return;
+            } else {
+                dashboard.classList.remove('hidden');
+            }
+
+            // 1. Process Hours Chart (Last 6 Timesheets)
+            const recentTimesheets = timesheets.slice(-6);
+            const hrLabels = recentTimesheets.map(t => t.name);
+            const normData = recentTimesheets.map(t => parseTimeToDecimal(t.normTotal));
+            const mercData = recentTimesheets.map(t => parseTimeToDecimal(t.mercTotal));
+
+            if (window.hoursChartInst) window.hoursChartInst.destroy();
+            const ctxHr = document.getElementById('hoursChart').getContext('2d');
+            window.hoursChartInst = new Chart(ctxHr, {
+                type: 'bar',
+                data: {
+                    labels: hrLabels,
+                    datasets: [
+                        { label: 'Normal Hrs', data: normData, backgroundColor: '#3b82f6', borderRadius: 4 },
+                        { label: 'Mercantile OT', data: mercData, backgroundColor: '#f97316', borderRadius: 4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            // 2. Process Salary Chart (Last 6 Salary Reports)
+            const recentSalaries = salaries.slice(-6);
+            const salLabels = recentSalaries.map(s => s.name);
+            const salData = recentSalaries.map(s => {
+                // Remove 'Rs.' and commas to parse string into a clean float
+                const cleanTotal = s.total ? s.total.replace(/Rs\.|,/g, '').trim() : '0';
+                return parseFloat(cleanTotal);
+            });
+
+            if (window.salChartInst) window.salChartInst.destroy();
+            const ctxSal = document.getElementById('salaryChart').getContext('2d');
+            window.salChartInst = new Chart(ctxSal, {
+                type: 'line',
+                data: {
+                    labels: salLabels,
+                    datasets: [{ 
+                        label: 'Net Disbursed Pay (LKR)', 
+                        data: salData, 
+                        borderColor: '#10b981', 
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)', 
+                        borderWidth: 3,
+                        fill: true, 
+                        tension: 0.4,
+                        pointBackgroundColor: '#047857',
+                        pointRadius: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+        }
 
         // --- SALARY CALCULATOR LOGIC ---
         window.openSalaryModal = () => {
@@ -540,9 +641,12 @@
         onSnapshot(sheetQ, (snap) => {
             const list = document.getElementById('sheetsList');
             list.innerHTML = '';
+            const allDashboardData = [];
+
             snap.forEach(d => {
                 const s = d.data();
                 window.cachedSheets[d.id] = s;
+                allDashboardData.push(s);
                 const isSal = s.isSalaryReport; 
 
                 list.innerHTML += `
@@ -560,6 +664,9 @@
                     </div>
                 </div>`;
             });
+            
+            // Pass compiled data to Analytics render function
+            updateAnalyticsDashboard(allDashboardData);
         });
 
         // --- SHEET VIEWS AND ACTIONS MANAGER ---
