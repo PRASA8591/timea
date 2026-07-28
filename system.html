@@ -33,7 +33,8 @@
 
 <body class="bg-slate-50 min-h-screen flex flex-col text-slate-800 font-sans">
 
-    <div id="customDialog" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[300] p-4 no-print">
+    <!-- Global Dialog Prompt -->
+    <div id="customDialog" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[500] p-4 no-print">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate">
             <div id="dialogIcon" class="text-4xl mb-4"></div>
             <h3 id="dialogTitle" class="text-2xl font-black mb-2 text-slate-800"></h3>
@@ -42,6 +43,21 @@
         </div>
     </div>
 
+    <!-- Info/Policy Modal -->
+    <div id="infoModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[400] p-4 no-print">
+        <div class="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl modal-animate relative max-h-[85vh] flex flex-col">
+            <button onclick="closeModal('infoModal')" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
+            <h2 id="infoTitle" class="text-2xl font-black mb-4 text-slate-800 border-b pb-4"></h2>
+            <div id="infoContent" class="overflow-y-auto custom-scroll text-slate-600 text-sm space-y-4 pr-2 leading-relaxed">
+                <!-- Content injected dynamically -->
+            </div>
+            <div class="mt-6 pt-4 border-t border-slate-100 text-right">
+                <button onclick="closeModal('infoModal')" class="bg-slate-100 text-slate-700 font-bold px-6 py-2.5 rounded-xl hover:bg-slate-200 transition">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
     <div id="userProfileDetailModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[250] p-4 no-print">
         <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl modal-animate relative">
             <button onclick="closeModal('userProfileDetailModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fas fa-times text-lg"></i></button>
@@ -74,6 +90,7 @@
         </div>
     </div>
 
+    <!-- Password Update Modal -->
     <div id="passwordPromptModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate">
             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-key text-2xl"></i></div>
@@ -87,6 +104,7 @@
         </div>
     </div>
 
+    <!-- Salary Calculator Modal -->
     <div id="salaryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden modal-animate">
             <div class="p-6 bg-emerald-600 text-white flex justify-between items-center">
@@ -133,6 +151,7 @@
         </div>
     </div>
 
+    <!-- View Salary Details Modal -->
     <div id="viewSalaryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4 no-print">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden modal-animate">
             <div class="p-6 bg-emerald-600 text-white flex justify-between items-center">
@@ -164,6 +183,7 @@
         </div>
     </div>
 
+    <!-- Main Dashboard Application -->
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-8 no-print">
         <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 gap-4">
             <div>
@@ -211,10 +231,19 @@
         <div id="sheetsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
     </main>
 
-    <footer class="w-full text-center py-6 border-t border-slate-200 text-slate-500 text-sm font-medium no-print">
-        &copy; 2026 PrasaTek System Solutions. All rights reserved.
+    <!-- Global Footer with Dynamic Modals -->
+    <footer class="w-full bg-white py-6 border-t border-slate-200 text-slate-500 text-sm font-medium mt-auto no-print shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)]">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center px-6">
+            <p>&copy; 2026 PrasaTek System Solutions. All rights reserved.</p>
+            <div class="flex flex-wrap justify-center gap-6 mt-4 md:mt-0">
+                <button onclick="openInfoModal('privacy')" class="hover:text-emerald-600 transition font-bold text-xs uppercase tracking-wider">Privacy Policy</button>
+                <button onclick="openInfoModal('terms')" class="hover:text-emerald-600 transition font-bold text-xs uppercase tracking-wider">Terms of Service</button>
+                <button onclick="openInfoModal('contact')" class="hover:text-emerald-600 transition font-bold text-xs uppercase tracking-wider">Contact Us</button>
+            </div>
+        </div>
     </footer>
 
+    <!-- Full Sheet Editor Modal -->
     <div id="modalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-40 p-2 md:p-4 no-print">
         <div class="bg-white w-full max-w-6xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[95vh] md:h-auto md:max-h-[90vh] modal-animate">
             <div class="p-4 border-b flex flex-wrap justify-between items-center gap-2">
@@ -277,6 +306,7 @@
         </div>
     </div>
 
+    <!-- Admin Panel Modal -->
     <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[150] p-4 no-print">
         <div class="bg-white rounded-3xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] modal-animate">
             <div class="p-6 border-b flex justify-between items-center bg-slate-900 text-white">
@@ -415,7 +445,6 @@
             const timesheets = [];
             const salaries = [];
             
-            // Sort data logically by creation/update (using rudimentary object sorting)
             allData.forEach(s => {
                 if (s.isSalaryReport) salaries.push(s);
                 else timesheets.push(s);
@@ -429,7 +458,6 @@
                 dashboard.classList.remove('hidden');
             }
 
-            // 1. Process Hours Chart (Last 6 Timesheets)
             const recentTimesheets = timesheets.slice(-6);
             const hrLabels = recentTimesheets.map(t => t.name);
             const normData = recentTimesheets.map(t => parseTimeToDecimal(t.normTotal));
@@ -449,11 +477,9 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
 
-            // 2. Process Salary Chart (Last 6 Salary Reports)
             const recentSalaries = salaries.slice(-6);
             const salLabels = recentSalaries.map(s => s.name);
             const salData = recentSalaries.map(s => {
-                // Remove 'Rs.' and commas to parse string into a clean float
                 const cleanTotal = s.total ? s.total.replace(/Rs\.|,/g, '').trim() : '0';
                 return parseFloat(cleanTotal);
             });
@@ -576,6 +602,60 @@
             document.getElementById('salaryModal').classList.remove('hidden');
         };
 
+        // --- INFO AND POLICY MODAL HANDLERS ---
+        window.openInfoModal = (type) => {
+            const titleEl = document.getElementById('infoTitle');
+            const contentEl = document.getElementById('infoContent');
+            
+            if (type === 'privacy') {
+                titleEl.innerHTML = '<i class="fas fa-shield-alt text-emerald-500 mr-3"></i>Privacy Policy';
+                contentEl.innerHTML = `
+                    <div class="space-y-4">
+                        <p><strong class="text-slate-800">1. Data Collection:</strong> We collect necessary authentication data (such as your email address, username, and mobile number) and timesheet logs entered by you to provide the TimeSheet Pro service.</p>
+                        <p><strong class="text-slate-800">2. Data Storage:</strong> All time-tracking and profile data is securely stored utilizing Google Firebase Cloud Infrastructure.</p>
+                        <p><strong class="text-slate-800">3. Usage:</strong> Your data is solely used for generating timesheets, calculating salaries, and administrative tracking by your system administrators. PrasaTek System Solutions does not sell or share your data with third parties.</p>
+                        <p><strong class="text-slate-800">4. User Rights:</strong> You have the right to request the inspection or deletion of your account and related data records by contacting your system administrator.</p>
+                    </div>
+                `;
+            } else if (type === 'terms') {
+                titleEl.innerHTML = '<i class="fas fa-file-contract text-emerald-500 mr-3"></i>Terms of Service';
+                contentEl.innerHTML = `
+                    <div class="space-y-4">
+                        <p><strong class="text-slate-800">1. License:</strong> TimeSheet Pro is proprietary software owned by PrasaTek System Solutions. Unauthorized copying, modification, or distribution is strictly prohibited.</p>
+                        <p><strong class="text-slate-800">2. Acceptable Use:</strong> Authorized operators must use the system strictly for lawful time-tracking purposes. The falsification or unauthorized modification of time logs is strictly prohibited and against company policy.</p>
+                        <p><strong class="text-slate-800">3. Limitation of Liability:</strong> The software is provided "as is". PrasaTek is not liable for any discrepancies in salary payouts or data loss resulting from unforeseen cloud infrastructure outages.</p>
+                        <p><strong class="text-slate-800">4. Account Termination:</strong> System Administrators reserve the right to suspend or terminate operator accounts that violate these terms or company operational guidelines.</p>
+                    </div>
+                `;
+            } else if (type === 'contact') {
+                titleEl.innerHTML = '<i class="fas fa-envelope text-emerald-500 mr-3"></i>Contact Us';
+                contentEl.innerHTML = `
+                    <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 text-center shadow-sm">
+                        <img src="logo.png" alt="PrasaTek Logo" class="h-16 mx-auto mb-4 object-contain">
+                        <h3 class="font-black text-xl text-slate-800 mb-1">PrasaTek System Solutions</h3>
+                        <p class="text-xs font-bold text-slate-400 mb-6 uppercase tracking-[0.2em]">Based in Sri Lanka</p>
+                        
+                        <div class="flex flex-col gap-4 text-left max-w-sm mx-auto bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
+                            <a href="mailto:support@prasatek.site" class="flex items-center gap-4 text-slate-600 hover:text-emerald-600 transition group">
+                                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition"><i class="fas fa-envelope"></i></div>
+                                <span class="font-bold">support@prasatek.site</span>
+                            </a>
+                            <a href="tel:+94719323239" class="flex items-center gap-4 text-slate-600 hover:text-emerald-600 transition group">
+                                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition"><i class="fas fa-phone"></i></div>
+                                <span class="font-bold">+94 71 932 3239</span>
+                            </a>
+                            <a href="https://prasatek.site" target="_blank" class="flex items-center gap-4 text-slate-600 hover:text-emerald-600 transition group">
+                                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition"><i class="fas fa-globe"></i></div>
+                                <span class="font-bold">prasatek.site</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('infoModal').classList.remove('hidden');
+        };
+
         // --- ULTRA-FAST CALCULATIONS ENGINE ---
         window.isMercantile = (dateStr) => {
             if (!dateStr) return false;
@@ -665,7 +745,6 @@
                 </div>`;
             });
             
-            // Pass compiled data to Analytics render function
             updateAnalyticsDashboard(allDashboardData);
         });
 
