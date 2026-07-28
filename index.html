@@ -11,6 +11,8 @@
             font-family: system-ui, -apple-system, sans-serif;
             background-color: #f8fafc;
         }
+        .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         #toast { opacity: 0; pointer-events: none; }
         #toast.opacity-100 { opacity: 1 !important; pointer-events: auto !important; }
         img { max-height: 4rem !important; margin: 0 auto; display: block; }
@@ -23,7 +25,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
-<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4 font-sans text-slate-800">
+<body class="bg-slate-50 min-h-screen flex flex-col items-center p-4 font-sans text-slate-800">
 
     <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full font-bold shadow-xl transition-all duration-300 opacity-0 pointer-events-none z-[300] flex items-center gap-2">
         <i id="toastIcon" class="fas fa-exclamation-circle text-emerald-400"></i> <span id="toastMsg">Notification</span>
@@ -47,6 +49,20 @@
                 </div>
             </div>
             <button id="googleSaveDetailsBtn" class="w-full bg-emerald-600 text-white py-3.5 rounded-xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition uppercase tracking-wider text-sm">Finish & Sign In</button>
+        </div>
+    </div>
+
+    <!-- Info/Policy Modal -->
+    <div id="infoModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[400] p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl modal-animate relative max-h-[85vh] flex flex-col">
+            <button onclick="closeModal('infoModal')" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
+            <h2 id="infoTitle" class="text-2xl font-black mb-4 text-slate-800 border-b pb-4"></h2>
+            <div id="infoContent" class="overflow-y-auto custom-scroll text-slate-600 text-sm space-y-4 pr-2 leading-relaxed">
+                <!-- Content injected dynamically -->
+            </div>
+            <div class="mt-6 pt-4 border-t border-slate-100 text-right">
+                <button onclick="closeModal('infoModal')" class="bg-slate-100 text-slate-700 font-bold px-6 py-2.5 rounded-xl hover:bg-slate-200 transition">Close</button>
+            </div>
         </div>
     </div>
 
@@ -158,15 +174,18 @@
                     <button onclick="switchPanel('login')" class="text-emerald-600 font-bold hover:underline ml-1">Login here</button>
                 </p>
             </div>
-
-            <p class="text-center text-[10px] font-black text-slate-300 mt-8 uppercase tracking-widest">
-                A product by PrasaTek System Solutions
-            </p>
         </div>
     </main>
 
-    <footer class="w-full text-center py-6 border-t border-slate-200 text-slate-400 text-[11px] font-bold uppercase tracking-wider">
-        &copy; 2026 PrasaTek System Solutions. All rights reserved.
+    <footer class="w-full bg-slate-50 py-6 border-t border-slate-200 text-slate-500 text-sm font-medium mt-auto z-10 relative">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center px-6 gap-4">
+            <p>&copy; 2026 PrasaTek System Solutions. All rights reserved.</p>
+            <div class="flex flex-wrap justify-center gap-6">
+                <button onclick="openInfoModal('privacy')" class="hover:text-emerald-600 transition font-bold text-xs uppercase tracking-wider">Privacy Policy</button>
+                <button onclick="openInfoModal('terms')" class="hover:text-emerald-600 transition font-bold text-xs uppercase tracking-wider">Terms of Service</button>
+                <button onclick="openInfoModal('contact')" class="hover:text-emerald-600 transition font-bold text-xs uppercase tracking-wider">Contact Us</button>
+            </div>
+        </div>
     </footer>
 
     <script type="module">
@@ -195,7 +214,6 @@
             setTimeout(() => { t.classList.remove('opacity-100'); t.classList.add('opacity-0', 'pointer-events-none'); }, 5000);
         }
 
-        // Handle error strings specifically to call out unauthorized domains gracefully
         function handleAuthError(err) {
             console.error(err);
             if (err.code === 'auth/unauthorized-domain') {
@@ -213,6 +231,62 @@
                 document.getElementById('registerPanel').classList.add('hidden');
                 document.getElementById('loginPanel').classList.remove('hidden');
             }
+        };
+
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
+        // --- INFO AND POLICY MODAL HANDLERS ---
+        window.openInfoModal = (type) => {
+            const titleEl = document.getElementById('infoTitle');
+            const contentEl = document.getElementById('infoContent');
+            
+            if (type === 'privacy') {
+                titleEl.innerHTML = '<i class="fas fa-shield-alt text-emerald-500 mr-3"></i>Privacy Policy';
+                contentEl.innerHTML = `
+                    <div class="space-y-4">
+                        <p><strong class="text-slate-800">1. Data Collection:</strong> We collect necessary authentication data (such as your email address, username, and mobile number) and timesheet logs entered by you to provide the TimeSheet Pro service.</p>
+                        <p><strong class="text-slate-800">2. Data Storage:</strong> All time-tracking and profile data is securely stored utilizing Google Firebase Cloud Infrastructure.</p>
+                        <p><strong class="text-slate-800">3. Usage:</strong> Your data is solely used for generating timesheets, calculating salaries, and administrative tracking by your system administrators. PrasaTek System Solutions does not sell or share your data with third parties.</p>
+                        <p><strong class="text-slate-800">4. User Rights:</strong> You have the right to request the inspection or deletion of your account and related data records by contacting your system administrator.</p>
+                    </div>
+                `;
+            } else if (type === 'terms') {
+                titleEl.innerHTML = '<i class="fas fa-file-contract text-emerald-500 mr-3"></i>Terms of Service';
+                contentEl.innerHTML = `
+                    <div class="space-y-4">
+                        <p><strong class="text-slate-800">1. License:</strong> TimeSheet Pro is proprietary software owned by PrasaTek System Solutions. Unauthorized copying, modification, or distribution is strictly prohibited.</p>
+                        <p><strong class="text-slate-800">2. Acceptable Use:</strong> Authorized operators must use the system strictly for lawful time-tracking purposes. The falsification or unauthorized modification of time logs is strictly prohibited and against company policy.</p>
+                        <p><strong class="text-slate-800">3. Limitation of Liability:</strong> The software is provided "as is". PrasaTek is not liable for any discrepancies in salary payouts or data loss resulting from unforeseen cloud infrastructure outages.</p>
+                        <p><strong class="text-slate-800">4. Account Termination:</strong> System Administrators reserve the right to suspend or terminate operator accounts that violate these terms or company operational guidelines.</p>
+                    </div>
+                `;
+            } else if (type === 'contact') {
+                titleEl.innerHTML = '<i class="fas fa-envelope text-emerald-500 mr-3"></i>Contact Us';
+                contentEl.innerHTML = `
+                    <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 text-center shadow-sm">
+                        <img src="logo.png" alt="PrasaTek Logo" class="h-16 mx-auto mb-4 object-contain">
+                        <h3 class="font-black text-xl text-slate-800 mb-1">PrasaTek System Solutions</h3>
+                        <p class="text-xs font-bold text-slate-400 mb-6 uppercase tracking-[0.2em]">Based in Sri Lanka</p>
+                        
+                        <div class="flex flex-col gap-4 text-left max-w-sm mx-auto bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
+                            <a href="mailto:support@prasatek.site" class="flex items-center gap-4 text-slate-600 hover:text-emerald-600 transition group">
+                                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition"><i class="fas fa-envelope"></i></div>
+                                <span class="font-bold">support@prasatek.site</span>
+                            </a>
+                            <a href="tel:+94719323239" class="flex items-center gap-4 text-slate-600 hover:text-emerald-600 transition group">
+                                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition"><i class="fas fa-phone"></i></div>
+                                <span class="font-bold">+94 71 932 3239</span>
+                            </a>
+                            <a href="https://prasatek.site" target="_blank" class="flex items-center gap-4 text-slate-600 hover:text-emerald-600 transition group">
+                                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition"><i class="fas fa-globe"></i></div>
+                                <span class="font-bold">prasatek.site</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('infoModal').classList.remove('hidden');
         };
 
         // --- AUTHENTICATION LOGIN WORKFLOW ---
