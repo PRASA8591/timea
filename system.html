@@ -226,7 +226,8 @@
                                 <th class="p-4 border-b border-slate-200">Start Point</th>
                                 <th class="p-4 border-b border-slate-200">End Point</th>
                                 <th class="p-4 border-b border-slate-200 text-right">Hours (HH.MM)</th>
-                                <th class="p-4 border-b border-slate-200">Remark</th>
+                                <th class="p-4 border-b border-slate-200 w-1/4">Remark</th>
+                                <th class="p-4 border-b border-slate-200 text-center w-16">Day Off</th>
                                 <th class="p-4 border-b border-slate-200 text-center w-16">Act</th>
                             </tr>
                         </thead>
@@ -486,7 +487,7 @@
 
             for (let i = 0; i < entries.length; i++) {
                 const e = entries[i];
-                if (!e.tIn || !e.tOut || !e.dIn || !e.dOut) continue;
+                if (!e.tIn || !e.tOut || !e.dIn || !e.dOut || e.isOff) continue;
 
                 const start = new Date(`${e.dIn}T${e.tIn}`);
                 const end = new Date(`${e.dOut}T${e.tOut}`);
@@ -600,7 +601,7 @@
                 
                 for (let i = 1; i <= daysInMonth; i++) {
                     const dateStr = `${year}-${month}-${String(i).padStart(2, '0')}`;
-                    currentEntries.push({ dIn: dateStr, tIn: '', dOut: dateStr, tOut: '', duration: '0.00', remark: '' });
+                    currentEntries.push({ dIn: dateStr, tIn: '', dOut: dateStr, tOut: '', duration: '0.00', remark: '', isOff: false });
                 }
             }
 
@@ -611,31 +612,61 @@
         };
 
         // --- PRESERVED DOM INLINE COUPLING (HIGH SPEED ENGINES) ---
+        window.toggleDayOff = (i, isChecked) => {
+            const e = currentEntries[i];
+            e.isOff = isChecked;
+            
+            if (isChecked) {
+                e.tIn = '';
+                e.tOut = '';
+                e.duration = '0.00';
+                if (!e.remark) e.remark = 'Day Off'; 
+            } else {
+                if (e.remark === 'Day Off') e.remark = ''; 
+            }
+            
+            initialTableRender(); 
+        };
+
         function initialTableRender() {
             const body = document.getElementById('modalTableBody');
             body.innerHTML = currentEntries.map((e, i) => {
                 const startMerc = window.isMercantile(e.dIn);
                 const endMerc = window.isMercantile(e.dOut);
-                let rowClass = 'hover:bg-slate-50';
-                if (startMerc || endMerc) rowClass = 'bg-orange-50/40 hover:bg-orange-50';
+                
+                let rowClass = 'hover:bg-slate-50 transition-colors';
+                if (e.isOff) {
+                    rowClass = 'bg-slate-100 opacity-75'; 
+                } else if (startMerc || endMerc) {
+                    rowClass = 'bg-orange-50/40 hover:bg-orange-50';
+                }
+
+                const disabledAttr = e.isOff ? 'disabled' : '';
 
                 return `
                 <tr class="${rowClass}" data-index="${i}">
                     <td class="p-3">
                         <div class="flex gap-2">
-                            <input type="date" value="${e.dIn || ''}" oninput="fastInlineUpdate(${i}, 'dIn', this.value)" class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-32">
-                            <input type="time" value="${e.tIn || ''}" oninput="fastInlineUpdate(${i}, 'tIn', this.value)" class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-24">
+                            <input type="date" value="${e.dIn || ''}" oninput="fastInlineUpdate(${i}, 'dIn', this.value)" ${disabledAttr} class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-32 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed">
+                            <input type="time" value="${e.tIn || ''}" oninput="fastInlineUpdate(${i}, 'tIn', this.value)" ${disabledAttr} class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-24 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed">
                         </div>
                     </td>
                     <td class="p-3">
                         <div class="flex gap-2">
-                            <input type="date" value="${e.dOut || ''}" oninput="fastInlineUpdate(${i}, 'dOut', this.value)" class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-32">
-                            <input type="time" value="${e.tOut || ''}" oninput="fastInlineUpdate(${i}, 'tOut', this.value)" class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-24">
+                            <input type="date" value="${e.dOut || ''}" oninput="fastInlineUpdate(${i}, 'dOut', this.value)" ${disabledAttr} class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-32 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed">
+                            <input type="time" value="${e.tOut || ''}" oninput="fastInlineUpdate(${i}, 'tOut', this.value)" ${disabledAttr} class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-24 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed">
                         </div>
                     </td>
                     <td class="p-3 text-right font-black text-sm pt-4 duration-cell ${startMerc || endMerc ? 'text-orange-700' : 'text-slate-800'}">${e.duration || '0.00'}</td>
-                    <td class="p-3"><input type="text" value="${e.remark || ''}" placeholder="Type remark..." oninput="fastInlineUpdate(${i}, 'remark', this.value)" class="border border-slate-200 rounded-lg px-3 py-1 text-xs w-full bg-white"></td>
-                    <td class="p-3 text-center"><button onclick="removeRowDirect(${i}, this)" class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button></td>
+                    <td class="p-3">
+                        <input type="text" value="${e.remark || ''}" placeholder="Type remark..." oninput="fastInlineUpdate(${i}, 'remark', this.value)" ${disabledAttr} class="border border-slate-200 rounded-lg px-3 py-1 text-xs w-full bg-white disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed">
+                    </td>
+                    <td class="p-3 text-center">
+                        <input type="checkbox" ${e.isOff ? 'checked' : ''} onchange="toggleDayOff(${i}, this.checked)" class="w-4 h-4 text-emerald-600 rounded border-slate-300 cursor-pointer accent-emerald-600">
+                    </td>
+                    <td class="p-3 text-center">
+                        <button onclick="removeRowDirect(${i}, this)" class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
+                    </td>
                 </tr>`;
             }).join('');
 
@@ -655,7 +686,6 @@
                     } else { e.duration = '0.00'; }
                 } else { e.duration = '0.00'; }
                 
-                // Fast target updates inside DOM trees exclusively
                 const rowNode = document.querySelector(`#modalTableBody tr[data-index="${i}"]`);
                 if (rowNode) {
                     rowNode.querySelector('.duration-cell').innerText = e.duration;
