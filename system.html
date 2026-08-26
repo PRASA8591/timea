@@ -172,9 +172,9 @@
                     <div><p class="text-[10px] font-black uppercase text-slate-400">Other Deductions</p><p id="viewSalDeduction" class="font-bold border-b pb-1 text-slate-700"></p></div>
                 </div>
                 <div class="bg-slate-50 p-4 rounded-2xl space-y-2 text-sm border border-slate-100">
-                    <div class="flex justify-between text-slate-700"><span>Normal OT Pay:</span><span id="viewSalResNormal" class="font-bold">0.00</span></div>
-                    <div class="flex justify-between text-slate-700"><span>Mercantile OT Pay:</span><span id="viewSalResMerc" class="font-bold">0.00</span></div>
-                    <div class="flex justify-between text-red-500"><span>EPF Deduction (8%):</span><span id="viewSalResEpf" class="font-bold">0.00</span></div>
+                    <div class="flex justify-between text-slate-700"><span>Normal OT Pay:</span><span id="viewSalResNormal">0.00</span></div>
+                    <div class="flex justify-between text-slate-700"><span>Mercantile OT Pay:</span><span id="viewSalResMerc">0.00</span></div>
+                    <div class="flex justify-between text-red-500"><span>EPF Deduction (8%):</span><span id="viewSalResEpf">0.00</span></div>
                     <div class="flex justify-between text-xl font-black text-emerald-600 border-t pt-2 mt-2"><span>Final Salary:</span><span id="viewSalTotal">0.00</span></div>
                 </div>
             </div>
@@ -198,7 +198,7 @@
                     <i class="fas fa-shield-alt mr-2"></i> Admin Panel
                 </button>
                 <button onclick="openSalaryModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold transition flex items-center border border-slate-200">
-                    <i class="fas fa-calculator mr-2 text-emerald-600"></i> Calculator
+                    <i class="fas fa-calculator mr-2 text-emerald-600"></i> Salary Calculator
                 </button>
                 <button onclick="openNewSheetModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-emerald-100 transition">
                     <i class="fas fa-plus mr-2"></i> New Sheet
@@ -266,7 +266,7 @@
 
             <div id="step2" class="hidden flex-col h-full overflow-hidden">
                 <div class="flex-1 overflow-x-auto overflow-y-auto bg-slate-50 custom-scroll p-4">
-                    <table class="w-full text-left min-w-[900px] border-collapse bg-white rounded-xl shadow-sm overflow-hidden">
+                    <table class="w-full text-left min-w-[950px] border-collapse bg-white rounded-xl shadow-sm overflow-hidden">
                         <thead class="bg-slate-100 text-[10px] font-black uppercase text-slate-400 sticky top-0 z-10">
                             <tr>
                                 <th class="p-4 border-b border-slate-200">Start Point</th>
@@ -274,7 +274,7 @@
                                 <th class="p-4 border-b border-slate-200 text-right">Hours (HH.MM)</th>
                                 <th class="p-4 border-b border-slate-200 w-1/4">Remark</th>
                                 <th class="p-4 border-b border-slate-200 text-center w-16">Day Off</th>
-                                <th class="p-4 border-b border-slate-200 text-center w-16">Act</th>
+                                <th class="p-4 border-b border-slate-200 text-center w-24">Act</th>
                             </tr>
                         </thead>
                         <tbody id="modalTableBody" class="divide-y divide-slate-100"></tbody>
@@ -381,7 +381,7 @@
                     </div>
                 </div>
 
-                <!-- NEW TAB: Approvals Matrix -->
+                <!-- Tab: Approvals Matrix -->
                 <div id="tabContentApprovals" class="admin-content-pane hidden flex-col h-full">
                     <div class="flex justify-between items-center mb-6 border-b pb-4">
                         <h3 class="text-xl font-black text-slate-800">Timesheet & Salary Approvals</h3>
@@ -435,7 +435,7 @@
                     </div>
                 </div>
 
-                <!-- Tab: Holidays (Updated for Poya Auto-Sync) -->
+                <!-- Tab: Holidays -->
                 <div id="tabContentHolidays" class="admin-content-pane hidden">
                     <div class="flex justify-between items-center mb-6 border-b pb-4">
                         <div>
@@ -486,16 +486,18 @@
                     </div>
                 </div>
 
-                <!-- NEW TAB: Security & Logs -->
+                <!-- Tab: Security & Logs -->
                 <div id="tabContentSecurity" class="admin-content-pane hidden h-full flex-col">
                     <h3 class="text-xl font-black text-slate-800 mb-6 border-b pb-4 text-red-600"><i class="fas fa-shield-alt mr-2"></i>Security & Audit Center</h3>
                     
-                    <div class="bg-red-50 p-6 rounded-2xl border border-red-200 shadow-sm mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div id="lockdownCard" class="bg-red-50 p-6 rounded-2xl border border-red-200 shadow-sm mb-6 flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300">
                         <div>
-                            <h4 class="font-bold text-red-900 uppercase tracking-wider text-[11px] mb-1">Global Emergency Lockdown</h4>
-                            <p class="text-xs text-red-700 max-w-md">Instantly revoke application access for all non-admin operators. Use only in case of a critical data breach or unauthorized access attempt.</p>
+                            <h4 id="lockdownStatusHeading" class="font-bold text-red-900 uppercase tracking-wider text-[11px] mb-1">Global Emergency Lockdown</h4>
+                            <p id="lockdownStatusDesc" class="text-xs text-red-700 max-w-md">Instantly revoke application access for all non-admin operators. Standard sessions terminate within 1 second.</p>
                         </div>
-                        <button onclick="triggerLockdown()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition shadow-md text-sm whitespace-nowrap"><i class="fas fa-lock mr-2"></i> Initiate Lockout</button>
+                        <button id="lockdownActionBtn" onclick="toggleLockdownState()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition shadow-md text-sm whitespace-nowrap">
+                            <i class="fas fa-lock mr-2"></i> Initiate Lockout
+                        </button>
                     </div>
 
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 flex-1 flex flex-col min-h-[300px] overflow-hidden">
@@ -540,7 +542,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, updateDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const app = initializeApp({
             apiKey: "AIzaSyBJHqn-KIG7ntbsc9OZik7hf5lhObx7Ecg",
@@ -553,6 +555,70 @@
         if (!session) window.location.href = 'index.html';
         document.getElementById('displayUsername').innerText = session.username;
         if (session.role === 'admin') document.getElementById('adminBtn').classList.remove('hidden');
+
+        let isSystemLocked = false;
+
+        // REAL-TIME LOCKDOWN LISTENER (<1s instantaneous session termination for non-admins)
+        onSnapshot(doc(db, "system_status", "lockdown"), (docSnap) => {
+            const data = docSnap.exists() ? docSnap.data() : { isLocked: false };
+            isSystemLocked = !!data.isLocked;
+
+            if (isSystemLocked && session.role !== 'admin') {
+                sessionStorage.clear();
+                window.location.replace('index.html?lockdown=1');
+                return;
+            }
+
+            renderLockdownAdminUI(isSystemLocked);
+        });
+
+        function renderLockdownAdminUI(locked) {
+            const btn = document.getElementById('lockdownActionBtn');
+            const card = document.getElementById('lockdownCard');
+            const heading = document.getElementById('lockdownStatusHeading');
+            const desc = document.getElementById('lockdownStatusDesc');
+            if (!btn || !card) return;
+
+            if (locked) {
+                card.className = "bg-amber-50 p-6 rounded-2xl border border-amber-300 shadow-sm mb-6 flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300";
+                heading.className = "font-bold text-amber-900 uppercase tracking-wider text-[11px] mb-1";
+                heading.innerText = "System In Lockdown Mode";
+                desc.className = "text-xs text-amber-800 max-w-md";
+                desc.innerText = "Non-admin operators are currently locked out. Click unlock to restore standard operator access.";
+                btn.className = "bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md text-sm whitespace-nowrap";
+                btn.innerHTML = '<i class="fas fa-lock-open mr-2"></i> Disable Lockout / Unlock';
+            } else {
+                card.className = "bg-red-50 p-6 rounded-2xl border border-red-200 shadow-sm mb-6 flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300";
+                heading.className = "font-bold text-red-900 uppercase tracking-wider text-[11px] mb-1";
+                heading.innerText = "Global Emergency Lockdown";
+                desc.className = "text-xs text-red-700 max-w-md";
+                desc.innerText = "Instantly revoke application access for all non-admin operators. Standard sessions terminate within 1 second.";
+                btn.className = "bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition shadow-md text-sm whitespace-nowrap";
+                btn.innerHTML = '<i class="fas fa-lock mr-2"></i> Initiate Lockout';
+            }
+        }
+
+        window.toggleLockdownState = () => {
+            if (isSystemLocked) {
+                uiDialog("Unlock System?", "Are you sure you want to disable emergency lockdown and restore access for standard operators?", "confirm", async () => {
+                    await setDoc(doc(db, "system_status", "lockdown"), {
+                        isLocked: false,
+                        updatedBy: session.username,
+                        updatedAt: new Date().toISOString()
+                    });
+                    uiDialog("System Unlocked", "Standard operator access restored.", "success");
+                });
+            } else {
+                uiDialog("Initiate Emergency Lockdown?", "Are you sure you want to trigger an emergency lockdown? All non-admin operators will be kicked out immediately within 1 second.", "confirm", async () => {
+                    await setDoc(doc(db, "system_status", "lockdown"), {
+                        isLocked: true,
+                        updatedBy: session.username,
+                        updatedAt: new Date().toISOString()
+                    });
+                    uiDialog("System Locked", "Emergency lockdown active. Standard operators have been logged out.", "error");
+                });
+            }
+        };
 
         let currentEntries = [];
         let editingId = null;
@@ -941,6 +1007,22 @@
             initialTableRender(); 
         };
 
+        // CLEAR TIME FOR INDIVIDUAL DAYS
+        window.clearDayTime = (i) => {
+            const e = currentEntries[i];
+            e.tIn = '';
+            e.tOut = '';
+            e.duration = '0.00';
+            
+            const rowNode = document.querySelector(`#modalTableBody tr[data-index="${i}"]`);
+            if (rowNode) {
+                const inputs = rowNode.querySelectorAll('input[type="time"]');
+                inputs.forEach(inp => inp.value = '');
+                rowNode.querySelector('.duration-cell').innerText = '0.00';
+            }
+            updateGlobalTotalsOnly();
+        };
+
         function initialTableRender() {
             const body = document.getElementById('modalTableBody');
             
@@ -979,7 +1061,10 @@
                         <input type="checkbox" ${e.isOff ? 'checked' : ''} onchange="toggleDayOff(${i}, this.checked)" ${isLocked ? 'disabled' : ''} class="w-4 h-4 text-emerald-600 rounded cursor-pointer accent-emerald-600">
                     </td>
                     <td class="p-3 text-center">
-                        <button onclick="removeRowDirect(${i}, this)" ${isLocked ? 'disabled' : ''} class="text-red-400 hover:text-red-600 disabled:opacity-50"><i class="fas fa-trash"></i></button>
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="clearDayTime(${i})" ${disabledAttr} title="Clear Time" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-500 hover:text-amber-600 transition disabled:opacity-30"><i class="fas fa-eraser text-xs"></i></button>
+                            <button onclick="removeRowDirect(${i}, this)" ${isLocked ? 'disabled' : ''} title="Delete Row" class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-500 text-red-400 hover:text-white transition disabled:opacity-30"><i class="fas fa-trash text-xs"></i></button>
+                        </div>
                     </td>
                 </tr>`;
             }).join('');
@@ -1090,7 +1175,7 @@
             
             sheetsSnap.forEach(d => {
                 const data = d.data();
-                data.id = d.id; // embed id for logs
+                data.id = d.id;
                 allSheets.push(data);
                 if (data.isSalaryReport) salCount++;
                 else tsCount++;
@@ -1098,7 +1183,6 @@
             document.getElementById('statTotalSheets').innerText = tsCount;
             document.getElementById('statTotalSalaries').innerText = salCount;
 
-            // Generate Activity Log for Security Tab
             const logList = document.getElementById('adminActivityLog');
             allSheets.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
             
@@ -1127,7 +1211,6 @@
             }
         }
 
-        // NEW FEATURE: Fetch and Manage Approvals
         window.fetchApprovalsData = async () => {
             const table = document.getElementById('adminApprovalsTable');
             table.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 italic"><i class="fas fa-circle-notch fa-spin mr-2"></i> Loading data...</td></tr>`;
@@ -1176,8 +1259,6 @@
         window.updateSheetStatus = async (id, newStatus) => {
             try {
                 await updateDoc(doc(db, "timesheets", id), { status: newStatus });
-                // We don't reload the entire table to prevent UI jumping, visual state is handled by the select box.
-                // It will correct its color on next full refresh.
             } catch (e) {
                 uiDialog("Error", "Could not update status.", "error");
             }
@@ -1264,8 +1345,6 @@
             
             const days = [];
             snap.forEach(d => { days.push({ id: d.id, ...d.data() }); });
-            
-            // Sort by date visually for the admin panel
             days.sort((a, b) => new Date(a.date) - new Date(b.date));
 
             days.forEach(h => {
@@ -1283,31 +1362,27 @@
         
         window.deleteMercDay = (id) => uiDialog("Remove Holiday", "Remove this mercantile day?", "confirm", async () => { await deleteDoc(doc(db, "mercantile_days", id)); fetchMercDays(); });
 
-        // NEW FEATURE: Poya Day Generator explicitly integrated for the 2026 calendar.
         window.fetchSLHolidays = async (event) => {
             const btn = event.currentTarget;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Syncing...';
             const year = new Date().getFullYear();
 
             try {
-                // Guaranteed Master List for Sri Lanka 2026 including ALL Poya days
                 let holidays = [
-                    // Standard Fixed & Moving Main Holidays
                     { date: `${year}-01-14`, name: 'Tamil Thai Pongal Day' },
                     { date: `${year}-02-04`, name: 'National Day' },
-                    { date: `${year}-03-08`, name: 'Mahasivarathri Day' }, // Approx 2026
-                    { date: `${year}-04-03`, name: 'Good Friday' }, // Approx 2026
+                    { date: `${year}-03-08`, name: 'Mahasivarathri Day' },
+                    { date: `${year}-04-03`, name: 'Good Friday' },
                     { date: `${year}-04-13`, name: 'Sinhala and Tamil New Year Eve' },
                     { date: `${year}-04-14`, name: 'Sinhala and Tamil New Year Day' },
                     { date: `${year}-05-01`, name: 'May Day' },
                     { date: `${year}-12-25`, name: 'Christmas Day' },
                     
-                    // 2026 Full Moon Poya Days (Calculated/Projected for SL 2026)
                     { date: `${year}-01-02`, name: 'Duruthu Full Moon Poya' },
                     { date: `${year}-02-01`, name: 'Navam Full Moon Poya' },
                     { date: `${year}-03-03`, name: 'Madin Full Moon Poya' },
                     { date: `${year}-04-01`, name: 'Bak Full Moon Poya' },
-                    { date: `${year}-05-01`, name: 'Vesak Full Moon Poya' }, // Coincides with May Day 2026
+                    { date: `${year}-05-01`, name: 'Vesak Full Moon Poya' },
                     { date: `${year}-05-30`, name: 'Adhi Poson Full Moon Poya' }, 
                     { date: `${year}-06-29`, name: 'Poson Full Moon Poya' },
                     { date: `${year}-07-28`, name: 'Esala Full Moon Poya' },
@@ -1317,9 +1392,6 @@
                     { date: `${year}-11-23`, name: 'Ill Full Moon Poya' },
                     { date: `${year}-12-23`, name: 'Unduvap Full Moon Poya' }
                 ];
-                
-                // We skip API fetch to guarantee Poya days are loaded reliably from our projected SL master array
-                // If you re-enable API, it will often overwrite or miss local specific lunar holidays.
 
                 let added = 0;
                 for (const h of holidays) {
@@ -1373,20 +1445,13 @@
             }
         };
 
-        // NEW FEATURE: Emergency Lockdown Trigger
-        window.triggerLockdown = () => {
-            uiDialog("CRITICAL: Global Lockdown", "Are you absolutely sure you want to trigger an emergency lockdown? This will immediately revoke access to all standard operators.", "confirm", () => {
-                uiDialog("System Locked", "Emergency lockdown initiated. All user sessions have been terminated. Consult logs.", "error");
-            });
-        };
-
         // --- EXPORT AND PRINT MANAGER ---
         window.printDocument = () => { window.print(); };
-        window.exportPDF = () => { /* jsPDF logic */ };
-        window.exportExcel = () => { /* SheetJS logic */ };
-        window.printSalary = () => { /* print payslip logic */ };
-        window.exportSalaryPDF = () => { /* pdf payslip logic */ };
-        window.exportSalaryExcel = () => { /* excel payslip logic */ };
+        window.exportPDF = () => {};
+        window.exportExcel = () => {};
+        window.printSalary = () => {};
+        window.exportSalaryPDF = () => {};
+        window.exportSalaryExcel = () => {};
         
         window.logout = () => { sessionStorage.clear(); window.location.href = 'index.html'; };
     </script>
