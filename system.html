@@ -21,7 +21,6 @@
         .modal-animate { animation: modalIn 0.2s ease-out; }
         @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         
-        /* Admin Tabs Active State */
         .admin-tab-btn.active { background-color: #1e293b; color: #10b981; border-left: 4px solid #10b981; }
         
         @media print {
@@ -39,8 +38,40 @@
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate">
             <div id="dialogIcon" class="text-5xl mb-4"></div>
             <h3 id="dialogTitle" class="text-2xl font-black mb-2 text-slate-800"></h3>
-            <p id="dialogMessage" class="text-slate-500 mb-8 font-medium"></p>
+            <p id="dialogMessage" class="text-slate-500 mb-8 font-medium text-sm"></p>
             <div class="flex gap-3" id="dialogButtons"></div>
+        </div>
+    </div>
+
+    <!-- Admin Owner / Access Assignment Modal -->
+    <div id="ownerModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[500] p-4 no-print">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl modal-animate relative">
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-black text-slate-800">Assign Ownership / Access</h3>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select one or multiple users</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('ownerModal')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-lg"></i></button>
+            </div>
+
+            <div class="mb-4">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                    <input type="text" id="ownerSearchInput" oninput="filterOwnerUsers()" placeholder="Search operators..." class="w-full pl-9 pr-4 py-2 border rounded-xl text-xs font-medium outline-none focus:border-emerald-500 bg-slate-50">
+                </div>
+            </div>
+
+            <div id="ownerUsersList" class="max-h-60 overflow-y-auto custom-scroll space-y-2 mb-6 pr-1"></div>
+
+            <div class="flex gap-3">
+                <button onclick="closeModal('ownerModal')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold text-sm text-slate-600">Cancel</button>
+                <button onclick="saveNewOwners()" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-700 transition shadow-md">Apply Access</button>
+            </div>
         </div>
     </div>
 
@@ -82,20 +113,6 @@
                 </div>
             </div>
             <button onclick="closeModal('userProfileDetailModal')" class="w-full mt-6 bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-black transition text-sm">Close Inspector</button>
-        </div>
-    </div>
-
-    <!-- Password Update Modal -->
-    <div id="passwordPromptModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[550] p-4 no-print">
-        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate">
-            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-key text-2xl"></i></div>
-            <h3 class="text-xl font-black mb-2">Update Password</h3>
-            <p id="passPromptUser" class="text-slate-500 text-sm mb-6"></p>
-            <input type="text" id="passPromptInput" class="w-full border-2 rounded-xl p-3 focus:border-emerald-500 outline-none mb-6 text-center font-bold text-lg" placeholder="New Password">
-            <div class="flex gap-3">
-                <button onclick="closeModal('passwordPromptModal')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Cancel</button>
-                <button id="passSaveBtn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">Update</button>
-            </div>
         </div>
     </div>
 
@@ -151,18 +168,22 @@
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden modal-animate">
             <div class="p-6 bg-emerald-600 text-white flex justify-between items-center">
                 <h2 class="text-xl font-black"><i class="fas fa-file-invoice-dollar mr-2"></i> Salary Details</h2>
-                <div class="flex gap-3">
+                <div class="flex gap-2.5 items-center">
+                    <button id="adminSalOwnerBtn" onclick="openOwnerModal(currentViewingSalaryId)" title="Change Owner / Access" class="hidden hover:text-emerald-200 transition"><i class="fas fa-users-cog"></i></button>
                     <button onclick="printSalary()" title="Print Payslip" class="hover:text-emerald-200 transition"><i class="fas fa-print"></i></button>
                     <button onclick="exportSalaryPDF()" title="Download PDF" class="hover:text-emerald-200 transition"><i class="fas fa-file-pdf"></i></button>
                     <button onclick="exportSalaryExcel()" title="Download Excel" class="hover:text-emerald-200 transition"><i class="fas fa-file-excel"></i></button>
                     <button onclick="editSalary()" title="Edit Salary" class="hover:text-emerald-200 transition"><i class="fas fa-edit"></i></button>
-                    <button onclick="closeModal('viewSalaryModal')" class="ml-2 hover:text-red-300 transition"><i class="fas fa-times"></i></button>
+                    <button onclick="closeModal('viewSalaryModal')" class="ml-1 hover:text-red-300 transition"><i class="fas fa-times"></i></button>
                 </div>
             </div>
             <div class="p-6 space-y-4">
                 <div class="text-center mb-4">
                     <h3 id="viewSalName" class="text-2xl font-black text-slate-800"></h3>
-                    <span id="viewSalStatus" class="inline-block mt-2 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-slate-100 text-slate-600">Pending</span>
+                    <div class="flex justify-center items-center gap-2 mt-2">
+                        <span id="viewSalStatus" class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-slate-100 text-slate-600">Pending</span>
+                        <span id="viewSalOwners" class="text-[9px] font-bold text-slate-500 uppercase bg-slate-100 px-2.5 py-1 rounded-full"></span>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div><p class="text-[10px] font-black uppercase text-slate-400">Basic Salary</p><p id="viewSalBasic" class="font-bold border-b pb-1 text-slate-700"></p></div>
@@ -244,7 +265,10 @@
                     <h2 id="modalSheetTitle" class="text-xl font-black text-slate-800">Sheet Editor</h2>
                     <span id="modalSheetStatus" class="hidden text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Pending</span>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex items-center gap-2">
+                    <button id="adminSheetOwnerBtn" onclick="openOwnerModal(editingId)" class="hidden items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition">
+                        <i class="fas fa-user-cog text-emerald-600"></i> Change Owner
+                    </button>
                     <button onclick="printDocument()" title="Print" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-800 hover:bg-slate-800 hover:text-white transition"><i class="fas fa-print"></i></button>
                     <button onclick="exportPDF()" title="Download PDF" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-red-500 hover:bg-red-500 hover:text-white transition"><i class="fas fa-file-pdf"></i></button>
                     <button onclick="exportExcel()" title="Download Excel" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition"><i class="fas fa-file-excel"></i></button>
@@ -265,7 +289,7 @@
             </div>
 
             <div id="step2" class="hidden flex-col h-full overflow-hidden">
-                <div class="flex-1 overflow-x-auto overflow-y-auto bg-slate-50 custom-scroll p-4">
+                <div class="hidden md:block flex-1 overflow-x-auto overflow-y-auto bg-slate-50 custom-scroll p-4">
                     <table class="w-full text-left min-w-[950px] border-collapse bg-white rounded-xl shadow-sm overflow-hidden">
                         <thead class="bg-slate-100 text-[10px] font-black uppercase text-slate-400 sticky top-0 z-10">
                             <tr>
@@ -281,19 +305,21 @@
                     </table>
                 </div>
 
+                <div class="block md:hidden flex-1 overflow-y-auto custom-scroll p-3 space-y-3 bg-slate-50" id="modalMobileCardsBody"></div>
+
                 <div class="p-5 border-t flex flex-wrap justify-between items-center bg-white gap-4 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] relative z-20">
                     <div class="flex gap-4 md:gap-8">
                         <div>
                             <p class="text-[10px] font-black text-slate-400 uppercase">Grand Total</p>
-                            <span id="modalGrandTotal" class="text-3xl font-black text-emerald-600">00:00</span>
+                            <span id="modalGrandTotal" class="text-2xl md:text-3xl font-black text-emerald-600">00:00</span>
                         </div>
                         <div>
                             <p class="text-[10px] font-black text-slate-400 uppercase">Mercantile OT</p>
-                            <span id="modalMercTotal" class="text-3xl font-black text-orange-500">00:00</span>
+                            <span id="modalMercTotal" class="text-2xl md:text-3xl font-black text-orange-500">00:00</span>
                         </div>
                         <div>
                             <p class="text-[10px] font-black text-slate-400 uppercase">Normal Hrs</p>
-                            <span id="modalNormTotal" class="text-3xl font-black text-blue-500">00:00</span>
+                            <span id="modalNormTotal" class="text-2xl md:text-3xl font-black text-blue-500">00:00</span>
                         </div>
                     </div>
                     <button id="saveSheetBtn" onclick="finalSave()" class="w-full md:w-auto bg-emerald-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl hover:bg-emerald-700 transition">Save to Cloud</button>
@@ -316,6 +342,9 @@
                 <nav class="flex flex-col gap-2 flex-grow">
                     <button onclick="switchAdminTab('dashboard')" id="btnTabDashboard" class="admin-tab-btn active text-left p-3 rounded-xl hover:bg-slate-800 hover:text-white transition font-bold text-sm">
                         <i class="fas fa-chart-pie mr-2 w-5 text-center"></i> System Overview
+                    </button>
+                    <button onclick="switchAdminTab('import')" id="btnTabImport" class="admin-tab-btn text-left p-3 rounded-xl hover:bg-slate-800 hover:text-white transition font-bold text-sm text-emerald-400">
+                        <i class="fas fa-file-import mr-2 w-5 text-center"></i> Import Excel Data
                     </button>
                     <button onclick="switchAdminTab('approvals')" id="btnTabApprovals" class="admin-tab-btn text-left p-3 rounded-xl hover:bg-slate-800 hover:text-white transition font-bold text-sm">
                         <i class="fas fa-check-double mr-2 w-5 text-center"></i> Approvals Matrix
@@ -381,6 +410,105 @@
                     </div>
                 </div>
 
+                <!-- Tab: Excel Importer -->
+                <div id="tabContentImport" class="admin-content-pane hidden">
+                    <div class="flex justify-between items-center mb-6 border-b pb-4">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-800">Excel Timesheet Importer</h3>
+                            <p class="text-slate-400 text-xs mt-1">Import external timesheets with time data, auto/manual working hours & operator permission assignment.</p>
+                        </div>
+                        <button onclick="downloadSampleTemplate()" class="bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-600 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                            <i class="fas fa-download"></i> Download Excel Template
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Left Panel: File Upload & Config -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                                <label class="block text-xs font-black uppercase text-slate-400 mb-2">1. Select Excel Document (.xlsx, .xls, .csv)</label>
+                                <input type="file" id="importExcelInput" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelect(event)" class="w-full border-2 border-dashed border-slate-300 hover:border-emerald-500 transition rounded-xl p-4 bg-slate-50 text-sm font-bold text-slate-600 cursor-pointer">
+                                
+                                <div id="importFilePreviewCard" class="hidden mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 bg-emerald-600 text-white rounded-lg flex items-center justify-center text-lg"><i class="fas fa-file-excel"></i></div>
+                                            <div>
+                                                <p id="previewFileName" class="text-xs font-black text-emerald-900 truncate max-w-xs"></p>
+                                                <p id="previewRowCount" class="text-[10px] text-emerald-700 font-bold uppercase tracking-wider"></p>
+                                            </div>
+                                        </div>
+                                        <button onclick="clearImportedFile()" class="text-red-500 hover:text-red-700 text-xs font-bold px-2 py-1"><i class="fas fa-trash mr-1"></i> Clear</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                                <label class="block text-xs font-black uppercase text-slate-400">2. Sheet Configuration Details</label>
+                                
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Timesheet Name</label>
+                                    <input type="text" id="importSheetName" placeholder="Auto-populated from Excel..." class="w-full border p-3 rounded-xl text-sm font-bold bg-slate-50 focus:bg-white outline-none focus:border-emerald-500">
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Target Month</label>
+                                        <input type="text" id="importMonth" placeholder="e.g. August or 8" class="w-full border p-3 rounded-xl text-sm font-bold bg-slate-50 focus:bg-white outline-none focus:border-emerald-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Target Year</label>
+                                        <input type="number" id="importYear" placeholder="e.g. 2026" class="w-full border p-3 rounded-xl text-sm font-bold bg-slate-50 focus:bg-white outline-none focus:border-emerald-500">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                                <label class="block text-xs font-black uppercase text-slate-400">3. Working Hours Calculation Mode</label>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <label class="border-2 rounded-xl p-4 cursor-pointer hover:border-emerald-500 transition flex items-start gap-3 bg-slate-50 has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500">
+                                        <input type="radio" name="calcMode" value="excel" class="mt-1 accent-emerald-600">
+                                        <div>
+                                            <span class="block text-xs font-black text-slate-800">Use Excel Durations</span>
+                                            <span class="block text-[10px] text-slate-500 mt-1">Keeps working hours exactly as provided in the Excel file without recalculating.</span>
+                                        </div>
+                                    </label>
+
+                                    <label class="border-2 rounded-xl p-4 cursor-pointer hover:border-emerald-500 transition flex items-start gap-3 bg-slate-50 has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500">
+                                        <input type="radio" name="calcMode" value="auto" checked class="mt-1 accent-emerald-600">
+                                        <div>
+                                            <span class="block text-xs font-black text-slate-800">Auto-Generate Hours</span>
+                                            <span class="block text-[10px] text-slate-500 mt-1">System calculates exact hours from In/Out times & isolates Mercantile Overtime.</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Assign Users & Commit -->
+                        <div class="space-y-6">
+                            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col h-full">
+                                <div class="mb-4">
+                                    <h4 class="text-xs font-black uppercase text-slate-400">4. Assign Operator Access</h4>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">Select user(s) who will own and see this timesheet.</p>
+                                </div>
+
+                                <div class="relative mb-3">
+                                    <i class="fas fa-search absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                                    <input type="text" id="importUserSearch" oninput="renderImportUsersList()" placeholder="Filter users..." class="w-full pl-8 pr-3 py-1.5 border rounded-xl text-xs outline-none focus:border-emerald-500 bg-slate-50">
+                                </div>
+
+                                <div id="importUserCheckboxes" class="max-h-64 overflow-y-auto custom-scroll space-y-2 mb-6 pr-1 flex-1"></div>
+
+                                <button id="btnExecuteImport" onclick="executeExcelImport()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-xl shadow-lg shadow-emerald-100 transition uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+                                    <i class="fas fa-cloud-upload-alt"></i> Import & Publish
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Tab: Approvals Matrix -->
                 <div id="tabContentApprovals" class="admin-content-pane hidden flex-col h-full">
                     <div class="flex justify-between items-center mb-6 border-b pb-4">
@@ -424,8 +552,8 @@
                         <h4 class="font-bold text-sm text-slate-700 mb-4 uppercase tracking-wider text-[11px]">Register New Operator Account</h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                             <input type="text" id="newUsername" placeholder="Username" class="border p-3 rounded-xl font-medium text-sm outline-none focus:border-emerald-500">
-                            <input type="text" id="newPassword" placeholder="Password" class="border p-3 rounded-xl font-medium text-sm outline-none focus:border-emerald-500">
-                            <input type="email" id="newEmail" placeholder="Email (Optional)" class="border p-3 rounded-xl font-medium text-sm outline-none focus:border-emerald-500">
+                            <input type="password" id="newPassword" placeholder="Temporary Password" class="border p-3 rounded-xl font-medium text-sm outline-none focus:border-emerald-500">
+                            <input type="email" id="newEmail" placeholder="Email Address" class="border p-3 rounded-xl font-medium text-sm outline-none focus:border-emerald-500">
                             <select id="newRole" class="border p-3 rounded-xl text-sm font-bold text-slate-600 bg-slate-50 outline-none">
                                 <option value="user">Standard Operator</option>
                                 <option value="admin">System Administrator</option>
@@ -480,7 +608,7 @@
 
                         <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100 shadow-sm mt-6">
                             <h4 class="font-bold text-sm text-blue-900 mb-2 uppercase tracking-wider text-[11px]"><i class="fas fa-database mr-2"></i>System Backup & Export</h4>
-                            <p class="text-xs text-blue-700 mb-4 leading-relaxed">Download a complete master ledger of all timesheets and salary disbursements ever recorded across the entire system. Useful for local backup and external auditing.</p>
+                            <p class="text-xs text-blue-700 mb-4 leading-relaxed">Download a complete master ledger of all timesheets and salary disbursements ever recorded across the entire system.</p>
                             <button onclick="exportMasterDatabase()" class="bg-blue-600 text-white px-6 rounded-xl font-bold py-3 hover:bg-blue-700 transition shadow-md text-sm w-full sm:w-auto"><i class="fas fa-file-excel mr-2"></i> Download Master Data (Excel)</button>
                         </div>
                     </div>
@@ -502,7 +630,8 @@
 
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 flex-1 flex flex-col min-h-[300px] overflow-hidden">
                         <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                            <h4 class="font-bold text-sm text-slate-700"><i class="fas fa-history mr-2 text-slate-500"></i>Complete Activity Audit Trail</h4>
+                            <h4 class="font-bold text-sm text-slate-700"><i class="fas fa-history mr-2 text-slate-500"></i>Detailed Activity Audit Trail</h4>
+                            <button onclick="fetchAuditLogs()" class="text-xs font-bold text-slate-500 hover:text-slate-800"><i class="fas fa-sync-alt"></i></button>
                         </div>
                         <div class="p-4 overflow-y-auto custom-scroll flex-1">
                             <ul id="adminActivityLog" class="space-y-2 text-sm divide-y divide-slate-50">
@@ -542,7 +671,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, updateDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, updateDoc, deleteDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, sendPasswordResetEmail, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const app = initializeApp({
             apiKey: "AIzaSyBJHqn-KIG7ntbsc9OZik7hf5lhObx7Ecg",
@@ -550,15 +680,47 @@
             projectId: "hours-80ce8"
         });
         const db = getFirestore(app);
+        const auth = getAuth(app);
         const session = JSON.parse(sessionStorage.getItem('sessionUser'));
 
         if (!session) window.location.href = 'index.html';
         document.getElementById('displayUsername').innerText = session.username;
-        if (session.role === 'admin') document.getElementById('adminBtn').classList.remove('hidden');
+        if (session.role === 'admin') {
+            document.getElementById('adminBtn').classList.remove('hidden');
+            document.getElementById('adminSheetOwnerBtn').classList.replace('hidden', 'flex');
+            document.getElementById('adminSalOwnerBtn').classList.remove('hidden');
+        }
+
+        // --- SESSION TIMEOUT / INACTIVITY AUTO-LOGOUT (15 Mins) ---
+        let idleTimer = null;
+        const resetIdleTimer = () => {
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+                sessionStorage.clear();
+                window.location.replace('index.html?timeout=1');
+            }, 15 * 60 * 1000);
+        };
+        ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => window.addEventListener(evt, resetIdleTimer));
+        resetIdleTimer();
+
+        // --- AUDIT LOGGER HELPER ---
+        window.logAuditTrail = async (action, details) => {
+            try {
+                await addDoc(collection(db, "audit_logs"), {
+                    operator: session.username,
+                    role: session.role || 'user',
+                    action,
+                    details,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (e) {
+                console.warn("Audit log error:", e);
+            }
+        };
 
         let isSystemLocked = false;
 
-        // REAL-TIME LOCKDOWN LISTENER (<1s instantaneous session termination for non-admins)
+        // REAL-TIME LOCKDOWN LISTENER
         onSnapshot(doc(db, "system_status", "lockdown"), (docSnap) => {
             const data = docSnap.exists() ? docSnap.data() : { isLocked: false };
             isSystemLocked = !!data.isLocked;
@@ -606,6 +768,7 @@
                         updatedBy: session.username,
                         updatedAt: new Date().toISOString()
                     });
+                    await logAuditTrail("EMERGENCY_LOCKDOWN_DISABLED", "System unlocked by admin.");
                     uiDialog("System Unlocked", "Standard operator access restored.", "success");
                 });
             } else {
@@ -615,6 +778,7 @@
                         updatedBy: session.username,
                         updatedAt: new Date().toISOString()
                     });
+                    await logAuditTrail("EMERGENCY_LOCKDOWN_INITIATED", "Emergency lockdown triggered by admin.");
                     uiDialog("System Locked", "Emergency lockdown active. Standard operators have been logged out.", "error");
                 });
             }
@@ -625,6 +789,8 @@
         window.cachedSheets = {};
         window.mercantileDays = new Set();
         window.usersRegistryMap = {}; 
+        window.allUsersCache = [];
+        let targetOwnerSheetId = null;
         
         window.hoursChartInst = null;
         window.salChartInst = null;
@@ -635,6 +801,16 @@
             if (editingId) updateGlobalTotalsOnly();
         });
 
+        // Preload all users for Owner selection & Importer
+        onSnapshot(collection(db, "users"), (snap) => {
+            window.allUsersCache = [];
+            snap.forEach(d => {
+                const u = d.data();
+                window.allUsersCache.push({ id: d.id, username: u.username, email: u.email, role: u.role || 'user' });
+            });
+            renderImportUsersList();
+        });
+
         let currentViewingSalaryId = null;
 
         function getStatusColor(status) {
@@ -642,6 +818,435 @@
             if(status === 'Rejected') return 'bg-red-100 text-red-700';
             return 'bg-amber-100 text-amber-700';
         }
+
+        // --- ADMIN CHANGE OWNER MODAL LOGIC ---
+        window.openOwnerModal = (sheetId) => {
+            if (session.role !== 'admin') return;
+            if (!sheetId) return uiDialog("Error", "Please save this sheet first before assigning owners.", "error");
+
+            targetOwnerSheetId = sheetId;
+            const sheet = window.cachedSheets[sheetId];
+            const currentAccess = sheet && sheet.accessList ? sheet.accessList : [];
+
+            document.getElementById('ownerSearchInput').value = '';
+            renderOwnerUsersList(currentAccess);
+            document.getElementById('ownerModal').classList.remove('hidden');
+        };
+
+        function renderOwnerUsersList(selectedUsernames = []) {
+            const listEl = document.getElementById('ownerUsersList');
+            const search = (document.getElementById('ownerSearchInput').value || '').toLowerCase();
+
+            const filtered = window.allUsersCache.filter(u => 
+                u.username.toLowerCase().includes(search) || (u.email && u.email.toLowerCase().includes(search))
+            );
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-4">No users found.</p>`;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(u => {
+                const isChecked = selectedUsernames.includes(u.username);
+                return `
+                <label class="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" value="${u.username}" class="owner-user-checkbox w-4 h-4 text-emerald-600 rounded accent-emerald-600 cursor-pointer" ${isChecked ? 'checked' : ''}>
+                        <div>
+                            <span class="text-xs font-bold text-slate-800 block">${u.username} ${u.role === 'admin' ? '<span class="text-[9px] bg-slate-800 text-white px-1.5 py-0.5 rounded ml-1 uppercase">Admin</span>' : ''}</span>
+                            <span class="text-[10px] text-slate-400 font-medium">${u.email || 'No email registered'}</span>
+                        </div>
+                    </div>
+                </label>`;
+            }).join('');
+        }
+
+        window.filterOwnerUsers = () => {
+            const currentlyChecked = Array.from(document.querySelectorAll('.owner-user-checkbox:checked')).map(cb => cb.value);
+            renderOwnerUsersList(currentlyChecked);
+        };
+
+        window.saveNewOwners = async () => {
+            const selectedCheckboxes = document.querySelectorAll('.owner-user-checkbox:checked');
+            const newAccessList = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+            if (newAccessList.length === 0) {
+                return uiDialog("Selection Required", "Please select at least one user to assign ownership/access.", "error");
+            }
+
+            try {
+                await updateDoc(doc(db, "timesheets", targetOwnerSheetId), {
+                    accessList: newAccessList,
+                    updatedAt: new Date().toISOString()
+                });
+
+                await logAuditTrail("OWNER_UPDATED", `Updated access list for sheet "${targetOwnerSheetId}" to: ${newAccessList.join(', ')}`);
+                closeModal('ownerModal');
+                uiDialog("Owners Updated", `Ownership & access granted to: ${newAccessList.join(', ')}`, "success");
+            } catch (err) {
+                uiDialog("Update Failed", "Could not update record owners in cloud database.", "error");
+            }
+        };
+
+        // --- EXCEL TEMPLATE GENERATOR ---
+        window.downloadSampleTemplate = () => {
+            const templateAoA = [
+                ["Date In", "Time In", "Date Out", "Time Out", "Duration (Hrs)", "Day Off", "Remark"],
+                ["This is sample data first remove this data and include your data .", "", "", "", "", "", ""],
+                ["01/08/2026", "08:30", "01/08/2026", "17:30", "9.00", "No", "Regular shift"],
+                ["02/08/2026", "09:00", "02/08/2026", "18:00", "9.00", "No", "Shift support"],
+                ["03/08/2026", "0:00", "03/08/2026", "0:00", "0.00", "yes", "Sunday Off"],
+                ["04/08/2026", "08:30", "04/08/2026", "17:30", "9.00", "No", "Regular shift"]
+            ];
+
+            const ws = XLSX.utils.aoa_to_sheet(templateAoA);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+            XLSX.writeFile(wb, "PrasaTek_timesheet_pro_templete.xlsx");
+        };
+
+        // --- HELPER FUNCTION: GET FIELD REGARDLESS OF HEADER FORMAT/SPACES ---
+        function getRowVal(row, keys) {
+            if (!row) return '';
+            const rowKeys = Object.keys(row);
+            for (const k of keys) {
+                const cleanK = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+                for (const rk of rowKeys) {
+                    const cleanRk = rk.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    if (cleanRk === cleanK && row[rk] !== undefined && row[rk] !== null && row[rk] !== '') {
+                        return row[rk];
+                    }
+                }
+            }
+            return '';
+        }
+
+        // --- EXCEL IMPORTER CORE LOGIC ---
+        let importedParsedRows = [];
+
+        window.renderImportUsersList = () => {
+            const listEl = document.getElementById('importUserCheckboxes');
+            if (!listEl) return;
+            const search = (document.getElementById('importUserSearch') ? document.getElementById('importUserSearch').value : '').toLowerCase();
+
+            const filtered = window.allUsersCache.filter(u => 
+                u.username.toLowerCase().includes(search) || (u.email && u.email.toLowerCase().includes(search))
+            );
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-4">No users found.</p>`;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(u => `
+                <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition">
+                    <div class="flex items-center gap-2.5">
+                        <input type="checkbox" value="${u.username}" class="import-user-cb w-4 h-4 text-emerald-600 rounded accent-emerald-600 cursor-pointer">
+                        <div>
+                            <span class="text-xs font-bold text-slate-800 block">${u.username}</span>
+                            <span class="text-[9px] text-slate-400">${u.role || 'user'}</span>
+                        </div>
+                    </div>
+                </label>
+            `).join('');
+        };
+
+        function getMonthNumber(monthStr) {
+            if (!monthStr) return null;
+            const str = String(monthStr).trim().toLowerCase();
+            const months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+            const idx = months.findIndex(m => m.startsWith(str.slice(0, 3)));
+            if (idx !== -1) return idx + 1;
+            const num = parseInt(str);
+            if (!isNaN(num) && num >= 1 && num <= 12) return num;
+            return null;
+        }
+
+        window.handleExcelFileSelect = (evt) => {
+            const file = evt.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+                    if (!json || json.length === 0) {
+                        return uiDialog("Empty File", "The uploaded Excel file contains no readable rows.", "error");
+                    }
+
+                    // Filter out header notes or sample instruction rows
+                    const cleanedRows = json.filter(row => {
+                        const firstColVal = String(getRowVal(row, ["Date In", "Date", "StartDate", "dIn"])).toLowerCase();
+                        return !firstColVal.includes("sample data") && !firstColVal.includes("first remove");
+                    });
+
+                    importedParsedRows = cleanedRows;
+                    
+                    document.getElementById('importFilePreviewCard').classList.remove('hidden');
+                    document.getElementById('previewFileName').innerText = file.name;
+                    document.getElementById('previewRowCount').innerText = `${cleanedRows.length} Attendance Records Found`;
+
+                    const rawName = file.name.replace(/\.[^/.]+$/, "");
+                    document.getElementById('importSheetName').value = rawName;
+
+                    // Auto-fill Month and Year from first date row or filename
+                    for (const r of cleanedRows) {
+                        const rawD = getRowVal(r, ["Date In", "Date", "StartDate", "dIn"]);
+                        const d = normalizeDateString(rawD);
+                        if (d && d.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                            const p = d.split('-');
+                            document.getElementById('importYear').value = p[0];
+                            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                            document.getElementById('importMonth').value = months[parseInt(p[1]) - 1];
+                            break;
+                        }
+                    }
+                } catch (err) {
+                    uiDialog("Parse Error", "Failed to parse Excel file. Ensure valid structure.", "error");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
+        window.clearImportedFile = () => {
+            document.getElementById('importExcelInput').value = '';
+            document.getElementById('importFilePreviewCard').classList.add('hidden');
+            importedParsedRows = [];
+            document.getElementById('importSheetName').value = '';
+            document.getElementById('importMonth').value = '';
+            document.getElementById('importYear').value = '';
+        };
+
+        function normalizeTimeString(val) {
+            if (val === null || val === undefined || val === '') return '';
+            
+            // Excel decimal fraction for time (e.g. 0.3291666 -> 07:54)
+            if (typeof val === 'number') {
+                const num = val >= 1 ? val - Math.floor(val) : val;
+                const totalSeconds = Math.round(num * 86400);
+                const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+                return `${hrs}:${mins}`;
+            }
+
+            val = String(val).trim();
+            if (!val || val === '0:00' || val === '00:00' || val === '0') return '00:00';
+            
+            // Parse time string e.g. "7:54", "07:54", "17:02", "5:02 PM"
+            const ampmMatch = val.match(/^(\d{1,2}):(\d{1,2})(?::\d{1,2})?\s*(AM|PM|am|pm)?$/i);
+            if (ampmMatch) {
+                let h = parseInt(ampmMatch[1]);
+                const m = ampmMatch[2].padStart(2, '0');
+                const modifier = ampmMatch[3];
+                if (modifier) {
+                    if (modifier.toUpperCase() === 'PM' && h < 12) h += 12;
+                    if (modifier.toUpperCase() === 'AM' && h === 12) h = 0;
+                }
+                return `${String(h).padStart(2, '0')}:${m}`;
+            }
+            return '';
+        }
+
+        function normalizeDateString(val) {
+            if (val === null || val === undefined || val === '') return '';
+            
+            // Handle Excel serial date numbers (e.g. 46235 -> 2026-08-01)
+            if (typeof val === 'number' || (!isNaN(Number(val)) && Number(val) > 10000 && Number(val) < 80000)) {
+                const serial = Number(val);
+                const utcDays = Math.floor(serial - 25569);
+                const date = new Date(utcDays * 86400 * 1000);
+                const y = date.getUTCFullYear();
+                const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+                const d = String(date.getUTCDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+
+            val = String(val).trim();
+            if (val.match(/^\d{4}-\d{2}-\d{2}$/)) return val;
+            
+            // Matches DD/MM/YYYY or DD-MM-YYYY (e.g. 01/08/2026)
+            const dmyMatch = val.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+            if (dmyMatch) {
+                const d = dmyMatch[1].padStart(2, '0');
+                const m = dmyMatch[2].padStart(2, '0');
+                const y = dmyMatch[3];
+                return `${y}-${m}-${d}`;
+            }
+
+            // Matches YYYY/MM/DD
+            const ymdMatch = val.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+            if (ymdMatch) {
+                const y = ymdMatch[1];
+                const m = ymdMatch[2].padStart(2, '0');
+                const d = ymdMatch[3].padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+            
+            const parsed = new Date(val);
+            if (!isNaN(parsed.getTime())) {
+                const y = parsed.getFullYear();
+                const m = String(parsed.getMonth() + 1).padStart(2, '0');
+                const d = String(parsed.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+            return '';
+        }
+
+        function parseRowToEntry(row, fallbackDate, calcMode) {
+            const rawDIn = getRowVal(row, ["Date In", "Date", "StartDate", "dIn"]);
+            const dIn = normalizeDateString(rawDIn) || fallbackDate || "";
+            let tIn = normalizeTimeString(getRowVal(row, ["Time In", "Start Time", "In Time", "tIn", "In"]));
+            
+            const rawDOut = getRowVal(row, ["Date Out", "EndDate", "dOut", "DateOut"]) || rawDIn;
+            const dOut = normalizeDateString(rawDOut) || dIn || "";
+            let tOut = normalizeTimeString(getRowVal(row, ["Time Out", "End Time", "Out Time", "tOut", "Out"]));
+            
+            const remark = String(getRowVal(row, ["Remark", "Remarks", "Note", "Notes", "remark"])).trim();
+            const rawDayOff = String(getRowVal(row, ["Day Off", "DayOff", "Off", "isOff"])).trim().toLowerCase();
+            
+            const isZeroTime = (tIn === '00:00' && (tOut === '00:00' || !tOut));
+            const isOff = rawDayOff === 'yes' || rawDayOff === 'true' || rawDayOff === '1' || remark.toLowerCase() === 'day off' || (isZeroTime && rawDayOff === 'yes');
+
+            if (isOff) {
+                tIn = '';
+                tOut = '';
+            }
+
+            let duration = "0.00";
+
+            if (calcMode === 'excel' && getRowVal(row, ["Duration (Hrs)", "Duration", "Hours", "Total Hours"])) {
+                duration = String(getRowVal(row, ["Duration (Hrs)", "Duration", "Hours", "Total Hours"]));
+            } else {
+                if (dIn && tIn && dOut && tOut && !isOff) {
+                    const diff = new Date(`${dOut}T${tOut}`) - new Date(`${dIn}T${tIn}`);
+                    if (diff >= 0) {
+                        const tm = Math.floor(diff / 60000);
+                        duration = `${Math.floor(tm / 60)}.${String(tm % 60).padStart(2, '0')}`;
+                    }
+                }
+            }
+
+            return { 
+                dIn, 
+                tIn, 
+                dOut, 
+                tOut, 
+                duration, 
+                remark: isOff ? (remark || 'Day Off') : remark, 
+                isOff 
+            };
+        }
+
+        window.executeExcelImport = async () => {
+            if (!importedParsedRows || importedParsedRows.length === 0) {
+                return uiDialog("Missing File", "Please upload an Excel document before importing.", "error");
+            }
+
+            const sheetName = document.getElementById('importSheetName').value.trim();
+            if (!sheetName) return uiDialog("Missing Name", "Please enter a Timesheet Name.", "error");
+
+            const selectedUsers = Array.from(document.querySelectorAll('.import-user-cb:checked')).map(cb => cb.value);
+            if (selectedUsers.length === 0) {
+                return uiDialog("No Operator Assigned", "Please select at least one operator/user to give access to this timesheet.", "error");
+            }
+
+            const calcMode = document.querySelector('input[name="calcMode"]:checked').value;
+            const btn = document.getElementById('btnExecuteImport');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing & Generating Full Month...';
+            btn.disabled = true;
+
+            try {
+                let targetYear = parseInt(document.getElementById('importYear').value.trim());
+                let targetMonth = getMonthNumber(document.getElementById('importMonth').value.trim());
+
+                // Auto-detect year/month from row contents
+                for (const r of importedParsedRows) {
+                    const rawDate = getRowVal(r, ["Date In", "Date", "StartDate", "dIn"]);
+                    const d = normalizeDateString(rawDate);
+                    if (d && d.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                        const p = d.split('-');
+                        if (!targetYear) targetYear = parseInt(p[0]);
+                        if (!targetMonth) targetMonth = parseInt(p[1]);
+                        break;
+                    }
+                }
+
+                // Map rows by exact ISO date string (YYYY-MM-DD)
+                const importedMap = {};
+                importedParsedRows.forEach(row => {
+                    const rawDate = getRowVal(row, ["Date In", "Date", "StartDate", "dIn"]);
+                    const dIn = normalizeDateString(rawDate);
+                    if (dIn) {
+                        if (!importedMap[dIn]) importedMap[dIn] = [];
+                        importedMap[dIn].push(row);
+                    }
+                });
+
+                let structuredEntries = [];
+
+                // Pre-generate full month calendar days starting precisely from Day 1 to Month End
+                if (targetYear && targetMonth) {
+                    const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
+                    const mStr = String(targetMonth).padStart(2, '0');
+
+                    for (let i = 1; i <= daysInMonth; i++) {
+                        const dStr = `${targetYear}-${mStr}-${String(i).padStart(2, '0')}`;
+                        if (importedMap[dStr] && importedMap[dStr].length > 0) {
+                            importedMap[dStr].forEach(row => {
+                                structuredEntries.push(parseRowToEntry(row, dStr, calcMode));
+                            });
+                        } else {
+                            structuredEntries.push({
+                                dIn: dStr,
+                                tIn: '',
+                                dOut: dStr,
+                                tOut: '',
+                                duration: '0.00',
+                                remark: '',
+                                isOff: false
+                            });
+                        }
+                    }
+                } else {
+                    structuredEntries = importedParsedRows.map(row => parseRowToEntry(row, null, calcMode));
+                }
+
+                const totals = calculateTotals(structuredEntries);
+
+                const payload = {
+                    name: sheetName,
+                    entries: structuredEntries,
+                    total: totals.totalStr,
+                    mercTotal: totals.mercStr,
+                    normTotal: totals.normStr,
+                    accessList: selectedUsers,
+                    status: 'Pending',
+                    month: document.getElementById('importMonth').value.trim() || (targetMonth ? String(targetMonth) : ''),
+                    year: document.getElementById('importYear').value.trim() || (targetYear ? String(targetYear) : ''),
+                    importSource: 'Excel Spreadsheet',
+                    importedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                await addDoc(collection(db, "timesheets"), payload);
+                await logAuditTrail("EXCEL_TIMESHEET_IMPORTED", `Imported timesheet "${sheetName}" (${structuredEntries.length} full-month days) with access granted to [${selectedUsers.join(', ')}]`);
+
+                clearImportedFile();
+                closeModal('adminModal');
+                uiDialog("Import Successful", `Timesheet "${sheetName}" populated with all ${structuredEntries.length} days of the month and assigned successfully.`, "success");
+            } catch (err) {
+                console.error(err);
+                uiDialog("Import Failed", "Failed to write timesheet to cloud database.", "error");
+            } finally {
+                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Import & Publish';
+                btn.disabled = false;
+            }
+        };
 
         // --- CHART & DASHBOARD ANALYTICS ENGINE ---
         function parseTimeToDecimal(timeStr) {
@@ -789,9 +1394,11 @@
 
             if (editingId) {
                 await updateDoc(doc(db, "timesheets", editingId), payload);
+                await logAuditTrail("SALARY_UPDATED", `Updated salary report "${reportName}"`);
             } else {
                 payload.accessList = [session.username];
                 await addDoc(collection(db, "timesheets"), payload);
+                await logAuditTrail("SALARY_CREATED", `Saved new salary calculation "${reportName}"`);
             }
 
             closeModal('salaryModal');
@@ -807,7 +1414,10 @@
             
             const statusBadge = document.getElementById('viewSalStatus');
             statusBadge.innerText = s.status || 'Pending';
-            statusBadge.className = `inline-block mt-2 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${getStatusColor(s.status || 'Pending')}`;
+            statusBadge.className = `text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${getStatusColor(s.status || 'Pending')}`;
+
+            const ownersBadge = document.getElementById('viewSalOwners');
+            ownersBadge.innerText = s.accessList ? `Access: ${s.accessList.join(', ')}` : 'Access: -';
 
             if (s.breakdown) {
                 document.getElementById('viewSalBasic').innerText = s.breakdown.basic || '0.00';
@@ -838,7 +1448,46 @@
             document.getElementById('salaryModal').classList.remove('hidden');
         };
 
-        window.openInfoModal = (type) => { closeModal('infoModal'); }; 
+        // --- INFO & POLICY MODALS ---
+        window.openInfoModal = (type) => {
+            const titleEl = document.getElementById('infoTitle');
+            const contentEl = document.getElementById('infoContent');
+            
+            if (type === 'privacy') {
+                titleEl.innerHTML = '<i class="fas fa-shield-alt text-emerald-500 mr-3"></i>Privacy Policy';
+                contentEl.innerHTML = `
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600">
+                        <p class="font-bold text-slate-800">Information Collection & Use</p>
+                        <p>TimeSheet Pro respects your privacy. All attendance, timesheet, and salary records stored in the cloud are encrypted and accessible only by authorized personnel and operators within your organization.</p>
+                        <p class="font-bold text-slate-800">Cloud Storage Security</p>
+                        <p>Our infrastructure utilizes Google Firebase Firestore for secure, encrypted synchronization across authorized endpoints.</p>
+                    </div>`;
+            } else if (type === 'terms') {
+                titleEl.innerHTML = '<i class="fas fa-file-contract text-emerald-500 mr-3"></i>Terms of Service';
+                contentEl.innerHTML = `
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600">
+                        <p class="font-bold text-slate-800">Proprietary Software License</p>
+                        <p>TimeSheet Pro is proprietary property of PrasaTek System Solutions. Any unauthorized duplication, redistribution, reverse engineering, or extraction of source code is strictly prohibited.</p>
+                        <p class="font-bold text-slate-800">Operational Integrity</p>
+                        <p>All recorded operations and administrator activities are subject to immutable audit tracking for compliance and security.</p>
+                    </div>`;
+            } else if (type === 'contact') {
+                titleEl.innerHTML = '<i class="fas fa-headset text-emerald-500 mr-3"></i>Contact Support';
+                contentEl.innerHTML = `
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 text-center">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl mb-1">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <h4 class="font-black text-slate-800 text-base">PrasaTek System Solutions</h4>
+                        <div class="space-y-2 text-xs pt-2">
+                            <p><i class="fas fa-envelope text-emerald-600 mr-2"></i> <a href="mailto:info@prasatek.lk" class="font-bold text-slate-700 hover:text-emerald-600 transition">info@prasatek.lk</a></p>
+                            <p><i class="fas fa-phone-alt text-emerald-600 mr-2"></i> <a href="tel:0719323239" class="font-bold text-slate-700 hover:text-emerald-600 transition">0719323239</a></p>
+                            <p><i class="fas fa-globe text-emerald-600 mr-2"></i> <a href="http://www.prasatek.lk" target="_blank" class="font-bold text-emerald-600 hover:underline">www.prasatek.lk</a></p>
+                        </div>
+                    </div>`;
+            }
+            document.getElementById('infoModal').classList.remove('hidden');
+        };
 
         // --- ULTRA-FAST CALCULATIONS ENGINE ---
         window.isMercantile = (dateStr) => {
@@ -904,10 +1553,15 @@
 
                 list.innerHTML += `
                 <div class="bg-white p-6 rounded-3xl border ${isSal ? 'bg-emerald-50/10' : ''} ${borderCol} hover:shadow-xl transition-all cursor-pointer relative group" onclick="${isSal ? `openViewSalaryModal('${d.id}')` : `openSheet('${d.id}')`}">
-                    ${session.role === 'admin' ? `
-                    <div class="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                        <button onclick="event.stopPropagation(); deleteSheet('${d.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition"><i class="fas fa-trash text-[10px]"></i></button>
-                    </div>` : ''}
+                    
+                    <div class="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition items-center">
+                        <button onclick="event.stopPropagation(); quickExportPDF('${d.id}')" title="Quick PDF Download" class="w-7 h-7 rounded-full bg-slate-100 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center text-xs"><i class="fas fa-file-pdf"></i></button>
+                        <button onclick="event.stopPropagation(); quickExportExcel('${d.id}')" title="Quick Excel Download" class="w-7 h-7 rounded-full bg-slate-100 text-emerald-600 hover:bg-emerald-600 hover:text-white transition flex items-center justify-center text-xs"><i class="fas fa-file-excel"></i></button>
+                        ${session.role === 'admin' ? `
+                        <button onclick="event.stopPropagation(); openOwnerModal('${d.id}')" title="Assign Ownership/Access" class="w-7 h-7 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-800 hover:text-white transition flex items-center justify-center text-xs"><i class="fas fa-users-cog"></i></button>
+                        <button onclick="event.stopPropagation(); deleteSheet('${d.id}')" title="Delete" class="w-7 h-7 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center text-xs"><i class="fas fa-trash"></i></button>` : ''}
+                    </div>
+
                     <div class="flex justify-between items-start mb-4">
                         <h4 class="font-bold text-lg text-slate-800 truncate pr-4">
                             ${isSal ? '<i class="fas fa-file-invoice-dollar text-emerald-500 mr-2"></i>' : ''}${s.name}
@@ -916,7 +1570,7 @@
                     <div class="flex justify-between items-end">
                         <span class="text-3xl font-black ${isSal ? 'text-emerald-700 text-xl' : 'text-emerald-600'}">${s.total || '00:00'}</span>
                         <div class="text-right">
-                            <span class="block text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">${s.accessList ? s.accessList[0] : ''}</span>
+                            <span class="block text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 truncate max-w-[120px]">${s.accessList ? s.accessList.join(', ') : ''}</span>
                             <span class="inline-block text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${getStatusColor(statusStr)}">${statusStr}</span>
                         </div>
                     </div>
@@ -925,6 +1579,114 @@
             
             updateAnalyticsDashboard(allDashboardData);
         });
+
+        // --- DIRECT QUICK EXPORT FUNCTIONS ---
+        window.quickExportPDF = (id) => {
+            const s = window.cachedSheets[id];
+            if (!s) return;
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF();
+
+            if (s.isSalaryReport) {
+                docPdf.setFontSize(18);
+                docPdf.text("SALARY PAYSLIP", 14, 20);
+                docPdf.setFontSize(10);
+                docPdf.text(`PrasaTek System Solutions | ${new Date().toLocaleDateString()}`, 14, 28);
+                docPdf.text(`Report: ${s.name} | Operators: ${s.accessList ? s.accessList.join(', ') : '-'}`, 14, 34);
+
+                const b = s.breakdown || {};
+                const tableData = [
+                    ['Basic Salary', `Rs. ${parseFloat(b.basic || 0).toFixed(2)}`],
+                    ['Allowances', `Rs. ${parseFloat(b.allowance || 0).toFixed(2)}`],
+                    ['Normal Overtime Pay', `Rs. ${parseFloat(b.normalPay || 0).toFixed(2)}`],
+                    ['Mercantile Overtime Pay', `Rs. ${parseFloat(b.mercPay || 0).toFixed(2)}`],
+                    ['EPF Employee (8%) Deduction', `- Rs. ${parseFloat(b.epf || 0).toFixed(2)}`],
+                    ['Other Deductions', `- Rs. ${parseFloat(b.deduction || 0).toFixed(2)}`],
+                    ['Net Disbursed Salary', `${s.total}`]
+                ];
+
+                docPdf.autoTable({
+                    startY: 42,
+                    head: [['Earnings / Deductions Item', 'Amount (LKR)']],
+                    body: tableData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [5, 150, 105] }
+                });
+
+                docPdf.save(`${s.name.replace(/\s+/g, '_')}_Payslip.pdf`);
+            } else {
+                docPdf.setFontSize(16);
+                docPdf.text(s.name, 14, 18);
+                docPdf.setFontSize(10);
+                docPdf.text(`Operators: ${s.accessList ? s.accessList.join(', ') : '-'} | Date: ${new Date().toLocaleDateString()}`, 14, 25);
+                
+                const entries = s.entries || [];
+                const rows = entries.map(e => [
+                    `${e.dIn || '-'} ${e.tIn || ''}`,
+                    `${e.dOut || '-'} ${e.tOut || ''}`,
+                    e.duration || '0.00',
+                    e.isOff ? 'Day Off' : (e.remark || '-')
+                ]);
+
+                docPdf.autoTable({
+                    startY: 30,
+                    head: [['Start Point', 'End Point', 'Hours', 'Remark']],
+                    body: rows,
+                    theme: 'striped',
+                    headStyles: { fillColor: [16, 185, 129] }
+                });
+
+                const finalY = docPdf.lastAutoTable.finalY + 10;
+                docPdf.text(`Normal Hours: ${s.normTotal || '00:00'}`, 14, finalY);
+                docPdf.text(`Mercantile OT: ${s.mercTotal || '00:00'}`, 70, finalY);
+                docPdf.text(`Grand Total: ${s.total || '00:00'}`, 140, finalY);
+
+                docPdf.save(`${s.name.replace(/\s+/g, '_')}.pdf`);
+            }
+        };
+
+        window.quickExportExcel = (id) => {
+            const s = window.cachedSheets[id];
+            if (!s) return;
+
+            if (s.isSalaryReport) {
+                const b = s.breakdown || {};
+                const data = [{
+                    "Report Name": s.name,
+                    "Operators": s.accessList ? s.accessList.join(', ') : "-",
+                    "Basic (LKR)": b.basic || 0,
+                    "Allowance (LKR)": b.allowance || 0,
+                    "Normal OT Hrs": b.normalOT || 0,
+                    "Merc OT Hrs": b.mercOT || 0,
+                    "Normal OT Pay": b.normalPay || 0,
+                    "Merc OT Pay": b.mercPay || 0,
+                    "EPF (8%)": b.epf || 0,
+                    "Deductions": b.deduction || 0,
+                    "Net Salary": s.total
+                }];
+
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Payslip");
+                XLSX.writeFile(wb, `${s.name.replace(/\s+/g, '_')}_Payslip.xlsx`);
+            } else {
+                const entries = s.entries || [];
+                const excelRows = entries.map(e => ({
+                    "Date In": e.dIn || "",
+                    "Time In": e.tIn || "",
+                    "Date Out": e.dOut || "",
+                    "Time Out": e.tOut || "",
+                    "Duration (Hrs)": e.duration || "0.00",
+                    "Day Off": e.isOff ? "Yes" : "No",
+                    "Remark": e.remark || ""
+                }));
+
+                const ws = XLSX.utils.json_to_sheet(excelRows);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Timesheet");
+                XLSX.writeFile(wb, `${s.name.replace(/\s+/g, '_')}.xlsx`);
+            }
+        };
 
         // --- SHEET VIEWS AND ACTIONS MANAGER ---
         window.openSheet = (id) => {
@@ -1007,29 +1769,23 @@
             initialTableRender(); 
         };
 
-        // CLEAR TIME FOR INDIVIDUAL DAYS
         window.clearDayTime = (i) => {
             const e = currentEntries[i];
             e.tIn = '';
             e.tOut = '';
             e.duration = '0.00';
-            
-            const rowNode = document.querySelector(`#modalTableBody tr[data-index="${i}"]`);
-            if (rowNode) {
-                const inputs = rowNode.querySelectorAll('input[type="time"]');
-                inputs.forEach(inp => inp.value = '');
-                rowNode.querySelector('.duration-cell').innerText = '0.00';
-            }
-            updateGlobalTotalsOnly();
+            initialTableRender();
         };
 
         function initialTableRender() {
-            const body = document.getElementById('modalTableBody');
+            const desktopBody = document.getElementById('modalTableBody');
+            const mobileBody = document.getElementById('modalMobileCardsBody');
             
             const s = editingId ? window.cachedSheets[editingId] : null;
             const isLocked = s && s.status === 'Approved' && session.role !== 'admin';
+            const disabledAttr = isLocked ? 'disabled' : '';
 
-            body.innerHTML = currentEntries.map((e, i) => {
+            desktopBody.innerHTML = currentEntries.map((e, i) => {
                 const startMerc = window.isMercantile(e.dIn);
                 const endMerc = window.isMercantile(e.dOut);
                 
@@ -1037,37 +1793,69 @@
                 if (e.isOff) rowClass = 'bg-slate-100 opacity-75'; 
                 else if (startMerc || endMerc) rowClass = 'bg-orange-50/40 hover:bg-orange-50';
 
-                const disabledAttr = (e.isOff || isLocked) ? 'disabled' : '';
+                const rowDisabled = (e.isOff || isLocked) ? 'disabled' : '';
 
                 return `
                 <tr class="${rowClass}" data-index="${i}">
                     <td class="p-3">
                         <div class="flex gap-2">
-                            <input type="date" value="${e.dIn || ''}" oninput="fastInlineUpdate(${i}, 'dIn', this.value)" ${disabledAttr} class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-32 disabled:bg-slate-100">
-                            <input type="time" value="${e.tIn || ''}" oninput="fastInlineUpdate(${i}, 'tIn', this.value)" ${disabledAttr} class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-24 disabled:bg-slate-100">
+                            <input type="date" value="${e.dIn || ''}" oninput="fastInlineUpdate(${i}, 'dIn', this.value)" ${rowDisabled} class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-32 disabled:bg-slate-100">
+                            <input type="time" value="${e.tIn || ''}" oninput="fastInlineUpdate(${i}, 'tIn', this.value)" ${rowDisabled} class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-24 disabled:bg-slate-100">
                         </div>
                     </td>
                     <td class="p-3">
                         <div class="flex gap-2">
-                            <input type="date" value="${e.dOut || ''}" oninput="fastInlineUpdate(${i}, 'dOut', this.value)" ${disabledAttr} class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-32 disabled:bg-slate-100">
-                            <input type="time" value="${e.tOut || ''}" oninput="fastInlineUpdate(${i}, 'tOut', this.value)" ${disabledAttr} class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-24 disabled:bg-slate-100">
+                            <input type="date" value="${e.dOut || ''}" oninput="fastInlineUpdate(${i}, 'dOut', this.value)" ${rowDisabled} class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-32 disabled:bg-slate-100">
+                            <input type="time" value="${e.tOut || ''}" oninput="fastInlineUpdate(${i}, 'tOut', this.value)" ${rowDisabled} class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold bg-white w-24 disabled:bg-slate-100">
                         </div>
                     </td>
                     <td class="p-3 text-right font-black text-sm pt-4 duration-cell ${startMerc || endMerc ? 'text-orange-700' : 'text-slate-800'}">${e.duration || '0.00'}</td>
                     <td class="p-3">
-                        <input type="text" value="${e.remark || ''}" placeholder="Type remark..." oninput="fastInlineUpdate(${i}, 'remark', this.value)" ${disabledAttr} class="border border-slate-200 rounded-lg px-3 py-1 text-xs w-full bg-white disabled:bg-slate-100">
+                        <input type="text" value="${e.remark || ''}" placeholder="Type remark..." oninput="fastInlineUpdate(${i}, 'remark', this.value)" ${rowDisabled} class="border border-slate-200 rounded-lg px-3 py-1 text-xs w-full bg-white disabled:bg-slate-100">
                     </td>
                     <td class="p-3 text-center">
-                        <input type="checkbox" ${e.isOff ? 'checked' : ''} onchange="toggleDayOff(${i}, this.checked)" ${isLocked ? 'disabled' : ''} class="w-4 h-4 text-emerald-600 rounded cursor-pointer accent-emerald-600">
+                        <input type="checkbox" ${e.isOff ? 'checked' : ''} onchange="toggleDayOff(${i}, this.checked)" ${disabledAttr} class="w-4 h-4 text-emerald-600 rounded cursor-pointer accent-emerald-600">
                     </td>
                     <td class="p-3 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <button onclick="clearDayTime(${i})" ${disabledAttr} title="Clear Time" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-500 hover:text-amber-600 transition disabled:opacity-30"><i class="fas fa-eraser text-xs"></i></button>
-                            <button onclick="removeRowDirect(${i}, this)" ${isLocked ? 'disabled' : ''} title="Delete Row" class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-500 text-red-400 hover:text-white transition disabled:opacity-30"><i class="fas fa-trash text-xs"></i></button>
+                            <button onclick="clearDayTime(${i})" ${rowDisabled} title="Clear Time" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-500 hover:text-amber-600 transition disabled:opacity-30"><i class="fas fa-eraser text-xs"></i></button>
+                            <button onclick="removeRowDirect(${i}, this)" ${disabledAttr} title="Delete Row" class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-500 text-red-400 hover:text-white transition disabled:opacity-30"><i class="fas fa-trash text-xs"></i></button>
                         </div>
                     </td>
                 </tr>`;
             }).join('');
+
+            mobileBody.innerHTML = currentEntries.map((e, i) => {
+                const isMerc = window.isMercantile(e.dIn);
+                return `
+                <div class="bg-white p-4 rounded-2xl border ${e.isOff ? 'bg-slate-100' : isMerc ? 'border-orange-200 bg-orange-50/20' : 'border-slate-200'} shadow-sm space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <span class="text-xs font-black ${isMerc ? 'text-orange-600' : 'text-slate-700'}">${e.dIn || `Day #${i+1}`} ${isMerc ? '(Mercantile)' : ''}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black text-emerald-600">${e.duration || '0.00'} hrs</span>
+                            <button onclick="clearDayTime(${i})" title="Clear Time" class="text-amber-500 text-xs px-2 py-1 bg-amber-50 rounded-lg"><i class="fas fa-eraser"></i></button>
+                            <button onclick="removeRowDirect(${i}, this)" class="text-red-400 text-xs px-2 py-1 bg-red-50 rounded-lg"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 block uppercase">In Time</label>
+                            <input type="time" value="${e.tIn || ''}" oninput="fastInlineUpdate(${i}, 'tIn', this.value)" class="w-full border rounded-lg p-2 font-bold mt-1 bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 block uppercase">Out Time</label>
+                            <input type="time" value="${e.tOut || ''}" oninput="fastInlineUpdate(${i}, 'tOut', this.value)" class="w-full border rounded-lg p-2 font-bold mt-1 bg-slate-50">
+                        </div>
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        <input type="text" value="${e.remark || ''}" placeholder="Remark" oninput="fastInlineUpdate(${i}, 'remark', this.value)" class="flex-1 border rounded-lg p-2 text-xs">
+                        <label class="flex items-center gap-1 text-[10px] font-bold text-slate-600">
+                            <input type="checkbox" ${e.isOff ? 'checked' : ''} onchange="toggleDayOff(${i}, this.checked)" class="accent-emerald-600"> Off
+                        </label>
+                    </div>
+                </div>`;
+            }).join('');
+
             updateGlobalTotalsOnly();
         }
 
@@ -1097,9 +1885,7 @@
 
         window.removeRowDirect = (i, btnNode) => {
             currentEntries.splice(i, 1);
-            const tr = btnNode.closest('tr');
-            if (tr) tr.remove();
-            updateGlobalTotalsOnly();
+            initialTableRender();
         };
 
         window.finalSave = async () => {
@@ -1110,9 +1896,10 @@
                 }
             }
 
+            const sheetName = document.getElementById('sheetNameInput').value;
             const totals = calculateTotals(currentEntries);
             const payload = {
-                name: document.getElementById('sheetNameInput').value,
+                name: sheetName,
                 entries: currentEntries,
                 total: totals.totalStr,
                 mercTotal: totals.mercStr,
@@ -1121,19 +1908,25 @@
                 updatedAt: new Date().toISOString()
             };
             
-            if (editingId) await updateDoc(doc(db, "timesheets", editingId), payload);
-            else {
+            if (editingId) {
+                await updateDoc(doc(db, "timesheets", editingId), payload);
+                await logAuditTrail("TIMESHEET_UPDATED", `Updated timesheet "${sheetName}"`);
+            } else {
                 payload.accessList = [session.username];
                 await addDoc(collection(db, "timesheets"), payload);
+                await logAuditTrail("TIMESHEET_CREATED", `Created timesheet "${sheetName}"`);
             }
             closeModal('modalOverlay');
             uiDialog("Saved", "Cloud data updated successfully.", "success");
         };
 
-        window.deleteSheet = (id) => uiDialog("Delete", "Delete this item permanently?", "confirm", async () => await deleteDoc(doc(db, "timesheets", id)));
+        window.deleteSheet = (id) => uiDialog("Delete", "Delete this item permanently?", "confirm", async () => {
+            const s = window.cachedSheets[id];
+            await deleteDoc(doc(db, "timesheets", id));
+            await logAuditTrail("RECORD_DELETED", `Deleted record "${s ? s.name : id}"`);
+        });
 
-        // --- ADMINISTRATIVE SECURITY DIRECTORY SYSTEM ---
-        
+        // --- ADMINISTRATIVE DIRECTORY & AUDIT LOGS ---
         window.switchAdminTab = (tabId) => {
             document.querySelectorAll('.admin-content-pane').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.admin-tab-btn').forEach(el => el.classList.remove('active'));
@@ -1141,15 +1934,18 @@
             const contentEl = document.getElementById(`tabContent${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`);
             if(contentEl) contentEl.classList.remove('hidden');
             
-            if(tabId === 'users' && contentEl) contentEl.classList.add('flex');
-            else if (tabId === 'approvals' && contentEl) contentEl.classList.add('flex');
-            else if (tabId === 'security' && contentEl) contentEl.classList.add('flex');
-            else if(contentEl) contentEl.classList.remove('flex');
+            if(tabId === 'users' || tabId === 'approvals' || tabId === 'security') {
+                if (contentEl) contentEl.classList.add('flex');
+            } else if(contentEl) {
+                contentEl.classList.remove('flex');
+            }
             
             const btnEl = document.getElementById(`btnTab${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`);
             if(btnEl) btnEl.classList.add('active');
 
+            if(tabId === 'import') renderImportUsersList();
             if(tabId === 'approvals') fetchApprovalsData();
+            if(tabId === 'security') fetchAuditLogs();
         };
 
         window.openAdminModal = async () => {
@@ -1161,7 +1957,7 @@
                 await fetchMercDays();
             } catch (error) {
                 console.error("Admin Load Error", error);
-                uiDialog("Admin Panel Error", "Could not fully load system data. Check console.", "error");
+                uiDialog("Admin Panel Error", "Could not fully load system data.", "error");
             }
         };
 
@@ -1171,45 +1967,44 @@
 
             const sheetsSnap = await getDocs(collection(db, "timesheets"));
             let tsCount = 0; let salCount = 0;
-            const allSheets = [];
-            
             sheetsSnap.forEach(d => {
-                const data = d.data();
-                data.id = d.id;
-                allSheets.push(data);
-                if (data.isSalaryReport) salCount++;
+                if (d.data().isSalaryReport) salCount++;
                 else tsCount++;
             });
             document.getElementById('statTotalSheets').innerText = tsCount;
             document.getElementById('statTotalSalaries').innerText = salCount;
+        }
 
+        window.fetchAuditLogs = async () => {
             const logList = document.getElementById('adminActivityLog');
-            allSheets.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+            logList.innerHTML = `<li class="text-slate-400 italic text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i> Loading audit trail...</li>`;
             
-            if (allSheets.length === 0) {
-                logList.innerHTML = `<li class="text-slate-400 italic text-center py-4">No recent activity found.</li>`;
-            } else {
-                logList.innerHTML = allSheets.map(s => {
-                    const timeStr = s.updatedAt ? new Date(s.updatedAt).toLocaleString() : 'Unknown Time';
-                    const icon = s.isSalaryReport ? '<i class="fas fa-money-bill-wave text-orange-500 w-5"></i>' : '<i class="fas fa-file-alt text-blue-500 w-5"></i>';
-                    const user = s.accessList ? s.accessList[0] : 'System';
+            try {
+                const qLogs = query(collection(db, "audit_logs"), orderBy("timestamp", "desc"), limit(40));
+                const snap = await getDocs(qLogs);
+                
+                if (snap.empty) {
+                    logList.innerHTML = `<li class="text-slate-400 italic text-center py-4">No activity recorded yet.</li>`;
+                    return;
+                }
+
+                logList.innerHTML = snap.docs.map(d => {
+                    const l = d.data();
+                    const time = l.timestamp ? new Date(l.timestamp).toLocaleString() : '-';
                     return `
-                    <li class="py-3 flex justify-between items-center px-4 hover:bg-slate-100 transition cursor-default border-b border-slate-50 last:border-0">
-                        <div class="flex items-center gap-3 truncate">
-                            ${icon} 
-                            <div>
-                                <span class="font-bold text-slate-700 block">${s.name}</span>
-                                <span class="text-[10px] text-slate-500 uppercase tracking-wider">Operator: ${user}</span>
-                            </div>
+                    <li class="py-3 flex justify-between items-center px-4 hover:bg-slate-50 transition border-b border-slate-50 text-xs">
+                        <div>
+                            <span class="font-black text-slate-800 uppercase text-[10px] tracking-wider">${l.action}</span>
+                            <p class="text-slate-600 mt-0.5">${l.details || '-'}</p>
+                            <span class="text-[9px] text-slate-400 font-bold uppercase">By: ${l.operator} (${l.role})</span>
                         </div>
-                        <div class="text-right">
-                            <span class="block text-xs font-bold text-slate-600">${s.total || '0'}</span>
-                            <span class="text-[9px] text-slate-400">${timeStr}</span>
-                        </div>
+                        <span class="text-[10px] text-slate-400 whitespace-nowrap ml-4">${time}</span>
                     </li>`;
                 }).join('');
+            } catch (err) {
+                logList.innerHTML = `<li class="text-red-400 italic text-center py-4">Could not load audit trail.</li>`;
             }
-        }
+        };
 
         window.fetchApprovalsData = async () => {
             const table = document.getElementById('adminApprovalsTable');
@@ -1237,7 +2032,7 @@
                     return `
                     <tr class="hover:bg-slate-50 transition border-b border-slate-50">
                         <td class="p-4 font-bold text-slate-700 max-w-[200px] truncate">${icon}${s.name}</td>
-                        <td class="p-4 text-xs font-bold text-slate-500 uppercase">${s.accessList ? s.accessList[0] : '-'}</td>
+                        <td class="p-4 text-xs font-bold text-slate-500 uppercase">${s.accessList ? s.accessList.join(', ') : '-'}</td>
                         <td class="p-4 font-black ${s.isSalaryReport ? 'text-emerald-600' : 'text-slate-800'}">${s.total || '0'}</td>
                         <td class="p-4 text-center">
                             <span class="inline-block text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${getStatusColor(statusStr)}">${statusStr}</span>
@@ -1259,6 +2054,7 @@
         window.updateSheetStatus = async (id, newStatus) => {
             try {
                 await updateDoc(doc(db, "timesheets", id), { status: newStatus });
+                await logAuditTrail("APPROVAL_STATUS_CHANGE", `Updated record ${id} status to ${newStatus}`);
             } catch (e) {
                 uiDialog("Error", "Could not update status.", "error");
             }
@@ -1281,10 +2077,10 @@
                         <button onclick="inspectUserProfile('${uId}')" class="text-emerald-600 hover:text-emerald-800 hover:underline font-black text-left">${u.username}</button>
                         ${u.role === 'admin' ? '<span class="ml-2 bg-slate-800 text-white text-[9px] px-2 py-0.5 rounded-full uppercase">Admin</span>' : ''}
                     </td>
-                    <td class="p-4 text-slate-500 text-xs font-medium hidden sm:table-cell">${u.email || 'no-email@prasa.tek'}</td>
+                    <td class="p-4 text-slate-500 text-xs font-medium hidden sm:table-cell">${u.email || 'N/A'}</td>
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-3">
-                            <button onclick="promptPassUpdate('${uId}', '${u.username}')" class="w-8 h-8 rounded-full bg-amber-50 text-amber-500 hover:bg-amber-500 hover:text-white transition" title="Change Password"><i class="fas fa-key text-xs"></i></button>
+                            <button onclick="sendPasswordReset('${u.email}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition" title="Send Password Reset Link"><i class="fas fa-paper-plane text-xs"></i></button>
                             ${u.username !== session.username ? `<button onclick="deleteUser('${uId}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition" title="Remove Account"><i class="fas fa-trash text-xs"></i></button>` : ''}
                         </div>
                     </td>
@@ -1292,28 +2088,26 @@
             });
         }
 
+        window.sendPasswordReset = async (email) => {
+            if (!email || !email.includes('@')) return uiDialog("Invalid Email", "This user does not have a valid email configured for password resets.", "error");
+            try {
+                await sendPasswordResetEmail(auth, email);
+                await logAuditTrail("PASSWORD_RESET_SENT", `Triggered password reset email to ${email}`);
+                uiDialog("Email Dispatched", `A password reset link has been dispatched to ${email}`, "success");
+            } catch (err) {
+                uiDialog("Auth Notice", err.message.replace("Firebase: ", ""), "error");
+            }
+        };
+
         window.inspectUserProfile = (userId) => {
             const profile = window.usersRegistryMap[userId];
             if (!profile) return;
             document.getElementById('profMainUsername').innerText = profile.username;
             document.getElementById('profBadgeRole').innerText = profile.role || 'user';
             document.getElementById('profEmail').innerText = profile.email || 'N/A';
-            document.getElementById('profAuth').innerText = profile.authProvider || 'Legacy Profile';
-            document.getElementById('profCreated').innerText = profile.createdAt ? new Date(profile.createdAt).toLocaleString() : 'Legacy Account Log Base';
+            document.getElementById('profAuth').innerText = profile.authProvider || 'Email/Password';
+            document.getElementById('profCreated').innerText = profile.createdAt ? new Date(profile.createdAt).toLocaleString() : '-';
             document.getElementById('userProfileDetailModal').classList.remove('hidden');
-        };
-
-        window.promptPassUpdate = (id, uname) => {
-            document.getElementById('passPromptUser').innerText = "Account: " + uname;
-            document.getElementById('passPromptInput').value = '';
-            document.getElementById('passwordPromptModal').classList.remove('hidden');
-            document.getElementById('passSaveBtn').onclick = async () => {
-                const newPass = document.getElementById('passPromptInput').value.trim();
-                if (!newPass) return;
-                await updateDoc(doc(db, "users", id), { password: newPass });
-                closeModal('passwordPromptModal');
-                uiDialog("Success", "Password updated for " + uname, "success");
-            };
         };
 
         window.createUser = async () => {
@@ -1321,19 +2115,27 @@
             const p = document.getElementById('newPassword').value.trim();
             const e = document.getElementById('newEmail').value.trim();
             const r = document.getElementById('newRole').value;
-            if (!u || !p) return uiDialog("Error", "Username and Password are required.", "error");
+            if (!u || !e || !p) return uiDialog("Error", "Username, Email, and Temporary Password are required.", "error");
 
-            await addDoc(collection(db, "users"), { 
-                username: u, password: p, email: e, mobile: '', role: r, authProvider: 'Admin-Provisioned', createdAt: new Date().toISOString() 
-            });
-            ['newUsername', 'newPassword', 'newEmail'].forEach(id => document.getElementById(id).value = '');
-            uiDialog("Success", "User account provisioned successfully.", "success");
-            fetchUsers();
-            fetchAdminDashboardData();
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, e, p);
+                await addDoc(collection(db, "users"), { 
+                    username: u, email: e, role: r, authProvider: 'Admin-Provisioned', createdAt: new Date().toISOString() 
+                });
+                await logAuditTrail("USER_CREATED", `Provisioned new user account: ${u} (${r})`);
+                ['newUsername', 'newPassword', 'newEmail'].forEach(id => document.getElementById(id).value = '');
+                uiDialog("Success", "User account provisioned securely in Firebase Auth & Database.", "success");
+                fetchUsers();
+                fetchAdminDashboardData();
+            } catch (err) {
+                uiDialog("Creation Error", err.message.replace("Firebase: ", ""), "error");
+            }
         };
 
         window.deleteUser = (id) => uiDialog("Remove User", "Are you sure you want to delete this user? This cannot be undone.", "confirm", async () => { 
+            const u = window.usersRegistryMap[id];
             await deleteDoc(doc(db, "users", id)); 
+            await logAuditTrail("USER_DELETED", `Removed user registry: ${u ? u.username : id}`);
             fetchUsers(); 
             fetchAdminDashboardData();
         });
@@ -1377,7 +2179,6 @@
                     { date: `${year}-04-14`, name: 'Sinhala and Tamil New Year Day' },
                     { date: `${year}-05-01`, name: 'May Day' },
                     { date: `${year}-12-25`, name: 'Christmas Day' },
-                    
                     { date: `${year}-01-02`, name: 'Duruthu Full Moon Poya' },
                     { date: `${year}-02-01`, name: 'Navam Full Moon Poya' },
                     { date: `${year}-03-03`, name: 'Madin Full Moon Poya' },
@@ -1412,10 +2213,125 @@
             }
         };
 
+        // --- FULL PDF & EXCEL EXPORT ENGINE ---
+        window.exportPDF = () => {
+            if (currentEntries.length === 0) return uiDialog("Export Error", "No data rows available to export.", "error");
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF();
+            const sheetTitle = document.getElementById('sheetNameInput').value || 'Timesheet';
+            
+            docPdf.setFontSize(16);
+            docPdf.text(sheetTitle, 14, 18);
+            docPdf.setFontSize(10);
+            docPdf.text(`Generated by: ${session.username} | ${new Date().toLocaleDateString()}`, 14, 25);
+            
+            const rows = currentEntries.map(e => [
+                `${e.dIn || '-'} ${e.tIn || ''}`,
+                `${e.dOut || '-'} ${e.tOut || ''}`,
+                e.duration || '0.00',
+                e.isOff ? 'Day Off' : (e.remark || '-')
+            ]);
+
+            docPdf.autoTable({
+                startY: 30,
+                head: [['Start Point', 'End Point', 'Hours', 'Remark']],
+                body: rows,
+                theme: 'striped',
+                headStyles: { fillColor: [16, 185, 129] }
+            });
+
+            const totals = calculateTotals(currentEntries);
+            const finalY = docPdf.lastAutoTable.finalY + 10;
+            docPdf.text(`Normal Hours: ${totals.normStr}`, 14, finalY);
+            docPdf.text(`Mercantile OT: ${totals.mercStr}`, 70, finalY);
+            docPdf.text(`Grand Total: ${totals.totalStr}`, 140, finalY);
+
+            docPdf.save(`${sheetTitle.replace(/\s+/g, '_')}.pdf`);
+        };
+
+        window.exportExcel = () => {
+            if (currentEntries.length === 0) return uiDialog("Export Error", "No data rows available to export.", "error");
+            const sheetTitle = document.getElementById('sheetNameInput').value || 'Timesheet';
+            const excelRows = currentEntries.map(e => ({
+                "Date In": e.dIn || "",
+                "Time In": e.tIn || "",
+                "Date Out": e.dOut || "",
+                "Time Out": e.tOut || "",
+                "Duration (Hrs)": e.duration || "0.00",
+                "Day Off": e.isOff ? "Yes" : "No",
+                "Remark": e.remark || ""
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(excelRows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Timesheet");
+            XLSX.writeFile(wb, `${sheetTitle.replace(/\s+/g, '_')}.xlsx`);
+        };
+
+        window.exportSalaryPDF = () => {
+            const s = window.cachedSheets[currentViewingSalaryId];
+            if (!s) return;
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF();
+
+            docPdf.setFontSize(18);
+            docPdf.text("SALARY PAYSLIP", 14, 20);
+            docPdf.setFontSize(10);
+            docPdf.text(`PrasaTek System Solutions - Ceylon`, 14, 28);
+            docPdf.text(`Report: ${s.name} | Operator: ${s.accessList ? s.accessList.join(', ') : '-'}`, 14, 34);
+
+            const b = s.breakdown || {};
+            const tableData = [
+                ['Basic Salary', `Rs. ${parseFloat(b.basic || 0).toFixed(2)}`],
+                ['Allowances', `Rs. ${parseFloat(b.allowance || 0).toFixed(2)}`],
+                ['Normal Overtime Pay', `Rs. ${parseFloat(b.normalPay || 0).toFixed(2)}`],
+                ['Mercantile Overtime Pay', `Rs. ${parseFloat(b.mercPay || 0).toFixed(2)}`],
+                ['EPF Employee (8%) Deduction', `- Rs. ${parseFloat(b.epf || 0).toFixed(2)}`],
+                ['Other Deductions', `- Rs. ${parseFloat(b.deduction || 0).toFixed(2)}`],
+                ['Net Disbursed Salary', `${s.total}`]
+            ];
+
+            docPdf.autoTable({
+                startY: 42,
+                head: [['Earnings / Deductions Item', 'Amount (LKR)']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [5, 150, 105] }
+            });
+
+            docPdf.save(`${s.name.replace(/\s+/g, '_')}_Payslip.pdf`);
+        };
+
+        window.exportSalaryExcel = () => {
+            const s = window.cachedSheets[currentViewingSalaryId];
+            if (!s) return;
+            const b = s.breakdown || {};
+            const data = [{
+                "Report Name": s.name,
+                "Operators": s.accessList ? s.accessList.join(', ') : "-",
+                "Basic (LKR)": b.basic || 0,
+                "Allowance (LKR)": b.allowance || 0,
+                "Normal OT Hrs": b.normalOT || 0,
+                "Merc OT Hrs": b.mercOT || 0,
+                "Normal OT Pay": b.normalPay || 0,
+                "Merc OT Pay": b.mercPay || 0,
+                "EPF (8%)": b.epf || 0,
+                "Deductions": b.deduction || 0,
+                "Net Salary": s.total
+            }];
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Payslip");
+            XLSX.writeFile(wb, `${s.name.replace(/\s+/g, '_')}_Payslip.xlsx`);
+        };
+
+        window.printDocument = () => { window.print(); };
+        window.printSalary = () => { window.print(); };
+
         window.exportMasterDatabase = async () => {
             try {
                 uiDialog("Exporting...", "Compiling master ledger records across the cloud. Please wait.", "success");
-                
                 const snap = await getDocs(collection(db, "timesheets"));
                 const data = [];
                 
@@ -1424,7 +2340,7 @@
                     data.push({
                         "Record Type": s.isSalaryReport ? "Salary Disbursement" : "Timesheet Auth Log",
                         "Record Name": s.name || "-",
-                        "Operator/User": s.accessList ? s.accessList[0] : "Unknown User",
+                        "Operators/Users": s.accessList ? s.accessList.join(', ') : "Unknown User",
                         "Total Recorded Value": s.total || "0",
                         "Status": s.status || "Pending",
                         "Last Updated Timestamp": s.updatedAt ? new Date(s.updatedAt).toLocaleString() : "-"
@@ -1437,22 +2353,12 @@
                 
                 const safeDate = new Date().toISOString().split('T')[0];
                 XLSX.writeFile(wb, `PrasaTek_Master_Backup_${safeDate}.xlsx`);
-                
                 setTimeout(() => closeDialog(), 1000); 
             } catch (error) {
-                console.error(error);
                 uiDialog("Export Failed", "Could not fetch data from the cloud node to export.", "error");
             }
         };
 
-        // --- EXPORT AND PRINT MANAGER ---
-        window.printDocument = () => { window.print(); };
-        window.exportPDF = () => {};
-        window.exportExcel = () => {};
-        window.printSalary = () => {};
-        window.exportSalaryPDF = () => {};
-        window.exportSalaryExcel = () => {};
-        
         window.logout = () => { sessionStorage.clear(); window.location.href = 'index.html'; };
     </script>
 </body>
