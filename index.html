@@ -40,6 +40,22 @@
         <p class="text-xs leading-relaxed text-red-800">System is currently under emergency lockdown. Standard access is restricted. Please wait a few moments and try again later. We apologize for the inconvenience.</p>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div id="forgotPassModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[250] p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate">
+            <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-key text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-black mb-2 text-slate-800">Reset Password</h3>
+            <p class="text-slate-500 text-xs mb-6">Enter your registered email and we'll dispatch a secure recovery link.</p>
+            <input type="email" id="forgotEmailInput" class="w-full border-2 border-slate-100 rounded-xl p-3 focus:border-blue-500 outline-none transition font-medium bg-slate-50 mb-6" placeholder="name@company.com">
+            <div class="flex gap-3">
+                <button onclick="closeModal('forgotPassModal')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold text-sm">Cancel</button>
+                <button onclick="sendUserResetEmail()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-blue-700 transition shadow-md">Send Link</button>
+            </div>
+        </div>
+    </div>
+
     <div id="googleDetailsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center z-[200] p-4">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl modal-animate">
             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -96,7 +112,10 @@
                         <input type="text" id="loginUser" class="w-full border-2 border-slate-100 rounded-xl p-3 focus:border-emerald-500 outline-none transition font-medium bg-slate-50 focus:bg-white" placeholder="Enter username or email" required>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Password</label>
+                        <div class="flex justify-between items-center mb-1 ml-1">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase">Password</label>
+                            <button type="button" onclick="openForgotModal()" class="text-[10px] font-bold text-blue-600 hover:underline">Forgot?</button>
+                        </div>
                         <input type="password" id="loginPassword" class="w-full border-2 border-slate-100 rounded-xl p-3 focus:border-emerald-500 outline-none transition font-medium bg-slate-50 focus:bg-white" placeholder="••••••••" required>
                     </div>
                     <button type="submit" id="loginBtn" class="w-full bg-emerald-600 text-white font-black py-4 rounded-xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-100 flex justify-center items-center gap-2 uppercase tracking-widest text-sm">
@@ -110,7 +129,7 @@
                 </div>
 
                 <button id="googleLoginBtn" class="w-full bg-slate-50 border border-slate-200 text-slate-700 font-black py-3.5 rounded-xl hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition flex justify-center items-center gap-3 text-sm shadow-sm group">
-                    <div class="bg-white p-1.5 rounded-lg border border-slate-100 shadow-sm flex items-center justify-center group-hover:border-emerald-200">
+                    <div class="bg-white p-1.5 rounded-lg border border-slate-100 shadow-sm flex items-center justify-center bg-white group-hover:border-emerald-200">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
                             <g transform="matrix(1, 0, 0, 1, 0, 0)">
                                 <path d="M21.35,11.1H12v2.7h5.38c-0.24,1.28 -0.96,2.37 -2.04,3.1v2.6h3.28c1.92,-1.78 3.03,-4.39 3.03,-7.4C21.65,11.8 21.54,11.42 21.35,11.1z" fill="#4285F4" />
@@ -198,7 +217,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const app = initializeApp({
             apiKey: "AIzaSyBJHqn-KIG7ntbsc9OZik7hf5lhObx7Ecg",
@@ -212,7 +231,11 @@
         let temporaryGoogleUserRef = null;
         let isSystemLockedDown = false;
 
-        // REAL-TIME LOCKDOWN LISTENER FOR LOGIN SCREEN
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('timeout')) {
+            showToast("Session timed out due to 15 minutes of inactivity. Please login again.", true);
+        }
+
         onSnapshot(doc(db, "system_status", "lockdown"), (snap) => {
             const data = snap.exists() ? snap.data() : { isLocked: false };
             isSystemLockedDown = !!data.isLocked;
@@ -251,6 +274,21 @@
             }
         }
 
+        window.openForgotModal = () => document.getElementById('forgotPassModal').classList.remove('hidden');
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
+        window.sendUserResetEmail = async () => {
+            const email = document.getElementById('forgotEmailInput').value.trim();
+            if (!email) return showToast("Please enter your registered email address.", true);
+            try {
+                await sendPasswordResetEmail(auth, email);
+                closeModal('forgotPassModal');
+                showToast("Password reset link dispatched! Please check your inbox.");
+            } catch (e) {
+                showToast(e.message.replace("Firebase: ", ""), true);
+            }
+        };
+
         window.switchPanel = (panelName) => {
             if (panelName === 'register') {
                 document.getElementById('loginPanel').classList.add('hidden');
@@ -261,8 +299,6 @@
             }
         };
 
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-
         window.openInfoModal = (type) => {
             const titleEl = document.getElementById('infoTitle');
             const contentEl = document.getElementById('infoContent');
@@ -270,49 +306,36 @@
             if (type === 'privacy') {
                 titleEl.innerHTML = '<i class="fas fa-shield-alt text-emerald-500 mr-3"></i>Privacy Policy';
                 contentEl.innerHTML = `
-                    <div class="space-y-4">
-                        <p><strong class="text-slate-800">1. Data Collection:</strong> We collect necessary authentication data (such as your email address, username, and mobile number) and timesheet logs entered by you to provide the TimeSheet Pro service.</p>
-                        <p><strong class="text-slate-800">2. Data Storage:</strong> All time-tracking and profile data is securely stored utilizing Google Firebase Cloud Infrastructure.</p>
-                        <p><strong class="text-slate-800">3. Usage:</strong> Your data is solely used for generating timesheets, calculating salaries, and administrative tracking by your system administrators. PrasaTek System Solutions does not sell or share your data with third parties.</p>
-                        <p><strong class="text-slate-800">4. User Rights:</strong> You have the right to request the inspection or deletion of your account and related data records by contacting your system administrator.</p>
-                    </div>
-                `;
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600">
+                        <p class="font-bold text-slate-800">Information Collection & Use</p>
+                        <p>TimeSheet Pro respects your privacy. All attendance, timesheet, and salary records stored in the cloud are encrypted and accessible only by authorized personnel and operators within your organization.</p>
+                        <p class="font-bold text-slate-800">Cloud Storage Security</p>
+                        <p>Our infrastructure utilizes Google Firebase Firestore for secure, encrypted synchronization across authorized endpoints.</p>
+                    </div>`;
             } else if (type === 'terms') {
                 titleEl.innerHTML = '<i class="fas fa-file-contract text-emerald-500 mr-3"></i>Terms of Service';
                 contentEl.innerHTML = `
-                    <div class="space-y-4">
-                        <p><strong class="text-slate-800">1. License:</strong> TimeSheet Pro is proprietary software owned by PrasaTek System Solutions. Unauthorized copying, modification, or distribution is strictly prohibited.</p>
-                        <p><strong class="text-slate-800">2. Acceptable Use:</strong> Authorized operators must use the system strictly for lawful time-tracking purposes. The falsification or unauthorized modification of time logs is strictly prohibited and against company policy.</p>
-                        <p><strong class="text-slate-800">3. Limitation of Liability:</strong> The software is provided "as is". PrasaTek is not liable for any discrepancies in salary payouts or data loss resulting from unforeseen cloud infrastructure outages.</p>
-                        <p><strong class="text-slate-800">4. Account Termination:</strong> System Administrators reserve the right to suspend or terminate operator accounts that violate these terms or company operational guidelines.</p>
-                    </div>
-                `;
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600">
+                        <p class="font-bold text-slate-800">Proprietary Software License</p>
+                        <p>TimeSheet Pro is proprietary property of PrasaTek System Solutions. Any unauthorized duplication, redistribution, reverse engineering, or extraction of source code is strictly prohibited.</p>
+                        <p class="font-bold text-slate-800">Operational Integrity</p>
+                        <p>All recorded operations and administrator activities are subject to immutable audit tracking for compliance and security.</p>
+                    </div>`;
             } else if (type === 'contact') {
-                titleEl.innerHTML = '<i class="fas fa-envelope text-emerald-500 mr-3"></i>Contact Us';
+                titleEl.innerHTML = '<i class="fas fa-headset text-emerald-500 mr-3"></i>Contact Support';
                 contentEl.innerHTML = `
-                    <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 text-center shadow-sm">
-                        <img src="logo.png" alt="PrasaTek Logo" class="h-16 mx-auto mb-4 object-contain">
-                        <h3 class="font-black text-xl text-slate-800 mb-1">PrasaTek System Solutions</h3>
-                        <p class="text-xs font-bold text-slate-400 mb-6 uppercase tracking-[0.2em]">Based in Sri Lanka</p>
-                        
-                        <div class="flex flex-col gap-4 text-left max-w-sm mx-auto bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-                            <a href="mailto:support@prasatek.site" class="flex items-center gap-4 text-slate-600 hover:text-emerald-600 transition group">
-                                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition"><i class="fas fa-envelope"></i></div>
-                                <span class="font-bold">support@prasatek.site</span>
-                            </a>
-                            <a href="tel:+94719323239" class="flex items-center gap-4 text-slate-600 hover:text-emerald-600 transition group">
-                                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition"><i class="fas fa-phone"></i></div>
-                                <span class="font-bold">+94 71 932 3239</span>
-                            </a>
-                            <a href="https://prasatek.site" target="_blank" class="flex items-center gap-4 text-slate-600 hover:text-emerald-600 transition group">
-                                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition"><i class="fas fa-globe"></i></div>
-                                <span class="font-bold">prasatek.site</span>
-                            </a>
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 text-center">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl mb-1">
+                            <i class="fas fa-building"></i>
                         </div>
-                    </div>
-                `;
+                        <h4 class="font-black text-slate-800 text-base">PrasaTek System Solutions</h4>
+                        <div class="space-y-2 text-xs pt-2">
+                            <p><i class="fas fa-envelope text-emerald-600 mr-2"></i> <a href="mailto:info@prasatek.lk" class="font-bold text-slate-700 hover:text-emerald-600 transition">info@prasatek.lk</a></p>
+                            <p><i class="fas fa-phone-alt text-emerald-600 mr-2"></i> <a href="tel:0719323239" class="font-bold text-slate-700 hover:text-emerald-600 transition">0719323239</a></p>
+                            <p><i class="fas fa-globe text-emerald-600 mr-2"></i> <a href="http://www.prasatek.lk" target="_blank" class="font-bold text-emerald-600 hover:underline">www.prasatek.lk</a></p>
+                        </div>
+                    </div>`;
             }
-            
             document.getElementById('infoModal').classList.remove('hidden');
         };
 
@@ -350,11 +373,14 @@
                         username = userCredential.user.email.split('@')[0];
                     }
                 } else {
-                    const qLegacy = query(collection(db, "users"), where("username", "==", inputField), where("password", "==", pass));
+                    const qLegacy = query(collection(db, "users"), where("username", "==", inputField));
                     const snapLegacy = await getDocs(qLegacy);
 
                     if (!snapLegacy.empty) {
                         const userData = snapLegacy.docs[0].data();
+                        if (userData.email) {
+                            await signInWithEmailAndPassword(auth, userData.email, pass);
+                        }
                         userRole = userData.role || 'user';
                         username = userData.username;
                     } else {
@@ -415,7 +441,6 @@
                     username: username,
                     email: email,
                     mobile: mobile,
-                    password: password, 
                     role: 'user',
                     authProvider: 'email-verification',
                     createdAt: new Date().toISOString()
@@ -470,24 +495,17 @@
             const username = document.getElementById('googleUsername').value.trim();
             const mobile = document.getElementById('googleMobile').value.trim();
 
-            if (!username || !mobile) {
-                showToast("All fields are required to set up credentials.", true);
-                return;
-            }
+            if (!username || !mobile) return showToast("All fields are required to set up credentials.", true);
 
             try {
                 const qUserCheck = query(collection(db, "users"), where("username", "==", username));
                 const userCheckSnap = await getDocs(qUserCheck);
-                if (!userCheckSnap.empty) {
-                    showToast("Username already exists in logs.", true);
-                    return;
-                }
+                if (!userCheckSnap.empty) return showToast("Username already exists in logs.", true);
 
                 await addDoc(collection(db, "users"), {
                     username: username,
                     email: temporaryGoogleUserRef.email,
                     mobile: mobile,
-                    password: 'google-authenticated-sso-token',
                     role: 'user',
                     authProvider: 'google-sso',
                     createdAt: new Date().toISOString()
@@ -497,7 +515,6 @@
                 sessionStorage.setItem('sessionUser', JSON.stringify({ username: username, role: 'user' }));
                 window.location.href = 'system.html';
             } catch (err) {
-                console.error(err);
                 showToast("Cloud failure profiling user registry record.", true);
             }
         });
